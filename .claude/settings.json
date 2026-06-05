@@ -22,7 +22,8 @@
       "Bash(Get-ChildItem -Path \"d:\\\\temple\\\\src\" -Recurse -Filter \"middleware.ts\" -ErrorAction SilentlyContinue)",
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(mkdir -p \"d:\\\\temple\\\\src\\\\app\\\\api\\\\events\\\\[id]\\\\rsvp\")",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(git push *)"
     ],
     "additionalDirectories": [
       "d:\\temple\\src\\app\\api\\services",
