@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"d:\\\\temple\" -Force | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}} | Sort-Object Name)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\temple\\\\src\" -Recurse -Force | Sort-Object FullName | Select-Object FullName, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}})",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\temple\\\\prisma\" -Force | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}} | Sort-Object Name)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\temple\\\\.claude\" -Force | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}} | Sort-Object Name)",
+      "Bash(Get-ChildItem -Path \"d:\\\\temple\\\\src\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); console.log\\('DATABASE_URL set:', !!process.env.DATABASE_URL\\); console.log\\('NEXTAUTH_SECRET set:', !!process.env.NEXTAUTH_SECRET\\); console.log\\('NEXTAUTH_URL set:', !!process.env.NEXTAUTH_URL\\);\")",
+      "Bash(cd /d d:\\\\temple)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('next-auth:', p.dependencies['next-auth']\\); console.log\\('@auth/prisma-adapter:', p.dependencies['@auth/prisma-adapter']\\); console.log\\('@prisma/adapter-pg:', p.dependencies['@prisma/adapter-pg']\\); console.log\\('prisma:', p.dependencies['prisma']\\)\")",
+      "Bash(node -e \"const p = require\\('d:/temple/package.json'\\); console.log\\('next-auth:', p.dependencies['next-auth']\\); console.log\\('@auth/prisma-adapter:', p.dependencies['@auth/prisma-adapter']\\); console.log\\('@prisma/adapter-pg:', p.dependencies['@prisma/adapter-pg']\\); console.log\\('prisma:', p.devDependencies['prisma']\\)\")",
+      "Bash(cd /d \"d:\\\\temple\")",
+      "Bash(npx prisma *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('next:', p.dependencies.next, 'react:', p.dependencies.react\\)\")",
+      "Bash(mkdir -p d:/temple/src/app/api/services/[id] 2>/dev/null; echo done)",
+      "Bash(node -e ' *)",
+      "Bash(node --env-file=.env -e ' *)",
+      "Bash(python -c ' *)",
+      "Bash(Get-ChildItem -Path \"d:\\\\temple\\\\src\" -Recurse -Filter \"middleware.ts\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(mkdir -p \"d:\\\\temple\\\\src\\\\app\\\\api\\\\events\\\\[id]\\\\rsvp\")",
+      "Bash(git fetch *)"
+    ],
+    "additionalDirectories": [
+      "d:\\temple\\src\\app\\api\\services",
+      "d:\\temple\\src\\app\\api\\events\\[id]",
+      "d:\\temple\\src\\app\\api\\services\\[slug]"
+    ]
+  }
+}
