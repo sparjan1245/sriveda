@@ -168,21 +168,20 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* ── Photo mosaic ── */}
-            <div className="grid grid-cols-12 grid-rows-6 gap-3 h-100 lg:h-115">
-              <div className="col-span-7 row-span-4 relative rounded-2xl overflow-hidden gold-border card-hover shadow-md">
-                <Image src={IMAGES.about1} alt="Temple interior" fill className="object-cover" />
-                <div className="absolute inset-0 bg-linear-to-t from-maroon/30 to-transparent opacity-60" />
-              </div>
-              <div className="col-span-5 row-span-3 relative rounded-2xl overflow-hidden gold-border card-hover shadow-md">
-                <Image src={IMAGES.about2} alt="Temple puja" fill className="object-cover" />
-              </div>
-              <div className="col-span-5 row-span-3 relative rounded-2xl overflow-hidden gold-border card-hover shadow-md">
-                <Image src={IMAGES.about3} alt="Temple community" fill className="object-cover" />
-              </div>
-              <div className="col-span-7 row-span-2 relative rounded-2xl overflow-hidden gold-border card-hover shadow-md">
-                <Image src={IMAGES.about4} alt="Temple event" fill className="object-cover" />
-                <div className="absolute inset-0 bg-linear-to-t from-maroon/30 to-transparent opacity-60" />
+            {/* ── Single image ── */}
+            <div className="relative rounded-3xl overflow-hidden gold-border shadow-xl h-100 lg:h-115 group">
+              <Image
+                src={IMAGES.about1}
+                alt="Sri Veda Gayatri Temple"
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-maroon/60 via-maroon/10 to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <p className="font-cinzel font-bold text-white text-sm md:text-base drop-shadow-lg">
+                  Sri Veda Gayatri Temple
+                </p>
+                <p className="text-white/65 text-xs mt-0.5">Manteca, California · Est. {TEMPLE.founded}</p>
               </div>
             </div>
 
