@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-function adminOnly(session: Awaited<ReturnType<typeof auth>>) {
-  return (session?.user as { role?: string })?.role !== "ADMIN";
+function adminOnly(session: { user?: { role?: string } | null } | null) {
+  return session?.user?.role !== "ADMIN";
 }
 
 export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
