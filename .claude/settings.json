@@ -23,7 +23,11 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(mkdir -p \"d:\\\\temple\\\\src\\\\app\\\\api\\\\events\\\\[id]\\\\rsvp\")",
       "Bash(git fetch *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'fix: add IMAGES.altar key to constants to resolve Vercel TS build error *)",
+      "Bash(git commit -m 'fix: replace Awaited<ReturnType<typeof auth>> with explicit session type *)",
+      "Bash(git commit -m 'fix: replace adminOnly helper with requireAdmin async pattern *)"
     ],
     "additionalDirectories": [
       "d:\\temple\\src\\app\\api\\services",

@@ -52,7 +52,7 @@ export function GallerySection({ photos, videos }: Props) {
     const measure = () => {
       if (!photoRef.current) return;
       const w = photoRef.current.offsetWidth;
-      const v = w >= 1024 ? 3 : w >= 640 ? 2 : 1;
+      const v = w >= 1024 ? 4 : w >= 640 ? 3 : 2;
       setPhotoVisible(v);
       setPhotoCardW((w - GAP * (v - 1)) / v);
     };
@@ -72,7 +72,7 @@ export function GallerySection({ photos, videos }: Props) {
     const measure = () => {
       if (!videoRef.current) return;
       const w = videoRef.current.offsetWidth;
-      const v = w >= 1024 ? 3 : w >= 640 ? 2 : 1;
+      const v = w >= 1024 ? 4 : w >= 640 ? 2 : 1;
       setVideoVisible(v);
       setVideoCardW((w - GAP * (v - 1)) / v);
     };
