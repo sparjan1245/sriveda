@@ -23,6 +23,6 @@ export async function POST(req: Request) {
   const testimonial = await db.testimonial.create({
     data: { name, location, avatar, text, rating: rating ?? 5, order: order ?? count },
   });
-  revalidateTag("testimonials");
+  revalidateTag("testimonials", "max");
   return NextResponse.json(testimonial);
 }

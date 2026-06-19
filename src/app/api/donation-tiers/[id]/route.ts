@@ -15,7 +15,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const allowed = ["name", "description", "amount", "recurring", "order", "active"] as const;
   const update = Object.fromEntries(allowed.filter((k) => k in data).map((k) => [k, data[k]]));
   const tier = await db.donationTier.update({ where: { id }, data: update });
-  revalidateTag("donation-tiers");
+  revalidateTag("donation-tiers", "max");
   return NextResponse.json(tier);
 }
 
@@ -23,6 +23,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   const { id } = await params;
   await db.donationTier.delete({ where: { id } });
-  revalidateTag("donation-tiers");
+  revalidateTag("donation-tiers", "max");
   return NextResponse.json({ success: true });
 }
