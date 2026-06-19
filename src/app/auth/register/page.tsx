@@ -11,7 +11,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirm: "",
@@ -89,17 +90,23 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Full Name *</label>
-                <input name="name" value={form.name} onChange={handleChange} required className={inputClass} placeholder="Your full name" />
+                <label className={labelClass}>First Name *</label>
+                <input name="firstName" value={form.firstName} onChange={handleChange} required className={inputClass} placeholder="First name" />
               </div>
+              <div>
+                <label className={labelClass}>Last Name *</label>
+                <input name="lastName" value={form.lastName} onChange={handleChange} required className={inputClass} placeholder="Last name" />
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Phone *</label>
                 <input name="phone" value={form.phone} onChange={handleChange} required className={inputClass} placeholder="+1 (xxx) xxx-xxxx" />
               </div>
-            </div>
-            <div>
-              <label className={labelClass}>Email Address *</label>
-              <input name="email" type="email" value={form.email} onChange={handleChange} required className={inputClass} placeholder="your@email.com" />
+              <div>
+                <label className={labelClass}>Email Address *</label>
+                <input name="email" type="email" value={form.email} onChange={handleChange} required className={inputClass} placeholder="your@email.com" />
+              </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>

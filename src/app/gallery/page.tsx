@@ -38,11 +38,22 @@ export default async function GalleryPage() {
   const dbSrcs = new Set(dbMapped.map((i) => i.src));
   const combined = [...dbMapped, ...STATIC_IMAGES.filter((i) => !dbSrcs.has(i.src))];
 
+  const STATIC_VIDEOS = [
+    { thumbnail: IMAGES.hero,      title: "Archana & Abhishekam",        href: "https://www.youtube.com/@srivedagayatritemple" },
+    { thumbnail: IMAGES.puja,      title: "Ganapathi Homam",             href: "https://www.youtube.com/@srivedagayatritemple" },
+    { thumbnail: IMAGES.about2,    title: "Annadaanam",                  href: "https://www.youtube.com/@srivedagayatritemple" },
+    { thumbnail: IMAGES.temple1,   title: "Navaratri Celebrations 2024", href: "https://www.youtube.com/@srivedagayatritemple" },
+    { thumbnail: IMAGES.about3,    title: "Satyanarayan Puja",           href: "https://www.youtube.com/@srivedagayatritemple" },
+    { thumbnail: IMAGES.about4,    title: "Cultural Program",            href: "https://www.youtube.com/@srivedagayatritemple" },
+    { thumbnail: IMAGES.download4, title: "Devotee Service",             href: "https://www.youtube.com/@srivedagayatritemple" },
+    { thumbnail: IMAGES.about1,    title: "Temple Inauguration",         href: "https://www.youtube.com/@srivedagayatritemple" },
+  ];
+
   return (
     <div>
 
       {/* ── Inner Page Banner ── */}
-      <section className="relative h-40 md:h-52 flex items-center justify-center overflow-hidden">
+      <section className="relative h-40 md:h-22 flex items-center justify-center overflow-hidden">
         <Image src={IMAGES.altar} alt="Gallery" fill className="object-cover object-center" priority />
         <div className="absolute inset-0 bg-black/55" />
         <div className="absolute inset-0 bg-maroon/60" />
@@ -54,24 +65,14 @@ export default async function GalleryPage() {
             <span className="text-gold/60">›</span>
             <span className="text-gold/80">Gallery</span>
           </div>
-          <h1 className="font-cinzel font-bold text-2xl md:text-3xl text-white drop-shadow-md leading-tight">
-            Photo Gallery
-          </h1>
-          <div className="flex items-center justify-center gap-3 my-2">
-            <span className="block h-px w-10 md:w-16 bg-linear-to-r from-transparent to-gold/60" />
-            <span className="text-gold text-base drop-shadow-sm">🪷</span>
-            <span className="block h-px w-10 md:w-16 bg-linear-to-l from-transparent to-gold/60" />
-          </div>
-          <p className="text-white/80 text-xs max-w-md mx-auto drop-shadow-sm">
-            A glimpse into the sacred ceremonies, festivals, and community life at our temple
-          </p>
+         
         </div>
       </section>
 
       {/* ── Grid ── */}
       <section className="py-16 px-4 bg-cream pattern-bg">
         <div className="max-w-7xl mx-auto">
-          <GalleryClient images={combined} />
+          <GalleryClient images={combined} videos={STATIC_VIDEOS} />
         </div>
       </section>
 

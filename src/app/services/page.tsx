@@ -35,7 +35,7 @@ export default async function ServicesPage() {
     <div>
 
       {/* ── Inner Page Banner ── */}
-      <section className="relative h-40 md:h-52 flex items-center justify-center overflow-hidden">
+      <section className="relative h-20 md:h-22 flex items-center justify-center overflow-hidden">
         <Image src={IMAGES.temple1} alt="Temple Services" fill className="object-cover object-center" priority />
         <div className="absolute inset-0 bg-black/55" />
         <div className="absolute inset-0 bg-maroon/60" />

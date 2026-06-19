@@ -52,7 +52,7 @@ export function GallerySection({ photos, videos }: Props) {
     const measure = () => {
       if (!photoRef.current) return;
       const w = photoRef.current.offsetWidth;
-      const v = w >= 1024 ? 4 : w >= 640 ? 3 : 2;
+      const v = w >= 1024 ? 6 : w >= 640 ? 4 : 2;
       setPhotoVisible(v);
       setPhotoCardW((w - GAP * (v - 1)) / v);
     };
@@ -192,10 +192,9 @@ export function GallerySection({ photos, videos }: Props) {
                 href={v.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative shrink-0 rounded-2xl overflow-hidden gold-border shadow-md flex flex-col card-hover"
+                className="group relative shrink-0 rounded-2xl overflow-hidden gold-border shadow-md card-hover"
                 style={{ width: videoCardW }}
               >
-                {/* Thumbnail */}
                 <div className="relative aspect-video bg-maroon/10 overflow-hidden">
                   <Image
                     src={v.thumbnail}
@@ -204,24 +203,11 @@ export function GallerySection({ photos, videos }: Props) {
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-maroon/45 group-hover:bg-maroon/35 transition-colors duration-300" />
-                  {/* Play button */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-14 h-14 rounded-full bg-gold/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300 ring-4 ring-white/20">
                       <div className="w-0 h-0 border-t-[9px] border-t-transparent border-l-[16px] border-l-white border-b-[9px] border-b-transparent ml-1" />
                     </div>
                   </div>
-                  {/* Duration badge */}
-                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] font-semibold px-2 py-0.5 rounded">
-                    {v.duration}
-                  </div>
-                </div>
-                {/* Info */}
-                <div className="p-4 bg-white flex-1">
-                  <h4 className="font-cinzel font-semibold text-maroon text-xs md:text-sm leading-snug mb-1.5 line-clamp-2 group-hover:text-saffron transition-colors duration-200">
-                    {v.title}
-                  </h4>
-                  <div className="divider-gold mb-2" />
-                  <p className="text-foreground/55 text-[11px] leading-relaxed line-clamp-2">{v.description}</p>
                 </div>
               </Link>
             ))}

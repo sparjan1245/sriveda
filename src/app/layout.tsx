@@ -3,6 +3,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import QuickContact from "@/components/layout/QuickContact";
 
 export const metadata: Metadata = {
   title: {
@@ -48,6 +49,7 @@ export default function RootLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <QuickContact />
         </SessionProvider>
       </body>
     </html>

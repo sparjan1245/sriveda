@@ -11,7 +11,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { serviceSlug, name, email, phone, date, occasion, notes } = await req.json();
+    const { serviceSlug, firstName, lastName, email, phone, date, occasion, notes } = await req.json();
+    const name = `${firstName ?? ""} ${lastName ?? ""}`.trim();
     const userId = (session.user as { id: string }).id;
 
     if (!date || new Date(date) < new Date()) {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Loader2, CheckCircle } from "lucide-react";
 
 export default function ContactForm() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -25,7 +25,7 @@ export default function ContactForm() {
       });
       if (res.ok) {
         setSuccess(true);
-        setForm({ name: "", email: "", phone: "", message: "" });
+        setForm({ firstName: "", lastName: "", email: "", phone: "", message: "" });
       } else {
         setError("Something went wrong. Please try again.");
       }
@@ -56,17 +56,23 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>Full Name *</label>
-          <input name="name" value={form.name} onChange={handleChange} required className={inputClass} placeholder="Your name" />
+          <label className={labelClass}>First Name *</label>
+          <input name="firstName" value={form.firstName} onChange={handleChange} required className={inputClass} placeholder="First name" />
+        </div>
+        <div>
+          <label className={labelClass}>Last Name *</label>
+          <input name="lastName" value={form.lastName} onChange={handleChange} required className={inputClass} placeholder="Last name" />
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass}>Email *</label>
+          <input name="email" type="email" value={form.email} onChange={handleChange} required className={inputClass} placeholder="your@email.com" />
         </div>
         <div>
           <label className={labelClass}>Phone</label>
           <input name="phone" value={form.phone} onChange={handleChange} className={inputClass} placeholder="+1 (xxx) xxx-xxxx" />
         </div>
-      </div>
-      <div>
-        <label className={labelClass}>Email *</label>
-        <input name="email" type="email" value={form.email} onChange={handleChange} required className={inputClass} placeholder="your@email.com" />
       </div>
       <div>
         <label className={labelClass}>Message *</label>

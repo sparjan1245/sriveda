@@ -3,11 +3,13 @@ import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, phone, message } = await req.json();
+    const { firstName, lastName, email, phone, message } = await req.json();
 
-    if (!name || !email || !message) {
-      return NextResponse.json({ error: "Name, email and message are required." }, { status: 400 });
+    if (!firstName || !lastName || !email || !message) {
+      return NextResponse.json({ error: "First name, last name, email and message are required." }, { status: 400 });
     }
+
+    const name = `${firstName} ${lastName}`.trim();
 
     await db.contactMessage.create({
       data: { name, email, phone, message },

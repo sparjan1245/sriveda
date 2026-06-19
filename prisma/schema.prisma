@@ -227,3 +227,25 @@ model Banner {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
 }
+
+model DonationTier {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  amount      Float
+  recurring   Boolean @default(false)
+  order       Int     @default(0)
+  active      Boolean @default(true)
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  location  String?
+  avatar    String?
+  text      String
+  rating    Int      @default(5)
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}

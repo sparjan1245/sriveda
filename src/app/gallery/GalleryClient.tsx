@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { Images, PlayCircle } from "lucide-react";
 
 interface GalleryImage {
   src: string;
@@ -9,74 +11,126 @@ interface GalleryImage {
   category: string;
 }
 
-const CATEGORIES = ["All", "Temple", "Rituals", "Events", "Community"];
+interface GalleryVideo {
+  thumbnail: string;
+  title: string;
+  href: string;
+}
 
-export default function GalleryClient({ images }: { images: GalleryImage[] }) {
-  const [active, setActive] = useState("All");
+interface Props {
+  images: GalleryImage[];
+  videos: GalleryVideo[];
+}
 
-  const filtered = active === "All" ? images : images.filter((img) => img.category === active);
+const TABS = [
+  { key: "images" as const, label: "Images", icon: <Images className="w-3.5 h-3.5" /> },
+  { key: "videos" as const, label: "Videos", icon: <PlayCircle className="w-3.5 h-3.5" /> },
+];
+
+export default function GalleryClient({ images, videos }: Props) {
+  const [tab, setTab] = useState<"images" | "videos">("images");
+
+  const count = tab === "images" ? images.length : videos.length;
+  const label = tab === "images"
+    ? `${count} photo${count !== 1 ? "s" : ""}`
+    : `${count} video${count !== 1 ? "s" : ""}`;
 
   return (
     <>
-      {/* Category filters */}
-      <div className="flex flex-wrap justify-center gap-2 mb-10">
-        {CATEGORIES.map((cat) => (
+      {/* Tab switcher */}
+      <div className="flex items-center justify-center gap-2 mb-10">
+        {TABS.map((t) => (
           <button
-            key={cat}
-            onClick={() => setActive(cat)}
-            className={`relative px-5 py-2 rounded-full text-sm font-cinzel font-semibold tracking-wide transition-all duration-200 ${
-              active === cat
-                ? "bg-maroon text-white shadow-md shadow-maroon/30"
-                : "bg-white text-maroon border border-gold/30 hover:border-saffron hover:text-saffron"
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`inline-flex items-center gap-2 px-6 py-2 rounded-full text-xs font-semibold tracking-widest uppercase transition-all duration-300 border ${
+              tab === t.key
+                ? "bg-maroon text-white border-maroon shadow-md"
+                : "bg-white text-maroon border-gold/35 hover:border-maroon/50 hover:bg-cream"
             }`}
           >
-            {cat}
-            {active === cat && (
-              <span className="absolute -bottom-px left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-gold" />
-            )}
+            {t.icon}
+            {t.label}
           </button>
         ))}
       </div>
 
       {/* Count */}
       <p className="text-center text-foreground/40 text-xs font-medium uppercase tracking-widest mb-8">
-        {filtered.length} photo{filtered.length !== 1 ? "s" : ""}
-        {active !== "All" ? ` · ${active}` : ""}
+        {label}
       </p>
 
-      {/* Masonry grid */}
-      <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-        {filtered.map((img, i) => (
-          <div
-            key={i}
-            className="break-inside-avoid rounded-2xl overflow-hidden shadow-sm border border-gold/20 group cursor-pointer hover:shadow-lg hover:border-gold/50 transition-all duration-300"
-          >
-            <div className="relative">
-              <Image
-                src={img.src}
-                alt={img.alt}
-                width={400}
-                height={300}
-                className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-maroon/0 group-hover:bg-maroon/50 transition-all duration-300 flex items-end">
-                <div className="p-3 w-full translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                  <span className="inline-block bg-gold text-white text-xs px-2.5 py-0.5 rounded-full font-semibold mb-1">
-                    {img.category}
-                  </span>
-                  <p className="text-white text-xs leading-snug">{img.alt}</p>
+      {/* ── Images grid ── */}
+      {tab === "images" && (
+        images.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-4xl mb-4">🖼️</div>
+            <p className="text-foreground/50">No photos available yet.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+            {images.map((img, i) => (
+              <div
+                key={i}
+                className="relative aspect-square rounded-2xl overflow-hidden border border-gold/20 group cursor-zoom-in shadow-sm hover:shadow-md hover:border-gold/50 transition-all duration-300"
+              >
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-maroon/0 group-hover:bg-maroon/55 transition-all duration-300 flex items-end">
+                  <div className="p-2 w-full translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                    <p className="text-white text-[10px] font-cinzel font-semibold leading-snug drop-shadow-md line-clamp-2">
+                      {img.alt}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        )
+      )}
 
-      {filtered.length === 0 && (
-        <div className="text-center py-16">
-          <div className="text-4xl mb-4">🖼️</div>
-          <p className="text-foreground/50">No photos in this category yet.</p>
-        </div>
+      {/* ── Videos grid ── */}
+      {tab === "videos" && (
+        videos.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-4xl mb-4">▶️</div>
+            <p className="text-foreground/50">No videos available yet.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+            {videos.map((v, i) => (
+              <Link
+                key={i}
+                href={v.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={v.title}
+                className="group relative rounded-2xl overflow-hidden border border-gold/20 hover:border-gold/50 shadow-sm hover:shadow-md transition-all duration-300"
+              >
+                <div className="relative aspect-video overflow-hidden bg-maroon/10">
+                  <Image
+                    src={v.thumbnail}
+                    alt={v.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-maroon/45 group-hover:bg-maroon/30 transition-colors duration-300" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-gold/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300 ring-4 ring-white/20">
+                      <div className="w-0 h-0 border-t-8 border-t-transparent border-l-14 border-l-white border-b-8 border-b-transparent ml-1" />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )
       )}
     </>
   );

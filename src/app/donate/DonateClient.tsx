@@ -16,7 +16,8 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
   const { data: session } = useSession();
   const [selected, setSelected] = useState<string | null>(null);
   const [customAmount, setCustomAmount] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,9 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
   // Pre-fill when session loads
   useEffect(() => {
     if (session?.user) {
-      setName((prev) => prev || session.user?.name || "");
+      const parts = (session.user?.name || "").split(" ");
+      setFirstName((prev) => prev || parts[0] || "");
+      setLastName((prev) => prev || parts.slice(1).join(" ") || "");
       setEmail((prev) => prev || session.user?.email || "");
     }
   }, [session]);
@@ -44,7 +47,8 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
         body: JSON.stringify({
           amount,
           cause: selectedTier?.name || "General Donation",
-          name,
+          firstName,
+          lastName,
           email,
           message,
           recurring: selectedTier?.recurring || false,
@@ -133,14 +137,25 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
           </p>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-maroon/80 mb-1.5">Your Name</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputClass}
-                placeholder="Full name"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-maroon/80 mb-1.5">First Name</label>
+                <input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className={inputClass}
+                  placeholder="First name"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-maroon/80 mb-1.5">Last Name</label>
+                <input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Last name"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-maroon/80 mb-1.5">Email</label>
