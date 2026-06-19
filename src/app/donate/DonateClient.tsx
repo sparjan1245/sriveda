@@ -7,7 +7,7 @@ import { Loader2, RefreshCw, Lock } from "lucide-react";
 interface Tier {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   amount: number;
   recurring: boolean;
 }
