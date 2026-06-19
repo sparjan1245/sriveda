@@ -23,6 +23,6 @@ export async function POST(req: Request) {
   const tier = await db.donationTier.create({
     data: { name, description, amount: parseFloat(amount), recurring: !!recurring, order: order ?? count },
   });
-  revalidateTag("donation-tiers");
+  revalidateTag("donation-tiers", "max");
   return NextResponse.json(tier);
 }

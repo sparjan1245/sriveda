@@ -23,6 +23,6 @@ export async function POST(req: Request) {
   const banner = await db.banner.create({
     data: { image, title, subtitle, description, ctaText, ctaLink, cta2Text, cta2Link, order: count },
   });
-  revalidateTag("banners");
+  revalidateTag("banners", "max");
   return NextResponse.json(banner);
 }
