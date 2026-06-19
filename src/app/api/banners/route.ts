@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { revalidateTag } from "next/cache";
 
 export async function GET() {
   const banners = await db.banner
@@ -22,5 +23,6 @@ export async function POST(req: Request) {
   const banner = await db.banner.create({
     data: { image, title, subtitle, description, ctaText, ctaLink, cta2Text, cta2Link, order: count },
   });
+  revalidateTag("banners");
   return NextResponse.json(banner);
 }

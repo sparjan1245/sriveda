@@ -12,17 +12,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   const { id } = await params;
   const data = await req.json();
-  const allowed = ["active", "order", "image", "title", "subtitle", "description", "ctaText", "ctaLink", "cta2Text", "cta2Link"] as const;
+  const allowed = ["name", "location", "avatar", "text", "rating", "order", "active"] as const;
   const update = Object.fromEntries(allowed.filter((k) => k in data).map((k) => [k, data[k]]));
-  const banner = await db.banner.update({ where: { id }, data: update });
-  revalidateTag("banners");
-  return NextResponse.json(banner);
+  const testimonial = await db.testimonial.update({ where: { id }, data: update });
+  revalidateTag("testimonials");
+  return NextResponse.json(testimonial);
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   const { id } = await params;
-  await db.banner.delete({ where: { id } });
-  revalidateTag("banners");
+  await db.testimonial.delete({ where: { id } });
+  revalidateTag("testimonials");
   return NextResponse.json({ success: true });
 }

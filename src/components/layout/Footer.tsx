@@ -24,19 +24,22 @@ export default function Footer() {
 
           {/* Brand column */}
           <div>
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 border-gold/30 shadow-lg ring-4 ring-white/5">
+            <div className="flex flex-col items-center text-center mb-5">
+              <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-gold/40 shadow-lg ring-4 ring-white/5 mb-3">
                 <Image
                   src="/logo.png"
                   alt="Sri Veda Gayatri Temple"
-                  width={48}
-                  height={48}
+                  width={64}
+                  height={64}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div>
-                <div className="font-cinzel font-bold text-gold text-sm leading-tight">Sri Veda Gayatri</div>
-                <div className="font-cinzel text-white/100 text-[10px] tracking-[0.15em] uppercase">Temple · Est. 2024</div>
+              <div className="font-cinzel font-bold text-gold text-sm leading-tight mb-0.5">Sri Veda Gayatri</div>
+              <div className="font-cinzel font-semibold text-white/90 text-[11px] leading-tight mb-1">Cultural Center</div>
+              <div className="flex items-center gap-2">
+                <span className="block h-px w-8 bg-gold/30" />
+                <span className="font-cinzel text-gold/60 text-[9px] tracking-[0.25em] uppercase">Est. 2024</span>
+                <span className="block h-px w-8 bg-gold/30" />
               </div>
             </div>
 

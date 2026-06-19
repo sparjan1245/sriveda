@@ -17,7 +17,8 @@ export default function BookingForm({ service }: { service: Service }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     date: "",
@@ -28,9 +29,11 @@ export default function BookingForm({ service }: { service: Service }) {
   // Pre-fill when session loads (async)
   useEffect(() => {
     if (session?.user) {
+      const parts = (session.user?.name || "").split(" ");
       setForm((prev) => ({
         ...prev,
-        name: prev.name || session.user?.name || "",
+        firstName: prev.firstName || parts[0] || "",
+        lastName: prev.lastName || parts.slice(1).join(" ") || "",
         email: prev.email || session.user?.email || "",
       }));
     }
@@ -70,18 +73,31 @@ export default function BookingForm({ service }: { service: Service }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-4">
+      <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>Full Name *</label>
+          <label className={labelClass}>First Name *</label>
           <input
-            name="name"
-            value={form.name}
+            name="firstName"
+            value={form.firstName}
             onChange={handleChange}
             required
             className={inputClass}
-            placeholder="Your full name"
+            placeholder="First name"
           />
         </div>
+        <div>
+          <label className={labelClass}>Last Name *</label>
+          <input
+            name="lastName"
+            value={form.lastName}
+            onChange={handleChange}
+            required
+            className={inputClass}
+            placeholder="Last name"
+          />
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-4">
         <div>
           <label className={labelClass}>Email *</label>
           <input
@@ -96,7 +112,7 @@ export default function BookingForm({ service }: { service: Service }) {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-4">
+      <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label className={labelClass}>Phone *</label>
           <input

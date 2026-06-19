@@ -6,7 +6,8 @@ import { createCheckoutSession } from "@/lib/stripe";
 export async function POST(req: Request) {
   try {
     const session = await auth();
-    const { amount, cause, name, email, message, recurring } = await req.json();
+    const { amount, cause, firstName, lastName, email, message, recurring } = await req.json();
+    const name = `${firstName ?? ""} ${lastName ?? ""}`.trim();
 
     if (!amount || amount < 1) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });

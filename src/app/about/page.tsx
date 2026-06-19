@@ -80,7 +80,7 @@ export default async function AboutPage() {
     <div>
 
       {/* ── Inner Page Banner ── */}
-      <section className="relative h-40 md:h-52 flex items-center justify-center overflow-hidden">
+      <section className="relative h-20 md:h-22 flex items-center justify-center overflow-hidden">
         <Image
           src={IMAGES.temple1}
           alt="About Sri Veda Gayatri Temple"
@@ -103,46 +103,12 @@ export default async function AboutPage() {
             <span className="text-gold/60">›</span>
             <span className="text-gold/80">About Us</span>
           </div>
-          <h1 className="font-cinzel font-bold text-2xl md:text-3xl text-white drop-shadow-md leading-tight">
-            About Our Temple
-          </h1>
-          {/* Divider */}
-          <div className="flex items-center justify-center gap-3 my-2">
-            <span className="block h-px w-10 md:w-16 bg-linear-to-r from-transparent to-gold/60" />
-            <span className="text-gold text-base drop-shadow-sm">🪷</span>
-            <span className="block h-px w-10 md:w-16 bg-linear-to-l from-transparent to-gold/60" />
-          </div>
-          <p className="text-white/80 text-xs max-w-md mx-auto drop-shadow-sm">
-            A spiritual &amp; charitable non-profit serving the Hindu community since {TEMPLE.founded}
-          </p>
+         
         </div>
       </section>
 
       {/* ── Mission ── */}
-      <section className="relative py-8 md:py-6 px-4 overflow-hidden" style={{ background: "linear-gradient(160deg, #FFF8F0 0%, #F5EBD8 50%, #FFF8F0 100%)" }}>
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-          <span className="text-maroon/[0.04] font-cinzel leading-none -translate-y-8" style={{ fontSize: "min(65vw,600px)" }}>ॐ</span>
-        </div>
-        <div className="relative max-w-6xl mx-auto">
-          <div className="text-center mb-8 md:mb-10">
-            <span className="badge-gold mb-5 inline-flex text-xs md:text-sm px-4 py-1.5">Our Purpose</span>
-            <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
-              A Sanctuary for the Soul
-            </h2>
-            <div className="flex items-center justify-center gap-4 mb-2">
-              <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
-              <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
-              <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
-            </div>
-            <p className="text-foreground/75 text-sm font-light leading-relaxed max-w-3xl mx-auto">
-              {TEMPLE.mission} As a&nbsp;
-              <strong className="text-maroon font-semibold">California Registered 501(c)(3) Non-Profit</strong>,
-              every contribution goes directly toward serving the spiritual needs of our community.
-            </p>
-          </div>
-        </div>
-      </section>
-
+      
       {/* ── Story + Live Stats ── */}
       <section className="py-8 md:py-6 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
@@ -230,123 +196,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* ── Programs ── */}
-      <section className="py-8 md:py-6 px-4 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8 md:mb-10">
-            <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">What We Do</span>
-            <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
-              Our Programs
-            </h2>
-            <div className="flex items-center justify-center gap-4 mb-3">
-              <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
-              <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
-              <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
-            </div>
-            <p className="text-foreground/60 text-sm font-light max-w-xl mx-auto">
-              From sacred rituals to cultural education, we offer a complete spiritual and community experience.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              {
-                icon: "🕉",
-                title: "Spiritual Services",
-                color: "from-maroon/5 to-saffron/5",
-                accent: "bg-saffron/10 text-saffron",
-                items: ["Daily Archana & Abhishekam", "Special Pujas & Homams", "Samskaras", "Astrological Consultations"],
-              },
-              {
-                icon: "🎭",
-                title: "Cultural Programs",
-                color: "from-gold/5 to-maroon/5",
-                accent: "bg-gold/10 text-gold",
-                items: ["Classical Music", "Kuchipudi Dance", "Sanskrit Language", "Yoga & Meditation"],
-              },
-              {
-                icon: "🤝",
-                title: "Community Service",
-                color: "from-saffron/5 to-gold/5",
-                accent: "bg-maroon/10 text-maroon",
-                items: ["Weekly Annadaanam", "Festival Celebrations", "Youth Engagement", "Volunteer Programs"],
-              },
-            ].map((program) => (
-              <div
-                key={program.title}
-                className={`relative rounded-2xl p-5 gold-border shadow-sm card-hover overflow-hidden bg-linear-to-br ${program.color}`}
-              >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-3 shadow-sm ${program.accent}`}>
-                  {program.icon}
-                </div>
-                <h3 className="font-cinzel font-bold text-maroon text-sm mb-2.5">{program.title}</h3>
-                <ul className="space-y-1.5">
-                  {program.items.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-xs font-light text-foreground/70">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-    
-      {/* ── Upcoming Events (live) ── */}
-      {upcomingEvents.length > 0 && (
-        <section className="py-8 md:py-6 px-4 bg-cream pattern-bg">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-8 md:mb-10">
-              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">What&apos;s Coming</span>
-              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
-                Upcoming Events
-              </h2>
-              <div className="flex items-center justify-center gap-4">
-                <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
-                <span className="text-gold text-2xl drop-shadow-md">🪷</span>
-                <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="bg-white rounded-2xl overflow-hidden gold-border shadow-sm card-hover">
-                  {event.image && (
-                    <div className="relative h-32 overflow-hidden">
-                      <Image src={event.image} alt={event.title} fill className="object-cover" />
-                      <div className="absolute inset-0 bg-linear-to-t from-maroon/60 to-transparent" />
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="font-cinzel font-semibold text-maroon text-xs md:text-sm mb-2 leading-snug line-clamp-2">
-                      {event.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-foreground/55 mb-1">
-                      <Calendar className="w-3 h-3 text-saffron shrink-0" />
-                      {new Date(event.date).toLocaleDateString("en-US", {
-                        weekday: "short", month: "long", day: "numeric", year: "numeric",
-                      })}
-                    </div>
-                    {event.location && (
-                      <div className="flex items-center gap-2 text-xs text-foreground/55">
-                        <MapPin className="w-3 h-3 text-saffron shrink-0" />
-                        {event.location}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center mt-8">
-              <Link href="/events" className="btn-secondary px-10">View All Events</Link>
-            </div>
-          </div>
-        </section>
-      )}
+     
 
       {/* ── Contact Info ── */}
       <section className="py-8 md:py-6 px-4 bg-white">

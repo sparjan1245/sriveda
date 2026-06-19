@@ -1,18 +1,29 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import { TEMPLE, IMAGES, DONATION_TIERS } from "@/lib/constants";
+import { db } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import DonateClient from "./DonateClient";
+
+const getActiveDonationTiers = unstable_cache(
+  () => db.donationTier.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+  ["donation-tiers"],
+  { tags: ["donation-tiers"] }
+);
 
 export const metadata: Metadata = {
   title: "Donate",
   description: "Support Sri Veda Gayatri Temple — a 501(c)(3) nonprofit. All donations are tax-deductible.",
 };
 
-export default function DonatePage() {
+export default async function DonatePage() {
+  const dbTiers = await getActiveDonationTiers();
+  const tiers = dbTiers.length > 0 ? dbTiers : DONATION_TIERS;
+
   return (
     <div>
       {/* ── Inner Page Banner ── */}
-      <section className="relative h-40 md:h-52 flex items-center justify-center overflow-hidden">
+      <section className="relative h-20 md:h-22 flex items-center justify-center overflow-hidden">
         <Image src={IMAGES.temple1} alt="Donate" fill className="object-cover object-center" priority />
         <div className="absolute inset-0 bg-black/55" />
         <div className="absolute inset-0 bg-maroon/60" />
@@ -24,27 +35,11 @@ export default function DonatePage() {
             <span className="text-gold/60">›</span>
             <span className="text-gold/80">Donate</span>
           </div>
-          <div className="text-2xl mb-1">🙏</div>
-          <h1 className="font-cinzel font-bold text-2xl md:text-3xl text-white drop-shadow-md leading-tight">
-            Support Our Mission
-          </h1>
-          <div className="flex items-center justify-center gap-3 my-2">
-            <span className="block h-px w-10 md:w-16 bg-linear-to-r from-transparent to-gold/60" />
-            <span className="text-gold text-base drop-shadow-sm">🪷</span>
-            <span className="block h-px w-10 md:w-16 bg-linear-to-l from-transparent to-gold/60" />
-          </div>
-          <p className="text-white/80 text-xs max-w-md mx-auto drop-shadow-sm">
-            501(c)(3) Nonprofit · All donations tax-deductible · Tax ID: {TEMPLE.taxId}
-          </p>
+          
         </div>
       </section>
 
-      {/* Tax info banner */}
-      <div className="bg-linear-to-r from-saffron to-gold text-white py-4 text-center px-4">
-        <p className="text-sm font-medium">
-          🏛 We are a registered 501(c)(3) nonprofit organization. All donations are fully tax-deductible in the U.S.
-        </p>
-      </div>
+     
 
       {/* Donation tiers */}
       <section className="py-16 px-4 bg-cream pattern-bg">
@@ -56,7 +51,7 @@ export default function DonatePage() {
               Every contribution, large or small, helps us serve the community and preserve our sacred traditions.
             </p>
           </div>
-          <DonateClient tiers={DONATION_TIERS} />
+          <DonateClient tiers={tiers} />
         </div>
       </section>
 

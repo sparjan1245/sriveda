@@ -59,8 +59,14 @@ export default function Header() {
     <>
       {/* ── Top utility bar ─────────────────────────────── */}
       <div className="bg-maroon hidden md:block">
+        {/* Temple name strip */}
+        <div className="text-center py-1 border-b border-white/10" style={{ backgroundColor: "#fdea9d" }}>
+          <span className="font-cinzel font-bold tracking-[0.25em] uppercase text-[14px] text-maroon">
+            🕉&nbsp; Sri Veda Gayatri Temple &nbsp;🕉
+          </span>
+        </div>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between py-1.5 border-b border-white/10">
+          <div className="flex items-center justify-between py-1.5">
             <div className="flex items-center gap-5 text-white/70 text-[11px] tracking-wide">
               <span className="flex items-center gap-1.5">
                 <Clock className="w-3 h-3 text-gold/80" />
@@ -100,16 +106,16 @@ export default function Header() {
         <div className="h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
 
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between h-18 md:h-22 py-2">
+          <div className="flex items-center justify-between h-18 md:h-28 py-2">
 
             {/* ── Logo ── */}
             <Link href="/" className="flex items-center gap-3 group shrink-0">
               <Image
                 src="/logo.png"
                 alt="Sri Veda Gayatri Temple"
-                width={64}
-                height={64}
-                className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain shrink-0"
+                width={80}
+                height={80}
+                className="w-16 h-16 md:w-22 md:h-22 lg:w-22 lg:h-22 object-contain shrink-0"
                 priority
               />
               {/* Name beside logo */}

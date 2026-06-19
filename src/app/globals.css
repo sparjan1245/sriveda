@@ -49,7 +49,18 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-align: justify;
 }
+
+p, li, td, blockquote {
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Preserve explicit alignment overrides */
+.text-center, .text-center * { text-align: center !important; hyphens: none; }
+.text-left,   .text-left *   { text-align: left   !important; hyphens: none; }
+.text-right,  .text-right *  { text-align: right  !important; hyphens: none; }
 
 h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
 

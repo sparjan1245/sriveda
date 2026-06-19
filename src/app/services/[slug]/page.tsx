@@ -71,7 +71,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     <div>
 
       {/* ── Full Service Hero ── */}
-       <section className="relative h-40 md:h-52 flex items-center justify-center overflow-hidden">
+       <section className="relative h-20 md:h-22 flex items-center justify-center overflow-hidden">
               <Image src={IMAGES.temple1} alt="Temple Services" fill className="object-cover object-center" priority />
               <div className="absolute inset-0 bg-black/55" />
               <div className="absolute inset-0 bg-maroon/60" />
@@ -84,17 +84,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                   <span className="text-gold/60">›</span>
                   <span className="text-gold/80">Services</span>
                 </div>
-                <h1 className="font-cinzel font-bold text-2xl md:text-3xl text-white drop-shadow-md leading-tight">
-                  Our Sacred Services
-                </h1>
-                <div className="flex items-center justify-center gap-3 my-2">
-                  <span className="block h-px w-10 md:w-16 bg-linear-to-r from-transparent to-gold/60" />
-                  <span className="text-gold text-base drop-shadow-sm">🪷</span>
-                  <span className="block h-px w-10 md:w-16 bg-linear-to-l from-transparent to-gold/60" />
-                </div>
-                <p className="text-white/80 text-xs max-w-md mx-auto drop-shadow-sm">
-                  Performed by trained and experienced priests with authentic Vedic procedures
-                </p>
+               
               </div>
             </section>
 

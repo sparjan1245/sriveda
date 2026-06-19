@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Heart, Star, Users, Phone, MapPin, Clock, ArrowRight, CheckCircle, Sparkles } from "lucide-react";
-import { TEMPLE, IMAGES, BOARD_MEMBERS, SERVICES as STATIC_SERVICES } from "@/lib/constants";
+import { Calendar, Heart, Star, Users, ArrowRight, CheckCircle } from "lucide-react";
+import { TEMPLE, IMAGES, BOARD_MEMBERS, SERVICES as STATIC_SERVICES, DONATION_TIERS } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 import HeroSlider, { type BannerSlide } from "@/components/home/HeroSlider";
 import { ServiceSlider } from "@/components/home/ServiceSlider";
 import { GallerySection } from "@/components/home/GallerySection";
+import TestimonialCarousel from "@/components/home/TestimonialCarousel";
 
 const DEFAULT_SLIDES: BannerSlide[] = [
   { id: "d1", image: IMAGES.hero },
@@ -13,17 +15,45 @@ const DEFAULT_SLIDES: BannerSlide[] = [
   { id: "d4", image: IMAGES.puja },
 ];
 
+const getActiveBanners = unstable_cache(
+  () => db.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+  ["banners"],
+  { tags: ["banners"] }
+);
+
+const getActiveServices = unstable_cache(
+  () => db.service.findMany({ where: { active: true }, orderBy: { createdAt: "desc" } }).catch(() => []),
+  ["services"],
+  { tags: ["services"] }
+);
+
+const getActiveDonationTiers = unstable_cache(
+  () => db.donationTier.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+  ["donation-tiers"],
+  { tags: ["donation-tiers"] }
+);
+
+const getActiveTestimonials = unstable_cache(
+  () => db.testimonial.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+  ["testimonials"],
+  { tags: ["testimonials"] }
+);
+
+const STATIC_TESTIMONIALS = [
+  { id: "t1", name: "Priya Sharma", location: "Stockton, CA", avatar: "PS", rating: 5, text: "The Abhishekam ceremony was deeply moving. The chanting and rituals were conducted with such devotion and authenticity. Sri Veda Gayatri Temple has truly become our spiritual home in California." },
+  { id: "t2", name: "Rajan & Meena Patel", location: "Tracy, CA", avatar: "RP", rating: 5, text: "We had our son's Upanayana Samskara performed here and it was a beautiful experience. The priest explained each step with such depth. The temple team was incredibly welcoming throughout." },
+  { id: "t3", name: "Dr. Ananya Krishnan", location: "Modesto, CA", avatar: "AK", rating: 5, text: "The weekly Annadaanam is a wonderful initiative. I can see the incredible love and dedication the founders and priests put into every ritual and community event. Truly a blessed place." },
+];
+
 export default async function HomePage() {
-  const dbBanners = await db.banner
-    .findMany({ where: { active: true }, orderBy: { order: "asc" } })
-    .catch(() => []);
-
-  const dbServices = await db.service
-    .findMany({ where: { active: true }, orderBy: { createdAt: "desc" } })
-    .catch(() => []);
-
+  const dbBanners = await getActiveBanners();
+  const dbServices = await getActiveServices();
+  const dbTiers = await getActiveDonationTiers();
+  const dbTestimonials = await getActiveTestimonials();
   const slides: BannerSlide[] = dbBanners.length > 0 ? dbBanners : DEFAULT_SLIDES;
   const services = dbServices.length > 0 ? dbServices : STATIC_SERVICES;
+  const donationTiers = dbTiers.length > 0 ? dbTiers : DONATION_TIERS;
+  const testimonials = dbTestimonials.length > 0 ? dbTestimonials : STATIC_TESTIMONIALS;
 
   return (
     <div className="overflow-x-hidden">
@@ -31,25 +61,7 @@ export default async function HomePage() {
       {/* ─────────────────────────── HERO ─────────────────────────── */}
       <HeroSlider slides={slides} />
 
-      {/* ─────────────────────── INFO STRIP ───────────────────────── */}
-      <div className="bg-maroon text-cream">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/10">
-            {[
-              { icon: <Clock className="w-4 h-4" />, text: "Mon–Sun: 5:00 PM – 9:00 PM" },
-              { icon: <MapPin className="w-4 h-4" />, text: "702 W Yosemite Ave, Manteca, CA" },
-              { icon: <Phone className="w-4 h-4" />, text: "+1 (669) 213-8780", href: "tel:+16692138780" },
-            ].map((item) => (
-              <div key={item.text} className="flex items-center justify-center gap-2.5 py-3 px-4 text-xs font-medium">
-                <span className="text-gold shrink-0">{item.icon}</span>
-                {item.href
-                  ? <a href={item.href} className="hover:text-gold transition-colors">{item.text}</a>
-                  : <span className="text-cream/80">{item.text}</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      
 
       {/* ─────────────────────── PURPOSE + STATS ──────────────────── */}
       <section className="relative py-8 md:py-6 px-4 overflow-hidden" style={{ background: "linear-gradient(160deg, #FFF8F0 0%, #F5EBD8 50%, #FFF8F0 100%)" }}>
@@ -203,12 +215,6 @@ export default async function HomePage() {
 
         <div className="relative max-w-5xl mx-auto text-center text-white">
 
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/25 rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-widest uppercase mb-5">
-            <Sparkles className="w-3 h-3 text-gold" />
-            <span className="text-gold">501(c)(3) Nonprofit · Tax Deductible</span>
-          </div>
-
           <h2 className="font-cinzel font-bold text-xl md:text-2xl lg:text-3xl mb-3 leading-tight">
             Support Our Sacred Mission
           </h2>
@@ -220,23 +226,15 @@ export default async function HomePage() {
             <span className="block h-px w-12 md:w-20 bg-linear-to-l from-transparent to-gold/50" />
           </div>
 
-          <p className="text-white/55 text-sm leading-relaxed mb-2 max-w-xl mx-auto">
+          <p className="text-white/55 text-sm leading-relaxed mb-8 max-w-xl mx-auto">
             Every contribution sustains daily pujas, cultural programs, and community service.
           </p>
-          <p className="text-gold/50 text-[11px] mb-8 font-medium tracking-wide">
-            Tax ID: {TEMPLE.taxId} · Fully tax-deductible under U.S. law
-          </p>
 
-          {/* Tier tiles */}
+          {/* Tier tiles — first 3 from DB + custom */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 max-w-3xl mx-auto">
-            {[
-              { amount: "$51",    label: "Anna Prasadam",   desc: "Feed the community" },
-              { amount: "$75",    label: "Pushpa Alankara", desc: "Flower offerings" },
-              { amount: "$116",   label: "Abhishekam Seva", desc: "Sacred bath ritual" },
-              { amount: "Custom", label: "Your Amount",     desc: "Any contribution" },
-            ].map((t) => (
+            {donationTiers.slice(0, 3).map((t) => (
               <Link
-                key={t.label}
+                key={t.id}
                 href="/donate"
                 className="group relative rounded-2xl py-5 px-4 text-center overflow-hidden transition-all duration-300 hover:-translate-y-1"
                 style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(212,160,23,0.20)" }}
@@ -245,13 +243,29 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-linear-to-b from-gold/[0.06] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative">
                   <div className="font-cinzel font-bold text-xl md:text-2xl text-gold mb-1 group-hover:scale-105 transition-transform duration-200 inline-block">
-                    {t.amount}
+                    ${t.amount}
                   </div>
-                  <div className="text-white/70 text-[11px] font-semibold uppercase tracking-wide mb-0.5">{t.label}</div>
-                  <div className="text-white/30 text-[10px]">{t.desc}</div>
+                  <div className="text-white/70 text-[11px] font-semibold uppercase tracking-wide mb-0.5 line-clamp-1">{t.name}</div>
+                  <div className="text-white/30 text-[10px] line-clamp-1">{t.description}</div>
                 </div>
               </Link>
             ))}
+            {/* Custom tile */}
+            <Link
+              href="/donate"
+              className="group relative rounded-2xl py-5 px-4 text-center overflow-hidden transition-all duration-300 hover:-translate-y-1"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(212,160,23,0.20)" }}
+            >
+              <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-gold/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-linear-to-b from-gold/[0.06] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative">
+                <div className="font-cinzel font-bold text-xl md:text-2xl text-gold mb-1 group-hover:scale-105 transition-transform duration-200 inline-block">
+                  Custom
+                </div>
+                <div className="text-white/70 text-[11px] font-semibold uppercase tracking-wide mb-0.5">Your Amount</div>
+                <div className="text-white/30 text-[10px]">Any contribution</div>
+              </div>
+            </Link>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
@@ -406,7 +420,7 @@ export default async function HomePage() {
           <span className="text-maroon/3 font-cinzel leading-none" style={{ fontSize: "min(65vw,560px)" }}>ॐ</span>
         </div>
 
-        <div className="relative max-w-6xl mx-auto">
+        <div className="relative max-w-3xl mx-auto">
           <div className="text-center mb-8 md:mb-10">
             <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Devotee Stories</span>
             <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
@@ -419,55 +433,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              {
-                name: "Priya Sharma",
-                location: "Stockton, CA",
-                avatar: "PS",
-                text: "The Abhishekam ceremony was deeply moving. The chanting and rituals were conducted with such devotion and authenticity. Sri Veda Gayatri Temple has truly become our spiritual home in California.",
-              },
-              {
-                name: "Rajan & Meena Patel",
-                location: "Tracy, CA",
-                avatar: "RP",
-                text: "We had our son's Upanayana Samskara performed here and it was a beautiful experience. The priest explained each step with such depth. The temple team was incredibly welcoming throughout.",
-              },
-              {
-                name: "Dr. Ananya Krishnan",
-                location: "Modesto, CA",
-                avatar: "AK",
-                text: "The weekly Annadaanam is a wonderful initiative. I can see the incredible love and dedication the founders and priests put into every ritual and community event. Truly a blessed place.",
-              },
-            ].map((t) => (
-              <div key={t.name} className="group relative bg-white rounded-2xl p-6 gold-border card-hover shadow-md flex flex-col">
-                <span className="absolute top-3 right-5 text-5xl text-gold/10 font-serif leading-none select-none">&rdquo;</span>
-
-                {/* Stars */}
-                <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />
-                  ))}
-                </div>
-
-                <p className="text-foreground/70 text-sm leading-relaxed flex-1 mb-4 italic">
-                  &ldquo;{t.text}&rdquo;
-                </p>
-
-                <div className="divider-gold mb-4" />
-
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-linear-to-br from-saffron/20 to-gold/20 border border-gold/30 flex items-center justify-center shrink-0">
-                    <span className="font-cinzel font-bold text-xs text-maroon">{t.avatar}</span>
-                  </div>
-                  <div>
-                    <p className="font-cinzel font-semibold text-maroon text-xs leading-snug">{t.name}</p>
-                    <p className="text-foreground/45 text-[11px]">{t.location}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <TestimonialCarousel items={testimonials} />
         </div>
       </section>
 

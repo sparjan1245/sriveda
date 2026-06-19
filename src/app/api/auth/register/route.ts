@@ -4,11 +4,13 @@ import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, phone, city, state, gotram, nakshatra } = await req.json();
+    const { firstName, lastName, email, password, phone, city, state, gotram, nakshatra } = await req.json();
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: "Name, email and password are required." }, { status: 400 });
+    if (!firstName || !lastName || !email || !password) {
+      return NextResponse.json({ error: "First name, last name, email and password are required." }, { status: 400 });
     }
+
+    const name = `${firstName} ${lastName}`.trim();
 
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
