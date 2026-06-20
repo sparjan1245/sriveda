@@ -14,8 +14,8 @@ export interface GalleryPhoto {
 export interface GalleryVideo {
   thumbnail: string;
   title: string;
-  description: string;
-  duration: string;
+  description?: string;
+  duration?: string;
   href: string;
 }
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency } from "@/lib/utils";
-import { Users, BookOpen, Heart, MessageSquare, Calendar, Image, Settings, Layers } from "lucide-react";
+import { Users, BookOpen, Heart, MessageSquare, Calendar, Image, Settings, Layers, Megaphone, Users2, BarChart2, ShieldCheck, CalendarDays } from "lucide-react";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -29,6 +29,11 @@ export default async function AdminPage() {
     { label: "Gallery", href: "/admin/gallery", icon: <Image />, desc: "Upload photos" },
     { label: "Messages", href: "/admin/messages", icon: <MessageSquare />, desc: "Contact inbox", badge: messageCount },
     { label: "Services", href: "/admin/services", icon: <Settings />, desc: "Manage service offerings" },
+    { label: "Announcements", href: "/admin/announcements", icon: <Megaphone />, desc: "Publish notices & events" },
+    { label: "Board Members", href: "/admin/board-members", icon: <Users2 />, desc: "Manage board of directors" },
+    { label: "Reports", href: "/admin/reports", icon: <BarChart2 />, desc: "Analytics & CSV exports" },
+    { label: "Staff", href: "/admin/staff", icon: <ShieldCheck />, desc: "Manage roles & permissions" },
+    { label: "Panchangam", href: "/admin/panchangam", icon: <CalendarDays />, desc: "Daily Hindu calendar entries" },
   ];
 
   return (

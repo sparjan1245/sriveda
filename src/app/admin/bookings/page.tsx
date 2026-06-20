@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency } from "@/lib/utils";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus, Receipt } from "lucide-react";
 import BookingActions from "./BookingActions";
 
 export default async function AdminBookingsPage() {
@@ -28,11 +28,16 @@ export default async function AdminBookingsPage() {
         <Link href="/admin" className="inline-flex items-center gap-2 text-maroon/60 hover:text-maroon text-sm mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Admin Dashboard
         </Link>
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <h1 className="font-cinzel font-bold text-3xl text-maroon">Bookings</h1>
-          <span className="bg-yellow-100 text-yellow-700 text-sm px-3 py-1 rounded-full font-medium">
-            {bookings.filter((b: { status: string }) => b.status === "PENDING").length} Pending
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="bg-yellow-100 text-yellow-700 text-sm px-3 py-1 rounded-full font-medium">
+              {bookings.filter((b: { status: string }) => b.status === "PENDING").length} Pending
+            </span>
+            <Link href="/admin/bookings/new" className="btn-primary flex items-center gap-2 text-sm px-4 py-2 whitespace-nowrap">
+              <Plus className="w-4 h-4" /> Walk-in Booking
+            </Link>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl gold-border shadow-sm overflow-hidden">
@@ -40,13 +45,13 @@ export default async function AdminBookingsPage() {
             <table className="w-full text-sm">
               <thead className="bg-cream border-b border-gold/20">
                 <tr>
-                  {["Devotee", "Service", "Date", "Amount", "Status", "Actions"].map((h) => (
+                  {["Devotee", "Service", "Date", "Amount", "Status", "Receipt", "Actions"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-cinzel font-medium text-maroon text-xs">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold/10">
-                {bookings.map((b: { id: string; status: string; guestName?: string | null; guestEmail?: string | null; date: Date; amount: number; user?: { name?: string | null; email?: string | null } | null; service: { name: string } }) => (
+                {bookings.map((b: { id: string; status: string; guestName?: string | null; guestEmail?: string | null; date: Date; amount: number; receiptNumber?: string | null; user?: { name?: string | null; email?: string | null } | null; service: { name: string } }) => (
                   <tr key={b.id} className="hover:bg-cream/50 transition-colors">
                     <td className="px-4 py-3">
                       <p className="font-medium text-maroon">{b.user?.name || b.guestName || "Guest"}</p>
@@ -59,6 +64,13 @@ export default async function AdminBookingsPage() {
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColors[b.status]}`}>
                         {b.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {b.receiptNumber ? (
+                        <Link href={`/receipts/booking/${b.id}`} className="flex items-center gap-1 text-xs text-saffron hover:underline whitespace-nowrap">
+                          <Receipt className="w-3 h-3" /> {b.receiptNumber}
+                        </Link>
+                      ) : <span className="text-foreground/30 text-xs">—</span>}
                     </td>
                     <td className="px-4 py-3">
                       <BookingActions bookingId={b.id} status={b.status} />

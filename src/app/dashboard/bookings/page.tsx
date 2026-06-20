@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency } from "@/lib/utils";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Receipt } from "lucide-react";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-700",
@@ -39,7 +39,7 @@ export default async function BookingsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {bookings.map((b: { id: string; status: string; amount: number; date: Date; occasion?: string | null; notes?: string | null; createdAt: Date; service: { name: string } }) => (
+            {bookings.map((b: { id: string; status: string; amount: number; date: Date; occasion?: string | null; notes?: string | null; receiptNumber?: string | null; createdAt: Date; service: { name: string } }) => (
               <div key={b.id} className="bg-white rounded-2xl p-6 gold-border shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
@@ -56,6 +56,11 @@ export default async function BookingsPage() {
                     </span>
                     <span className="font-bold text-saffron text-lg">{formatCurrency(b.amount)}</span>
                     <p className="text-xs text-foreground/40">Booked {formatDate(b.createdAt)}</p>
+                    {b.receiptNumber && (
+                      <Link href={`/receipts/booking/${b.id}`} className="text-xs text-saffron hover:underline flex items-center gap-1">
+                        <Receipt className="w-3 h-3" /> View Receipt
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

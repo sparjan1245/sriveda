@@ -9,45 +9,28 @@ export const metadata: Metadata = {
   description: "Photo gallery of Sri Veda Gayatri Temple — rituals, festivals, and community events.",
 };
 
-const STATIC_IMAGES = [
-  { src: IMAGES.hero,      alt: "Temple exterior",              category: "Temple" },
-  { src: IMAGES.altar,     alt: "Decorated altar with flowers", category: "Rituals" },
-  { src: IMAGES.puja,      alt: "Puja ceremony",                category: "Rituals" },
-  { src: IMAGES.temple1,   alt: "Temple gopuram",               category: "Temple" },
-  { src: IMAGES.about1,    alt: "Temple ceremony",              category: "Events" },
-  { src: IMAGES.about2,    alt: "Community gathering",          category: "Community" },
-  { src: IMAGES.about3,    alt: "Puja setup",                   category: "Rituals" },
-  { src: IMAGES.about4,    alt: "Festival celebration",         category: "Events" },
-  { src: IMAGES.download4, alt: "Temple deity",                 category: "Temple" },
-  { src: IMAGES.pujaBase,  alt: "Sacred rituals",               category: "Rituals" },
-];
+function getYouTubeThumb(url: string): string | null {
+  const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
+}
 
 export default async function GalleryPage() {
-  // Fetch DB-managed images and prepend them before static fallbacks
-  const dbImages = await db.galleryImage
-    .findMany({ orderBy: { createdAt: "desc" } })
-    .catch(() => []);
+  const [dbImages, dbVideos] = await Promise.all([
+    db.galleryImage.findMany({ orderBy: { createdAt: "desc" } }).catch(() => [] as { url: string; caption: string | null; category: string | null }[]),
+    db.galleryVideo.findMany({ orderBy: { createdAt: "desc" } }).catch(() => [] as { url: string; title: string | null; thumbnail: string | null }[]),
+  ]);
 
-  const dbMapped = dbImages.map((img) => ({
+  const images = dbImages.map((img: { url: string; caption: string | null; category: string | null }) => ({
     src: img.url,
     alt: img.caption || "Temple photo",
     category: img.category || "Gallery",
   }));
 
-  // DB images first; static images de-duped by src
-  const dbSrcs = new Set(dbMapped.map((i) => i.src));
-  const combined = [...dbMapped, ...STATIC_IMAGES.filter((i) => !dbSrcs.has(i.src))];
-
-  const STATIC_VIDEOS = [
-    { thumbnail: IMAGES.hero,      title: "Archana & Abhishekam",        href: "https://www.youtube.com/@srivedagayatritemple" },
-    { thumbnail: IMAGES.puja,      title: "Ganapathi Homam",             href: "https://www.youtube.com/@srivedagayatritemple" },
-    { thumbnail: IMAGES.about2,    title: "Annadaanam",                  href: "https://www.youtube.com/@srivedagayatritemple" },
-    { thumbnail: IMAGES.temple1,   title: "Navaratri Celebrations 2024", href: "https://www.youtube.com/@srivedagayatritemple" },
-    { thumbnail: IMAGES.about3,    title: "Satyanarayan Puja",           href: "https://www.youtube.com/@srivedagayatritemple" },
-    { thumbnail: IMAGES.about4,    title: "Cultural Program",            href: "https://www.youtube.com/@srivedagayatritemple" },
-    { thumbnail: IMAGES.download4, title: "Devotee Service",             href: "https://www.youtube.com/@srivedagayatritemple" },
-    { thumbnail: IMAGES.about1,    title: "Temple Inauguration",         href: "https://www.youtube.com/@srivedagayatritemple" },
-  ];
+  const videos = (dbVideos as { url: string; title: string | null; thumbnail: string | null }[]).map((v) => ({
+    thumbnail: v.thumbnail || getYouTubeThumb(v.url) || IMAGES.hero,
+    title: v.title || "Temple Video",
+    href: v.url,
+  }));
 
   return (
     <div>
@@ -72,7 +55,7 @@ export default async function GalleryPage() {
       {/* ── Grid ── */}
       <section className="py-16 px-4 bg-cream pattern-bg">
         <div className="max-w-7xl mx-auto">
-          <GalleryClient images={combined} videos={STATIC_VIDEOS} />
+          <GalleryClient images={images} videos={videos} />
         </div>
       </section>
 
