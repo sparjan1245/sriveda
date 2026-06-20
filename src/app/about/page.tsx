@@ -1,11 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Calendar, Users, Heart, Star, ArrowRight, MapPin, Phone, Clock, Mail } from "lucide-react";
-import { TEMPLE, IMAGES, BOARD_MEMBERS } from "@/lib/constants";
+import { Calendar, Users, Heart, Star, MapPin, Phone, Clock, Mail } from "lucide-react";
+import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
-import { GallerySection } from "@/components/home/GallerySection";
-import { ServiceSlider } from "@/components/home/ServiceSlider";
 import { BoardCarousel, type BoardMemberItem } from "@/components/about/BoardCarousel";
 
 export const metadata: Metadata = {
@@ -13,61 +11,18 @@ export const metadata: Metadata = {
   description: "Learn about Sri Veda Gayatri Temple — our mission, history, and board of directors.",
 };
 
-const STATIC_VIDEOS = [
-  {
-    thumbnail: IMAGES.hero,
-    title: "Archana & Abhishekam — Sacred Daily Ritual",
-    description: "Watch our priests perform the traditional Archana and Abhishekam ceremonies with full Vedic procedures.",
-    duration: "12:34",
-    href: "https://www.youtube.com/@srivedagayatritemple",
-  },
-  {
-    thumbnail: IMAGES.puja,
-    title: "Ganapathi Homam — Sacred Fire Ritual",
-    description: "A powerful Homam performed to remove obstacles and invoke divine blessings for the community.",
-    duration: "28:15",
-    href: "https://www.youtube.com/@srivedagayatritemple",
-  },
-  {
-    thumbnail: IMAGES.about2,
-    title: "Annadaanam — Weekly Community Food Offering",
-    description: "Our Sunday Annadaanam program where blessed food is distributed to all devotees.",
-    duration: "8:42",
-    href: "https://www.youtube.com/@srivedagayatritemple",
-  },
-];
-
-const FALLBACK_PHOTOS = [
-  { src: IMAGES.about1, alt: "Temple ceremony",     caption: "Sacred Ceremony" },
-  { src: IMAGES.about2, alt: "Puja ritual",         caption: "Daily Puja" },
-  { src: IMAGES.about3, alt: "Community gathering", caption: "Community Event" },
-  { src: IMAGES.about4, alt: "Festival",            caption: "Festival" },
-  { src: IMAGES.puja,   alt: "Homam ritual",        caption: "Homam Ritual" },
-  { src: IMAGES.temple1,alt: "Temple exterior",     caption: "Our Temple" },
-  { src: IMAGES.hero,   alt: "Devotee service",     caption: "Devotee Service" },
-  { src: IMAGES.download4, alt: "Cultural program", caption: "Cultural Program" },
-];
 
 export default async function AboutPage() {
-  const [userCount, bookingCount, dbServices, galleryImages, upcomingEvents, dbBoardMembers] = await Promise.all([
+  const [userCount, bookingCount, dbServices, dbBoardMembers] = await Promise.all([
     db.user.count().catch(() => 0),
     db.booking.count().catch(() => 0),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.service as any).findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
-    db.galleryImage.findMany({ take: 8, orderBy: { createdAt: "desc" } }).catch(() => []),
-    db.event.findMany({ where: { date: { gte: new Date() } }, orderBy: { date: "asc" }, take: 3 }).catch(() => []),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db as any).boardMember.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
   ]);
 
-  // Fall back to static constants if no DB board members seeded yet
-  const boardMembers: BoardMemberItem[] = (dbBoardMembers as BoardMemberItem[]).length > 0
-    ? (dbBoardMembers as BoardMemberItem[])
-    : BOARD_MEMBERS.map((m) => ({ name: m.name, title: m.title, image: m.image }));
-
-  const galleryPhotos = galleryImages.length > 0
-    ? galleryImages.map((img) => ({ src: img.url, alt: img.caption || "Temple photo", caption: img.caption || undefined }))
-    : FALLBACK_PHOTOS;
+  const boardMembers: BoardMemberItem[] = dbBoardMembers as BoardMemberItem[];
 
   const stats = [
     { icon: <Star className="w-5 h-5" />,    value: dbServices.length > 0 ? `${dbServices.length}+` : "4+",   label: "Sacred Services"    },
@@ -173,28 +128,29 @@ export default async function AboutPage() {
       </section>
 
       {/* ── Board of Directors ── */}
-      <section className="py-8 md:py-6 px-4 bg-cream pattern-bg relative overflow-hidden">
-        <div className="absolute inset-0 pattern-bg opacity-20 pointer-events-none" />
-        <div className="relative max-w-6xl mx-auto">
-          <div className="text-center mb-8 md:mb-10">
-            <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Our Leadership</span>
-            <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
-              Board of Directors
-            </h2>
-            <div className="flex items-center justify-center gap-4 mb-3">
-              <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
-              <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
-              <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
+      {boardMembers.length > 0 && (
+        <section className="py-8 md:py-6 px-4 bg-cream pattern-bg relative overflow-hidden">
+          <div className="absolute inset-0 pattern-bg opacity-20 pointer-events-none" />
+          <div className="relative max-w-6xl mx-auto">
+            <div className="text-center mb-8 md:mb-10">
+              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Our Leadership</span>
+              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
+                Board of Directors
+              </h2>
+              <div className="flex items-center justify-center gap-4 mb-3">
+                <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
+                <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
+                <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
+              </div>
+              <p className="text-foreground/60 text-sm font-light max-w-xl mx-auto">
+                Our dedicated board guides the temple with wisdom, devotion, and an unwavering
+                commitment to serving our community.
+              </p>
             </div>
-            <p className="text-foreground/60 text-sm font-light max-w-xl mx-auto">
-              Our dedicated board guides the temple with wisdom, devotion, and an unwavering
-              commitment to serving our community.
-            </p>
+            <BoardCarousel members={boardMembers} />
           </div>
-
-          <BoardCarousel members={boardMembers} />
-        </div>
-      </section>
+        </section>
+      )}
 
      
 

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import { TEMPLE, IMAGES, DONATION_TIERS } from "@/lib/constants";
+import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import DonateClient from "./DonateClient";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default async function DonatePage() {
   const dbTiers = await getActiveDonationTiers();
-  const tiers = dbTiers.length > 0 ? dbTiers : DONATION_TIERS;
+  const tiers = dbTiers;
 
   return (
     <div>
