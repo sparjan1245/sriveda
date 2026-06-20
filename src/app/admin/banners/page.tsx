@@ -5,7 +5,7 @@ import type { Banner } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ArrowLeft, ImageIcon, Info } from "lucide-react";
-import { IMAGES, TEMPLE } from "@/lib/constants";
+import { TEMPLE } from "@/lib/constants";
 import BannerForm from "./BannerForm";
 import BannerActions from "./BannerActions";
 
@@ -17,12 +17,6 @@ export default async function AdminBannersPage() {
     .findMany({ orderBy: { order: "asc" } })
     .catch(() => []);
 
-  const defaultSlides = [
-    { image: IMAGES.hero, label: "Temple exterior (default)" },
-    { image: IMAGES.altar, label: "Altar decoration (default)" },
-    { image: IMAGES.temple1, label: "Temple gopuram (default)" },
-    { image: IMAGES.puja, label: "Puja ceremony (default)" },
-  ];
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">
@@ -202,23 +196,7 @@ export default async function AdminBannersPage() {
           )}
         </div>
 
-        {/* Default fallback slides */}
-        <div>
-          <h2 className="font-cinzel font-semibold text-maroon text-lg mb-1">Default Fallback Slides</h2>
-          <p className="text-foreground/50 text-sm mb-4">
-            Shown automatically when there are no active custom banners.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {defaultSlides.map((slide, i) => (
-              <div key={i} className="rounded-xl overflow-hidden border border-gold/20 bg-white shadow-sm">
-                <div className="relative aspect-video">
-                  <Image src={slide.image} alt={slide.label} fill className="object-cover" />
-                </div>
-                <p className="text-xs text-foreground/60 p-2">{slide.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        
       </div>
     </div>
   );

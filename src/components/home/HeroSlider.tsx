@@ -5,7 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { TEMPLE } from "@/lib/constants";
+import PanchangamSlide, { type PanchangamData } from "@/components/home/PanchangamSlide";
+
+export type { PanchangamData };
 
 export interface BannerSlide {
   id: string;
@@ -19,32 +21,46 @@ export interface BannerSlide {
   cta2Link?: string | null;
 }
 
+type SlideItem =
+  | { type: "banner";     data: BannerSlide }
+  | { type: "panchangam"; data: PanchangamData };
+
 interface Props {
   slides: BannerSlide[];
+  panchangam?: PanchangamData | null;
 }
 
-export default function HeroSlider({ slides }: Props) {
+export default function HeroSlider({ slides, panchangam }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const allSlides: SlideItem[] = (() => {
+    const banners = slides.map((s): SlideItem => ({ type: "banner", data: s }));
+    if (!panchangam) return banners;
+    const p: SlideItem = { type: "panchangam", data: panchangam };
+    if (banners.length >= 2) return [...banners.slice(0, 2), p, ...banners.slice(2)];
+    return [...banners, p];
+  })();
+
+  const total = allSlides.length;
+
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (total <= 1) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
+      setCurrentIndex((prev) => (prev + 1) % total);
     }, 5500);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [total]);
 
-  const goToPrevious = () =>
-    setCurrentIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  const goToNext = () =>
-    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  const goToPrevious = () => setCurrentIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
+  const goToNext    = () => setCurrentIndex((prev) => (prev + 1) % total);
 
-  const current = slides[currentIndex];
+  const current = allSlides[currentIndex];
+  const isBanner = current.type === "banner";
 
   return (
     <section className="relative min-h-155 md:min-h-180 flex items-center justify-center overflow-hidden">
 
-      {/* ── Background image ── */}
+      {/* ── Background layer ── */}
       <div className="absolute inset-0">
         <AnimatePresence initial={false}>
           <motion.div
@@ -55,35 +71,42 @@ export default function HeroSlider({ slides }: Props) {
             transition={{ duration: 1.6, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            <Image
-              src={current.image}
-              alt={current.title || "Sri Veda Gayatri Temple"}
-              fill
-              className="object-cover"
-              priority={currentIndex === 0}
-            />
+            {isBanner ? (
+              <Image
+                src={(current.data as BannerSlide).image}
+                alt={(current.data as BannerSlide).title || "Sri Veda Gayatri Temple"}
+                fill
+                className="object-cover"
+                priority={currentIndex === 0}
+              />
+            ) : (
+              <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#FFF8F0 0%,#FCEABC 40%,#FFF8F0 100%)" }} />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* ── Multi-layer overlay for crisp text contrast ── */}
-      <div className="absolute inset-0 z-1" style={{ background: "linear-gradient(to bottom, rgba(20,5,8,0.55) 0%, rgba(107,15,26,0.35) 40%, rgba(30,8,12,0.80) 100%)" }} />
-      {/* Soft center radial to darken edges */}
-      <div className="absolute inset-0 z-2" style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(10,2,4,0.45) 100%)" }} />
+      {/* ── Dark overlays — banner only ── */}
+      {isBanner && (
+        <>
+          <div className="absolute inset-0 z-1" style={{ background: "linear-gradient(to bottom, rgba(20,5,8,0.55) 0%, rgba(107,15,26,0.35) 40%, rgba(30,8,12,0.80) 100%)" }} />
+          <div className="absolute inset-0 z-2" style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(10,2,4,0.45) 100%)" }} />
+        </>
+      )}
 
       {/* ── Nav Arrows ── */}
-      {slides.length > 1 && (
+      {total > 1 && (
         <>
           <button
             onClick={goToPrevious}
-            className="absolute z-20 left-4 md:left-8 top-1/2 -translate-y-1/2 w-10 h-10 md:w-11 md:h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/25 text-white flex items-center justify-center backdrop-blur-sm transition-all duration-200"
+            className={`absolute z-20 left-4 md:left-8 top-1/2 -translate-y-1/2 w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center backdrop-blur-sm transition-all duration-200 ${isBanner ? "bg-white/10 hover:bg-white/25 border-white/25 text-white" : "bg-white/60 hover:bg-white/90 border-maroon/20 text-maroon"}`}
             aria-label="Previous slide"
           >
             <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
           <button
             onClick={goToNext}
-            className="absolute z-20 right-4 md:right-8 top-1/2 -translate-y-1/2 w-10 h-10 md:w-11 md:h-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/25 text-white flex items-center justify-center backdrop-blur-sm transition-all duration-200"
+            className={`absolute z-20 right-4 md:right-8 top-1/2 -translate-y-1/2 w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center backdrop-blur-sm transition-all duration-200 ${isBanner ? "bg-white/10 hover:bg-white/25 border-white/25 text-white" : "bg-white/60 hover:bg-white/90 border-maroon/20 text-maroon"}`}
             aria-label="Next slide"
           >
             <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
@@ -92,14 +115,18 @@ export default function HeroSlider({ slides }: Props) {
       )}
 
       {/* ── Slide dots ── */}
-      {slides.length > 1 && (
+      {total > 1 && (
         <div className="absolute z-20 bottom-20 left-1/2 -translate-x-1/2 flex gap-2">
-          {slides.map((_, i) => (
+          {allSlides.map((s, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
               className={`rounded-full transition-all duration-300 ${
-                currentIndex === i ? "w-7 h-2 bg-gold" : "w-2 h-2 bg-white/40 hover:bg-white/70"
+                currentIndex === i
+                  ? "w-7 h-2 bg-gold"
+                  : s.type === "panchangam"
+                  ? "w-2 h-2 bg-maroon/30 hover:bg-maroon/60"
+                  : "w-2 h-2 bg-white/40 hover:bg-white/70"
               }`}
               aria-label={`Slide ${i + 1}`}
             />
@@ -107,93 +134,95 @@ export default function HeroSlider({ slides }: Props) {
         </div>
       )}
 
-      {/* ── Content ── */}
-      <div className="relative z-10 text-center px-5 w-full max-w-4xl mx-auto py-16">
-
-        {/* Logo */}
-        {/* <motion.div
-          className="flex justify-center mb-7"
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-        >
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-gold/60 shadow-[0_0_30px_rgba(212,160,23,0.3)] ring-4 ring-white/10">
-            <Image
-              src="/logo.png"
-              alt="Sri Veda Gayatri Temple"
-              width={96}
-              height={96}
-              className="w-full h-full object-cover"
-              priority
-            />
-          </div>
-        </motion.div> */}
-
-        <AnimatePresence mode="wait">
+      {/* ── Slide content ── */}
+      <AnimatePresence mode="wait">
+        {isBanner ? (
           <motion.div
-            key={currentIndex}
+            key={`banner-${currentIndex}`}
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -14 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col items-center"
+            className="relative z-10 text-center px-5 w-full max-w-4xl mx-auto py-16 flex flex-col items-center"
           >
-            {/* Overline label */}
-           
-            {/* Main title */}
-            <h1
-              className="font-cinzel font-bold text-white leading-tight drop-shadow-2xl mb-5"
-              style={{ fontSize: "clamp(1rem, 2vw, 3rem)", letterSpacing: "0.015em" }}
-            >
-              {current.title || TEMPLE.name}
-            </h1>
-
-            {/* Gold rule */}
-            <div className="flex items-center gap-3 mb-5">
-              <span className="block w-12 h-px bg-gold/50" />
-              <span className="text-gold text-lg">🪷</span>
-              <span className="block w-12 h-px bg-gold/50" />
-            </div>
-             <p className="text-gold text-xs md:text-sm font-semibold tracking-[0.25em] uppercase mb-4 flex items-center gap-3">
-              <span className="block w-8 h-px bg-gold/60" />
-              {current.subtitle || TEMPLE.tagline}
-              <span className="block w-8 h-px bg-gold/60" />
-            </p>
-
-
-            {/* Description */}
-            <p
-              className="text-white/82 leading-relaxed mb-9 font-light max-w-2xl mx-auto"
-              style={{ fontSize: "clamp(0.85rem, 1.6vw, 1.05rem)" }}
-            >
-              {current.description || TEMPLE.mission}
-            </p>
-
-            {/* CTA buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href={current.ctaLink || "/services"}
-                className="btn-primary text-sm md:text-base px-8 md:px-10 py-3 md:py-3.5 shadow-xl"
+            {(current.data as BannerSlide).title && (
+              <h1
+                className="font-cinzel font-bold text-white leading-tight drop-shadow-2xl mb-5"
+                style={{ fontSize: "clamp(1rem, 2vw, 3rem)", letterSpacing: "0.015em" }}
               >
-                {current.ctaText || "Book a Service"}
-              </Link>
-              <Link
-                href={current.cta2Link || "/donate"}
-                className="btn-ghost text-sm md:text-base px-8 md:px-10 py-3 md:py-3.5"
+                {(current.data as BannerSlide).title}
+              </h1>
+            )}
+
+            {((current.data as BannerSlide).title || (current.data as BannerSlide).subtitle) && (
+              <div className="flex items-center gap-3 mb-5">
+                <span className="block w-12 h-px bg-gold/50" />
+                <span className="text-gold text-lg">🪷</span>
+                <span className="block w-12 h-px bg-gold/50" />
+              </div>
+            )}
+
+            {(current.data as BannerSlide).subtitle && (
+              <p className="text-gold text-xs md:text-sm font-semibold tracking-[0.25em] uppercase mb-4 flex items-center gap-3">
+                <span className="block w-8 h-px bg-gold/60" />
+                {(current.data as BannerSlide).subtitle}
+                <span className="block w-8 h-px bg-gold/60" />
+              </p>
+            )}
+
+            {(current.data as BannerSlide).description && (
+              <p
+                className="text-white/82 leading-relaxed mb-9 font-light max-w-2xl mx-auto"
+                style={{ fontSize: "clamp(0.85rem, 1.6vw, 1.05rem)" }}
               >
-                {current.cta2Text || "Donate Now"}
-              </Link>
-            </div>
+                {(current.data as BannerSlide).description}
+              </p>
+            )}
+
+            {((current.data as BannerSlide).ctaText && (current.data as BannerSlide).ctaLink ||
+              (current.data as BannerSlide).cta2Text && (current.data as BannerSlide).cta2Link) && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                {(current.data as BannerSlide).ctaText && (current.data as BannerSlide).ctaLink && (
+                  <Link
+                    href={(current.data as BannerSlide).ctaLink!}
+                    className="btn-primary text-sm md:text-base px-8 md:px-10 py-3 md:py-3.5 shadow-xl"
+                  >
+                    {(current.data as BannerSlide).ctaText}
+                  </Link>
+                )}
+                {(current.data as BannerSlide).cta2Text && (current.data as BannerSlide).cta2Link && (
+                  <Link
+                    href={(current.data as BannerSlide).cta2Link!}
+                    className="btn-ghost text-sm md:text-base px-8 md:px-10 py-3 md:py-3.5"
+                  >
+                    {(current.data as BannerSlide).cta2Text}
+                  </Link>
+                )}
+              </div>
+            )}
           </motion.div>
-        </AnimatePresence>
-      </div>
+        ) : (
+          <motion.div
+            key={`panchangam-${currentIndex}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55 }}
+            className="absolute inset-0 z-3"
+          >
+            <PanchangamSlide data={(current.data as PanchangamData)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ── Scroll cue ── */}
-      <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-        <div className="w-5 h-8 border-2 border-white/30 rounded-full flex items-start justify-center pt-1.5">
-          <div className="w-0.5 h-1.5 bg-white/50 rounded-full" />
+      {/* ── Scroll cue — banner only ── */}
+      {isBanner && (
+        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+          <div className="w-5 h-8 border-2 border-white/30 rounded-full flex items-start justify-center pt-1.5">
+            <div className="w-0.5 h-1.5 bg-white/50 rounded-full" />
+          </div>
         </div>
-      </div>
+      )}
 
     </section>
   );

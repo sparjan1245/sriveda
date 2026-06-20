@@ -10,6 +10,7 @@ enum Role {
   DEVOTEE
   ADMIN
   PRIEST
+  STAFF
 }
 
 enum BookingStatus {
@@ -23,25 +24,37 @@ enum DonationStatus {
   PENDING
   COMPLETED
   FAILED
+  REFUNDED
+}
+
+enum PaymentMode {
+  ONLINE
+  CASH
+  CHECK
+  CARD
+  UPI
+  OTHER
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  phone         String?
-  address       String?
-  city          String?
-  state         String?
-  zip           String?
-  gotram        String?
-  nakshatra     String?
-  role          Role      @default(DEVOTEE)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  emailVerified      DateTime?
+  image              String?
+  password           String?
+  phone              String?
+  address            String?
+  city               String?
+  state              String?
+  zip                String?
+  gotram             String?
+  nakshatra          String?
+  role               Role      @default(DEVOTEE)
+  resetToken         String?
+  resetTokenExpiry   DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   accounts      Account[]
   sessions      Session[]
@@ -86,6 +99,15 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 model FamilyMember {
   id        String  @id @default(cuid())
   userId    String
@@ -122,7 +144,13 @@ model Booking {
   date            DateTime
   occasion        String?
   notes           String?
+  gotra           String?
+  nakshatra       String?
+  sankalpam       String?
   status          BookingStatus @default(PENDING)
+  paymentMode     PaymentMode   @default(ONLINE)
+  isAdminEntry    Boolean       @default(false)
+  receiptNumber   String?       @unique
   stripePaymentId String?
   amount          Float
   createdAt       DateTime      @default(now())
@@ -137,10 +165,16 @@ model Donation {
   userId          String?
   guestName       String?
   guestEmail      String?
+  guestPhone      String?
+  address         String?
   amount          Float
   cause           String
   message         String?
   recurring       Boolean        @default(false)
+  paymentMode     PaymentMode    @default(ONLINE)
+  isAdminEntry    Boolean        @default(false)
+  receiptNumber   String?        @unique
+  checkRef        String?
   stripePaymentId String?
   receiptUrl      String?
   status          DonationStatus @default(PENDING)
@@ -190,6 +224,22 @@ model ContactMessage {
   message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  type      String   @default("INFO")
+  active    Boolean  @default(true)
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Counter {
+  id  String @id
+  seq Int    @default(0)
 }
 
 model SponsorTier {
@@ -248,4 +298,36 @@ model Testimonial {
   active    Boolean  @default(true)
   order     Int      @default(0)
   createdAt DateTime @default(now())
+}
+
+model GalleryVideo {
+  id        String   @id @default(cuid())
+  url       String
+  title     String?
+  thumbnail String?
+  category  String?
+  createdAt DateTime @default(now())
+}
+
+model Panchangam {
+  id          String   @id @default(cuid())
+  date        DateTime @unique
+
+  samvatsara  String?
+  masam       String?
+  ayanam      String?
+  ruthuvu     String?
+
+  thithi      String?
+  nakshatra   String?
+  varjyam     String?
+  durmuhurtam String?
+  rahuKalam   String?
+  yamagandam  String?
+  goodTime    String?
+
+  priestName  String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -11,21 +11,15 @@ export default function EventForm() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-
   const [uploadedUrl, setUploadedUrl] = useState("");
   const [previewSrc, setPreviewSrc] = useState("");
-
-  const [form, setForm] = useState({
-    title: "", description: "", date: "", endDate: "",
-    location: "", featured: false,
-  });
+  const [form, setForm] = useState({ title: "", description: "", date: "", endDate: "", location: "", featured: false });
 
   const reset = () => {
     setForm({ title: "", description: "", date: "", endDate: "", location: "", featured: false });
     setUploadedUrl(""); setPreviewSrc(""); setError("");
     if (fileRef.current) fileRef.current.value = "";
   };
-
   const close = () => { setOpen(false); reset(); };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -40,8 +34,7 @@ export default function EventForm() {
     setUploadedUrl(""); setError(""); setUploading(true);
     try {
       const fd = new FormData();
-      fd.append("file", file);
-      fd.append("folder", "temple/events");
+      fd.append("file", file); fd.append("folder", "temple/events");
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Upload failed."); setPreviewSrc(""); }
@@ -75,90 +68,92 @@ export default function EventForm() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl gold-border my-auto">
-            <div className="flex items-center justify-between mb-5">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl gold-border w-full max-w-lg flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gold/15 shrink-0">
               <h3 className="font-cinzel font-bold text-maroon text-xl">Create New Event</h3>
               <button onClick={close} className="text-foreground/40 hover:text-maroon transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Image upload */}
-              <div>
-                <label className={labelClass}>Event Image</label>
-                <div
-                  onClick={() => !uploading && fileRef.current?.click()}
-                  className={`relative rounded-xl border-2 border-dashed cursor-pointer overflow-hidden transition-colors
-                    ${previewSrc ? "border-gold/40" : "border-gold/30 hover:border-saffron"}
-                    ${uploading ? "cursor-wait" : ""}`}
-                  style={{ minHeight: "8rem" }}
-                >
-                  {previewSrc ? (
-                    <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={previewSrc} alt="Preview" className="w-full h-36 object-cover" />
-                      {uploading && (
-                        <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 text-white">
-                          <Loader2 className="w-6 h-6 animate-spin" /><span className="text-sm">Uploading…</span>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                {/* Image upload */}
+                <div>
+                  <label className={labelClass}>Event Image</label>
+                  <div
+                    onClick={() => !uploading && fileRef.current?.click()}
+                    className={`relative rounded-xl border-2 border-dashed cursor-pointer overflow-hidden transition-colors
+                      ${previewSrc ? "border-gold/40" : "border-gold/30 hover:border-saffron"}
+                      ${uploading ? "cursor-wait" : ""}`}
+                    style={{ minHeight: "8rem" }}
+                  >
+                    {previewSrc ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={previewSrc} alt="Preview" className="w-full h-36 object-cover" />
+                        {uploading && (
+                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 text-white">
+                            <Loader2 className="w-6 h-6 animate-spin" /><span className="text-sm">Uploading…</span>
+                          </div>
+                        )}
+                        {uploadedUrl && !uploading && (
+                          <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">✓ Uploaded</div>
+                        )}
+                        {!uploading && (
+                          <button type="button" onClick={(ev) => { ev.stopPropagation(); setPreviewSrc(""); setUploadedUrl(""); if (fileRef.current) fileRef.current.value = ""; }}
+                            className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors">
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-2 py-8 text-foreground/50">
+                        <div className="w-10 h-10 rounded-full bg-cream flex items-center justify-center">
+                          <ImageIcon className="w-5 h-5 text-gold/60" />
                         </div>
-                      )}
-                      {uploadedUrl && !uploading && (
-                        <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">✓ Uploaded</div>
-                      )}
-                      {!uploading && (
-                        <button type="button" onClick={(ev) => { ev.stopPropagation(); setPreviewSrc(""); setUploadedUrl(""); if (fileRef.current) fileRef.current.value = ""; }}
-                          className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors">
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center gap-2 py-8 text-foreground/50">
-                      <div className="w-10 h-10 rounded-full bg-cream flex items-center justify-center">
-                        <ImageIcon className="w-5 h-5 text-gold/60" />
+                        <p className="text-sm font-medium">Click to upload image</p>
+                        <p className="text-xs">JPEG, PNG, WebP · max 10 MB</p>
                       </div>
-                      <p className="text-sm font-medium">Click to upload image</p>
-                      <p className="text-xs">JPEG, PNG, WebP · max 10 MB</p>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                  <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
                 </div>
-                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
-              </div>
 
-              <div>
-                <label className={labelClass}>Title *</label>
-                <input name="title" value={form.title} onChange={handleChange} required className={inputClass} placeholder="Event title" />
-              </div>
-              <div>
-                <label className={labelClass}>Description</label>
-                <textarea name="description" value={form.description} onChange={handleChange} rows={3} className={inputClass} placeholder="Event description" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={labelClass}>Date & Time *</label>
-                  <input name="date" type="datetime-local" value={form.date} onChange={handleChange} required className={inputClass} />
+                  <label className={labelClass}>Title *</label>
+                  <input name="title" value={form.title} onChange={handleChange} required className={inputClass} placeholder="Event title" />
                 </div>
                 <div>
-                  <label className={labelClass}>End Date & Time</label>
-                  <input name="endDate" type="datetime-local" value={form.endDate} onChange={handleChange} className={inputClass} />
+                  <label className={labelClass}>Description</label>
+                  <textarea name="description" value={form.description} onChange={handleChange} rows={3} className={inputClass} placeholder="Event description" />
                 </div>
-              </div>
-              <div>
-                <label className={labelClass}>Location</label>
-                <input name="location" value={form.location} onChange={handleChange} className={inputClass} placeholder="e.g. Main Hall" />
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" name="featured" id="featured" checked={form.featured} onChange={handleChange} className="w-4 h-4 accent-saffron" />
-                <label htmlFor="featured" className="text-sm text-maroon/80">Featured event</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>Date & Time *</label>
+                    <input name="date" type="datetime-local" value={form.date} onChange={handleChange} required className={inputClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>End Date & Time</label>
+                    <input name="endDate" type="datetime-local" value={form.endDate} onChange={handleChange} className={inputClass} />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>Location</label>
+                  <input name="location" value={form.location} onChange={handleChange} className={inputClass} placeholder="e.g. Main Hall" />
+                </div>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" name="featured" checked={form.featured} onChange={handleChange} className="w-4 h-4 accent-saffron" />
+                  Featured event
+                </label>
+                {error && <p className="text-red-500 text-sm bg-red-50 border border-red-200 p-3 rounded-lg">{error}</p>}
               </div>
 
-              {error && <p className="text-red-500 text-sm bg-red-50 border border-red-200 p-3 rounded-lg">{error}</p>}
-
-              <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading || uploading}
-                  className="btn-primary flex-1 flex items-center justify-center gap-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed">
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-gold/15 flex gap-3 shrink-0">
+                <button type="submit" disabled={loading || uploading} className="btn-primary flex-1 flex items-center justify-center gap-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating…</>
                     : uploading ? <><Upload className="w-4 h-4 animate-pulse" /> Uploading…</>
                     : "Create Event"}

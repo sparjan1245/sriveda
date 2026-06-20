@@ -12,24 +12,13 @@ export const metadata: Metadata = {
   description: "Upcoming temple events, festivals, and celebrations at Sri Veda Gayatri Temple.",
 };
 
-const FALLBACK_EVENTS = [
-  { id: "1", title: "Satyanarayana Pooja",   date: new Date("2026-06-15T17:00:00"), endDate: null, location: "Main Hall",       description: "Monthly Satyanarayana Pooja for the well-being of all devotees. All are welcome.", image: IMAGES.puja,   featured: false },
-  { id: "2", title: "Guru Purnima",           date: new Date("2026-07-10T17:00:00"), endDate: null, location: "Temple Grounds",  description: "Annual Guru Purnima celebration with special puja and cultural programs.",           image: IMAGES.about3, featured: true  },
-  { id: "3", title: "Krishna Janmashtami",    date: new Date("2026-08-16T17:00:00"), endDate: null, location: "Main Hall",       description: "Celebrate the birth of Lord Krishna with bhajans, abhishekam, and prasadam.",       image: IMAGES.about4, featured: false },
-  { id: "4", title: "Ganesh Chaturthi",       date: new Date("2026-08-26T17:00:00"), endDate: null, location: "Temple Grounds",  description: "Grand Ganesh Chaturthi celebrations with homam and cultural programs.",               image: IMAGES.about1, featured: true  },
-  { id: "5", title: "Navaratri Festival",     date: new Date("2026-09-23T17:00:00"), endDate: null, location: "Temple Grounds",  description: "Nine nights of celebration with special pujas, cultural dance, and prasadam.",       image: IMAGES.about2, featured: false },
-  { id: "6", title: "Diwali Celebration",     date: new Date("2026-10-20T17:00:00"), endDate: null, location: "Temple Grounds",  description: "Festival of lights with special Lakshmi puja and community dinner.",                  image: IMAGES.hero,   featured: true  },
-];
-
 export default async function EventsPage() {
   const session = await auth();
   const userId = (session?.user as { id?: string })?.id ?? null;
 
-  const dbEvents = await db.event
+  const events = await db.event
     .findMany({ where: { date: { gte: new Date() } }, orderBy: { date: "asc" } })
     .catch(() => []);
-
-  const events = dbEvents.length > 0 ? dbEvents : FALLBACK_EVENTS;
   const featuredEvent = events.find((e) => e.featured) || events[0];
   const otherEvents = events.filter((e) => e.id !== featuredEvent?.id);
 

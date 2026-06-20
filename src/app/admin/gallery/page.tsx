@@ -3,18 +3,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ArrowLeft, ImageIcon } from "lucide-react";
+import { ArrowLeft, ImageIcon, Video } from "lucide-react";
 import { IMAGES } from "@/lib/constants";
 import GalleryForm from "./GalleryForm";
 import DeleteImageButton from "./DeleteImageButton";
+import VideoForm from "./VideoForm";
+import DeleteVideoButton from "./DeleteVideoButton";
+
+function getYouTubeThumb(url: string): string | null {
+  const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
+}
 
 export default async function AdminGalleryPage() {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const images = await db.galleryImage.findMany({
-    orderBy: { createdAt: "desc" },
-  }).catch(() => []);
+  const [images, videos] = await Promise.all([
+    db.galleryImage.findMany({ orderBy: { createdAt: "desc" } }).catch(() => []),
+    db.galleryVideo.findMany({ orderBy: { createdAt: "desc" } }).catch(() => []),
+  ]);
 
   const staticImages = [
     { id: "s1", url: IMAGES.hero, caption: "Temple exterior", category: "Temple" },
@@ -37,16 +45,23 @@ export default async function AdminGalleryPage() {
             <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Admin</p>
             <h1 className="font-cinzel font-bold text-3xl text-maroon">Gallery</h1>
           </div>
-          <GalleryForm />
+          <div className="flex gap-2">
+            <VideoForm />
+            <GalleryForm />
+          </div>
         </div>
 
-        {/* DB images */}
-        {images.length > 0 && (
-          <div className="mb-10">
-            <h2 className="font-cinzel font-semibold text-maroon text-lg mb-4">
-              Uploaded Photos <span className="text-foreground/40 text-sm font-normal">({images.length})</span>
+        {/* Images Section */}
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-4">
+            <ImageIcon className="w-5 h-5 text-saffron" />
+            <h2 className="font-cinzel font-semibold text-maroon text-lg">
+              Photos <span className="text-foreground/40 text-sm font-normal">({images.length} uploaded)</span>
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          </div>
+
+          {images.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
               {images.map((img) => (
                 <div key={img.id} className="group relative rounded-xl overflow-hidden gold-border bg-white shadow-sm">
                   <div className="relative aspect-square">
@@ -61,36 +76,62 @@ export default async function AdminGalleryPage() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-8 bg-white rounded-2xl gold-border mb-6">
+              <ImageIcon className="w-10 h-10 text-gold/40 mx-auto mb-3" />
+              <p className="text-foreground/50 mb-1">No photos uploaded yet.</p>
+              <p className="text-foreground/40 text-sm">Click &ldquo;Add Photo&rdquo; to add images by URL.</p>
+            </div>
+          )}
 
-        {images.length === 0 && (
-          <div className="text-center py-10 bg-white rounded-2xl gold-border mb-10">
-            <ImageIcon className="w-12 h-12 text-gold/40 mx-auto mb-4" />
-            <p className="text-foreground/50 mb-2">No photos uploaded yet.</p>
-            <p className="text-foreground/40 text-sm">Click &ldquo;Add Photo&rdquo; to add images by URL.</p>
-          </div>
-        )}
+         
+        </div>
 
-        {/* Static images (read-only reference) */}
+        {/* Videos Section */}
         <div>
-          <h2 className="font-cinzel font-semibold text-maroon text-lg mb-1">
-            Default Gallery Photos
-          </h2>
-          <p className="text-foreground/50 text-sm mb-4">These are the built-in temple photos shown on the public gallery page.</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {staticImages.map((img) => (
-              <div key={img.id} className="rounded-xl overflow-hidden border border-gold/20 bg-white shadow-sm">
-                <div className="relative aspect-square">
-                  <Image src={img.url} alt={img.caption} fill className="object-cover" />
-                </div>
-                <div className="p-2">
-                  <p className="text-xs text-foreground/70 truncate">{img.caption}</p>
-                  <span className="text-xs text-gold">{img.category}</span>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center gap-2 mb-4">
+            <Video className="w-5 h-5 text-saffron" />
+            <h2 className="font-cinzel font-semibold text-maroon text-lg">
+              Videos <span className="text-foreground/40 text-sm font-normal">({videos.length} added)</span>
+            </h2>
           </div>
+
+          {videos.length === 0 ? (
+            <div className="text-center py-8 bg-white rounded-2xl gold-border">
+              <Video className="w-10 h-10 text-gold/40 mx-auto mb-3" />
+              <p className="text-foreground/50 mb-1">No videos added yet.</p>
+              <p className="text-foreground/40 text-sm">Click &ldquo;Add Video&rdquo; to embed YouTube links.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {videos.map((v) => {
+                const thumb = v.thumbnail || getYouTubeThumb(v.url);
+                return (
+                  <div key={v.id} className="group relative rounded-xl overflow-hidden gold-border bg-white shadow-sm">
+                    <div className="relative aspect-video bg-black/10">
+                      {thumb ? (
+                        <Image src={thumb} alt={v.title || "Video"} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Video className="w-10 h-10 text-foreground/20" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                        <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-10 border-l-maroon ml-1" />
+                        </div>
+                      </div>
+                      <DeleteVideoButton videoId={v.id} />
+                    </div>
+                    <div className="p-2">
+                      {v.title && <p className="text-xs text-foreground/70 truncate">{v.title}</p>}
+                      {v.category && <span className="text-xs text-gold">{v.category}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

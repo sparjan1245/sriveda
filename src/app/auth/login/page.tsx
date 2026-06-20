@@ -69,7 +69,10 @@ function LoginForm() {
               />
             </div>
             <div>
-              <label className={labelClass}>Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className={labelClass} style={{marginBottom: 0}}>Password</label>
+                <Link href="/auth/forgot-password" className="text-xs text-saffron hover:underline">Forgot Password?</Link>
+              </div>
               <input
                 type="password"
                 value={form.password}

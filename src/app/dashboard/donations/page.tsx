@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency } from "@/lib/utils";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Receipt } from "lucide-react";
 
 export default async function DonationsPage() {
   const session = await auth();
@@ -46,7 +46,7 @@ export default async function DonationsPage() {
               📄 All donations are tax-deductible. Download individual receipts below for your records.
             </div>
             <div className="space-y-4">
-              {donations.map((d: { id: string; status: string; cause: string; amount: number; recurring: boolean; message?: string | null; receiptUrl?: string | null; createdAt: Date }) => (
+              {donations.map((d: { id: string; status: string; cause: string; amount: number; recurring: boolean; message?: string | null; receiptUrl?: string | null; receiptNumber?: string | null; createdAt: Date }) => (
                 <div key={d.id} className="bg-white rounded-2xl p-6 gold-border shadow-sm">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -60,7 +60,12 @@ export default async function DonationsPage() {
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${d.status === "COMPLETED" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
                         {d.status}
                       </span>
-                      {d.receiptUrl && (
+                      {d.receiptNumber && (
+                        <Link href={`/receipts/donation/${d.id}`} className="text-xs text-saffron hover:underline flex items-center gap-1">
+                          <Receipt className="w-3 h-3" /> View Receipt
+                        </Link>
+                      )}
+                      {d.receiptUrl && !d.receiptNumber && (
                         <a href={d.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-saffron hover:underline flex items-center gap-1">
                           <Download className="w-3 h-3" /> Download Receipt
                         </a>

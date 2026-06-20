@@ -1,19 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Heart, Star, Users, ArrowRight, CheckCircle } from "lucide-react";
-import { TEMPLE, IMAGES, BOARD_MEMBERS, SERVICES as STATIC_SERVICES, DONATION_TIERS } from "@/lib/constants";
+import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { unstable_cache } from "next/cache";
-import HeroSlider, { type BannerSlide } from "@/components/home/HeroSlider";
+import HeroSlider, { type BannerSlide, type PanchangamData } from "@/components/home/HeroSlider";
 import { ServiceSlider } from "@/components/home/ServiceSlider";
 import { GallerySection } from "@/components/home/GallerySection";
 import TestimonialCarousel from "@/components/home/TestimonialCarousel";
-
-const DEFAULT_SLIDES: BannerSlide[] = [
-  { id: "d1", image: IMAGES.hero },
-  { id: "d3", image: IMAGES.temple1 },
-  { id: "d4", image: IMAGES.puja },
-];
 
 const getActiveBanners = unstable_cache(
   () => db.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
@@ -39,27 +33,62 @@ const getActiveTestimonials = unstable_cache(
   { tags: ["testimonials"] }
 );
 
-const STATIC_TESTIMONIALS = [
-  { id: "t1", name: "Priya Sharma", location: "Stockton, CA", avatar: "PS", rating: 5, text: "The Abhishekam ceremony was deeply moving. The chanting and rituals were conducted with such devotion and authenticity. Sri Veda Gayatri Temple has truly become our spiritual home in California." },
-  { id: "t2", name: "Rajan & Meena Patel", location: "Tracy, CA", avatar: "RP", rating: 5, text: "We had our son's Upanayana Samskara performed here and it was a beautiful experience. The priest explained each step with such depth. The temple team was incredibly welcoming throughout." },
-  { id: "t3", name: "Dr. Ananya Krishnan", location: "Modesto, CA", avatar: "AK", rating: 5, text: "The weekly Annadaanam is a wonderful initiative. I can see the incredible love and dedication the founders and priests put into every ritual and community event. Truly a blessed place." },
-];
+const getActiveBoardMembers = unstable_cache(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  () => (db as any).boardMember.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+  ["board-members"],
+  { tags: ["board-members"] }
+);
+
+const getGalleryImages = unstable_cache(
+  () => db.galleryImage.findMany({ orderBy: { createdAt: "desc" }, take: 8 }).catch(() => []),
+  ["gallery-images"],
+  { tags: ["gallery"] }
+);
+
+const getGalleryVideos = unstable_cache(
+  () => db.galleryVideo.findMany({ orderBy: { createdAt: "desc" }, take: 5 }).catch(() => []),
+  ["gallery-videos"],
+  { tags: ["gallery"] }
+);
+
+const getTodayPanchangam = unstable_cache(
+  async (dateStr: string): Promise<PanchangamData | null> => {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const start = new Date(Date.UTC(y, m - 1, d));
+    const end   = new Date(start.getTime() + 86400000);
+    const row = await db.panchangam
+      .findFirst({ where: { date: { gte: start, lt: end } } })
+      .catch(() => null);
+    if (!row) return null;
+    return { ...row, date: row.date.toISOString() };
+  },
+  ["panchangam-today"],
+  { tags: ["panchangam"] }
+);
 
 export default async function HomePage() {
-  const dbBanners = await getActiveBanners();
-  const dbServices = await getActiveServices();
-  const dbTiers = await getActiveDonationTiers();
-  const dbTestimonials = await getActiveTestimonials();
-  const slides: BannerSlide[] = dbBanners.length > 0 ? dbBanners : DEFAULT_SLIDES;
-  const services = dbServices.length > 0 ? dbServices : STATIC_SERVICES;
-  const donationTiers = dbTiers.length > 0 ? dbTiers : DONATION_TIERS;
-  const testimonials = dbTestimonials.length > 0 ? dbTestimonials : STATIC_TESTIMONIALS;
+  const todayStr = new Date().toISOString().split("T")[0];
+  const [dbBanners, dbServices, dbTiers, dbTestimonials, dbBoardMembers, dbGalleryImages, dbGalleryVideos, todayPanchangam] = await Promise.all([
+    getActiveBanners(),
+    getActiveServices(),
+    getActiveDonationTiers(),
+    getActiveTestimonials(),
+    getActiveBoardMembers(),
+    getGalleryImages(),
+    getGalleryVideos(),
+    getTodayPanchangam(todayStr),
+  ]);
+  const slides: BannerSlide[] = dbBanners;
+  const services = dbServices;
+  const donationTiers = dbTiers;
+  const testimonials = dbTestimonials;
 
   return (
     <div className="overflow-x-hidden">
 
       {/* ─────────────────────────── HERO ─────────────────────────── */}
-      <HeroSlider slides={slides} />
+      <HeroSlider slides={slides} panchangam={todayPanchangam} />
 
       
 
@@ -114,24 +143,24 @@ export default async function HomePage() {
       </section>
 
       {/* ─────────────────────── SERVICES ─────────────────────────── */}
-      <section className="py-8 md:py-6 px-4 bg-white relative">
-        <div className="max-w-7xl mx-auto">
-
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
-            <div>
-              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">What We Offer</span>
-              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight drop-shadow-sm">
-                Our Sacred Services
-              </h2>
+      {services.length > 0 && (
+        <section className="py-8 md:py-6 px-4 bg-white relative">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+              <div>
+                <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">What We Offer</span>
+                <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight drop-shadow-sm">
+                  Our Sacred Services
+                </h2>
+              </div>
+              <Link href="/services" className="btn-secondary px-6 py-2.5 text-xs md:text-sm shrink-0 self-start md:self-auto hover:-translate-y-0.5 transition-transform">
+                View All Services <ArrowRight className="inline w-3.5 h-3.5 ml-1" />
+              </Link>
             </div>
-            <Link href="/services" className="btn-secondary px-6 py-2.5 text-xs md:text-sm shrink-0 self-start md:self-auto hover:-translate-y-0.5 transition-transform">
-              View All Services <ArrowRight className="inline w-3.5 h-3.5 ml-1" />
-            </Link>
+            <ServiceSlider services={services} />
           </div>
-
-          <ServiceSlider services={services} />
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─────────────────────── ABOUT SPLIT ──────────────────────── */}
       <section className=" py-8 md:py-6 px-4  relative overflow-hidden bg-cream">
@@ -202,6 +231,7 @@ export default async function HomePage() {
       </section>
 
       {/* ────────────────────── DONATE BANNER ─────────────────────── */}
+      {donationTiers.length > 0 && (
       <section className="relative py-8 md:py-6 px-4 overflow-hidden" style={{ background: "linear-gradient(135deg,#6B0F1A 0%,#4A0A12 50%,#2D0208 100%)" }}>
         {/* Decorations */}
         <div className="absolute inset-0 pattern-bg opacity-10 pointer-events-none" />
@@ -278,164 +308,119 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ──────────────────── BOARD OF DIRECTORS ──────────────────── */}
-      <section className="py-8 md:py-6 px-4 bg-white relative overflow-hidden">
-        <div className="absolute inset-0 pattern-bg opacity-20 pointer-events-none" />
-
-        <div className="relative max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8 md:mb-10">
-            <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Leadership</span>
-            <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
-              Board of Directors
-            </h2>
-            <div className="flex items-center justify-center gap-4">
-              <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
-              <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
-              <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
+      {dbBoardMembers.length > 0 && (
+        <section className="py-8 md:py-6 px-4 bg-white relative overflow-hidden">
+          <div className="absolute inset-0 pattern-bg opacity-20 pointer-events-none" />
+          <div className="relative max-w-6xl mx-auto">
+            <div className="text-center mb-8 md:mb-10">
+              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Leadership</span>
+              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
+                Board of Directors
+              </h2>
+              <div className="flex items-center justify-center gap-4">
+                <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
+                <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
+                <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {(dbBoardMembers as any[]).map((member, i) => {
+                const isChairman = i === 0;
+                return (
+                  <div key={member.id} className={`group relative bg-white rounded-2xl overflow-hidden card-hover flex flex-col items-center text-center ${isChairman ? "gold-border-thick shadow-xl" : "gold-border shadow-md"}`}>
+                    <div className={`h-1 w-full bg-linear-to-r from-saffron to-gold ${isChairman ? "opacity-100" : "opacity-0 group-hover:opacity-100 transition-opacity duration-300"}`} />
+                    <div className="pt-6 pb-4 px-4 w-full flex flex-col items-center">
+                      <div className={`relative rounded-full overflow-hidden mb-4 shrink-0 ${isChairman ? "w-24 h-24 md:w-28 md:h-28 ring-4 ring-gold/40 ring-offset-2" : "w-20 h-20 md:w-24 md:h-24 ring-2 ring-gold/25 ring-offset-2 group-hover:ring-gold/50 transition-all duration-300"}`}>
+                        {member.image ? (
+                          <Image src={member.image} alt={member.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                        ) : (
+                          <div className="w-full h-full bg-maroon/10 flex items-center justify-center font-cinzel font-bold text-maroon text-xl">
+                            {member.name[0]}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-linear-to-t from-maroon/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      {isChairman && <span className="badge-gold mb-2.5 text-[10px]">Founder</span>}
+                      <h4 className="font-cinzel font-semibold text-maroon text-xs md:text-sm leading-snug mb-1.5">{member.name}</h4>
+                      <div className="divider-gold w-8 mb-2" />
+                      <p className="text-saffron text-[11px] font-medium tracking-wide">{member.title}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="text-center mt-8">
+              <Link href="/about" className="btn-secondary px-10">Meet Our Full Team</Link>
             </div>
           </div>
-
-          {/* Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {BOARD_MEMBERS.map((member, i) => {
-              const isChairman = i === 0;
-              return (
-                <div
-                  key={member.name}
-                  className={`group relative bg-white rounded-2xl overflow-hidden card-hover flex flex-col items-center text-center ${isChairman ? "gold-border-thick shadow-xl" : "gold-border shadow-md"}`}
-                >
-                  <div className={`h-1 w-full bg-linear-to-r from-saffron to-gold ${isChairman ? "opacity-100" : "opacity-0 group-hover:opacity-100 transition-opacity duration-300"}`} />
-
-                  <div className="pt-6 pb-4 px-4 w-full flex flex-col items-center">
-                    <div className={`relative rounded-full overflow-hidden mb-4 shrink-0 ${isChairman ? "w-24 h-24 md:w-28 md:h-28 ring-4 ring-gold/40 ring-offset-2" : "w-20 h-20 md:w-24 md:h-24 ring-2 ring-gold/25 ring-offset-2 group-hover:ring-gold/50 transition-all duration-300"}`}>
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-maroon/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-
-                    {isChairman && (
-                      <span className="badge-gold mb-2.5 text-[10px]">Founder</span>
-                    )}
-
-                    <h4 className="font-cinzel font-semibold text-maroon text-xs md:text-sm leading-snug mb-1.5">
-                      {member.name}
-                    </h4>
-                    <div className="divider-gold w-8 mb-2" />
-                    <p className="text-saffron text-[11px] font-medium tracking-wide">{member.title}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link href="/about" className="btn-secondary px-10">Meet Our Full Team</Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ──────────────────────── GALLERY ────────────────────────── */}
-      <section className="py-8 md:py-6 px-4 bg-white relative overflow-hidden">
-        <div className="absolute inset-0 pattern-bg opacity-20 pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto">
-          <div className="text-center mb-8 md:mb-10">
-            <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Our Moments</span>
-            <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
-              Gallery &amp; Media
-            </h2>
-            <div className="flex items-center justify-center gap-4">
-              <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
-              <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
-              <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
+      {(dbGalleryImages.length > 0 || dbGalleryVideos.length > 0) && (
+        <section className="py-8 md:py-6 px-4 bg-white relative overflow-hidden">
+          <div className="absolute inset-0 pattern-bg opacity-20 pointer-events-none" />
+          <div className="relative max-w-7xl mx-auto">
+            <div className="text-center mb-8 md:mb-10">
+              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Our Moments</span>
+              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
+                Gallery &amp; Media
+              </h2>
+              <div className="flex items-center justify-center gap-4">
+                <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
+                <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
+                <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
+              </div>
+            </div>
+            <GallerySection
+              photos={dbGalleryImages.map((img) => ({
+                src: img.url,
+                alt: img.caption || "Temple photo",
+                caption: img.caption || undefined,
+              }))}
+              videos={dbGalleryVideos.map((v) => {
+                const ytMatch = v.url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                return {
+                  thumbnail: v.thumbnail || (ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/mqdefault.jpg` : IMAGES.hero),
+                  title: v.title || "Temple Video",
+                  href: v.url,
+                };
+              })}
+            />
+            <div className="text-center mt-8">
+              <Link href="/gallery" className="btn-secondary px-10">View Full Gallery</Link>
             </div>
           </div>
-
-          <GallerySection
-            photos={[
-              { src: IMAGES.about1, alt: "Temple ceremony",      caption: "Sacred Ceremony" },
-              { src: IMAGES.about2, alt: "Puja ritual",          caption: "Daily Puja" },
-              { src: IMAGES.about3, alt: "Community gathering",  caption: "Community Event" },
-              { src: IMAGES.about4, alt: "Festival celebration", caption: "Festival" },
-              { src: IMAGES.puja,   alt: "Sacred fire ritual",   caption: "Homam Ritual" },
-              { src: IMAGES.temple1,alt: "Temple exterior",      caption: "Our Temple" },
-              { src: IMAGES.hero,   alt: "Devotee service",      caption: "Devotee Service" },
-              { src: IMAGES.download4, alt: "Cultural program",  caption: "Cultural Program" },
-            ]}
-            videos={[
-              {
-                thumbnail: IMAGES.hero,
-                title: "Archana & Abhishekam — Sacred Daily Ritual",
-                description: "Watch our priests perform the traditional Archana and Abhishekam ceremonies with full Vedic procedures.",
-                duration: "12:34",
-                href: "https://www.youtube.com/@srivedagayatritemple",
-              },
-              {
-                thumbnail: IMAGES.puja,
-                title: "Ganapathi Homam — Sacred Fire Ritual",
-                description: "A powerful Homam performed to remove obstacles and invoke divine blessings for the community.",
-                duration: "28:15",
-                href: "https://www.youtube.com/@srivedagayatritemple",
-              },
-              {
-                thumbnail: IMAGES.about2,
-                title: "Annadaanam — Weekly Community Food Offering",
-                description: "Our Sunday Annadaanam program where blessed food is distributed to all devotees and visitors.",
-                duration: "8:42",
-                href: "https://www.youtube.com/@srivedagayatritemple",
-              },
-              {
-                thumbnail: IMAGES.temple1,
-                title: "Navaratri Celebrations 2024",
-                description: "Highlights from our vibrant Navaratri festival — nine nights of devotion, dance, and divine worship.",
-                duration: "18:05",
-                href: "https://www.youtube.com/@srivedagayatritemple",
-              },
-              {
-                thumbnail: IMAGES.about3,
-                title: "Upanayana Samskara Ceremony",
-                description: "Sacred thread ceremony performed with full Vedic rituals, marking a young devotee's spiritual journey.",
-                duration: "45:20",
-                href: "https://www.youtube.com/@srivedagayatritemple",
-              },
-            ]}
-          />
-
-          <div className="text-center mt-8">
-            <Link href="/gallery" className="btn-secondary px-10">View Full Gallery</Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─────────────────────── TESTIMONIALS ─────────────────────── */}
-      <section className="py-8 md:py-6 px-4 relative overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
-        <div className="absolute inset-0 pattern-bg opacity-40 pointer-events-none" />
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-          <span className="text-maroon/3 font-cinzel leading-none" style={{ fontSize: "min(65vw,560px)" }}>ॐ</span>
-        </div>
-
-        <div className="relative max-w-3xl mx-auto">
-          <div className="text-center mb-8 md:mb-10">
-            <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Devotee Stories</span>
-            <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
-              Blessings &amp; Testimonials
-            </h2>
-            <div className="flex items-center justify-center gap-4">
-              <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
-              <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
-              <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
-            </div>
+      {testimonials.length > 0 && (
+        <section className="py-8 md:py-6 px-4 relative overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
+          <div className="absolute inset-0 pattern-bg opacity-40 pointer-events-none" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+            <span className="text-maroon/3 font-cinzel leading-none" style={{ fontSize: "min(65vw,560px)" }}>ॐ</span>
           </div>
-
-          <TestimonialCarousel items={testimonials} />
-        </div>
-      </section>
+          <div className="relative max-w-3xl mx-auto">
+            <div className="text-center mb-8 md:mb-10">
+              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Devotee Stories</span>
+              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
+                Blessings &amp; Testimonials
+              </h2>
+              <div className="flex items-center justify-center gap-4">
+                <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
+                <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
+                <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
+              </div>
+            </div>
+            <TestimonialCarousel items={testimonials} />
+          </div>
+        </section>
+      )}
 
       {/* ────────────────────── REGISTER CTA ──────────────────────── */}
       <section className="relative py-8 md:py-6 px-4 overflow-hidden bg-cream">
