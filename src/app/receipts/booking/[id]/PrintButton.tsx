@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 
-export default function DownloadPDFButton({ id, receiptNo }: { id: string; receiptNo: string }) {
+export default function DownloadPDFButton({ id, receiptNo, token }: { id: string; receiptNo: string; token?: string }) {
   const [loading, setLoading] = useState(false);
 
   const handleDownload = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/receipts/booking/${id}`);
+      const apiUrl = token ? `/api/receipts/booking/${id}?token=${token}` : `/api/receipts/booking/${id}`;
+      const res = await fetch(apiUrl);
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);

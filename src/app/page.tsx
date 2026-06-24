@@ -102,8 +102,8 @@ export default async function HomePage() {
         <div className="relative max-w-6xl mx-auto">
           {/* Section label + heading */}
           <div className="text-center mb-8 md:mb-10">
-            <span className="badge-gold mb-5 inline-flex text-xs md:text-sm px-4 py-1.5">Our Purpose</span>
-            <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
+            <span className="badge-gold mb-5 inline-flex text-md md:text-md text-maroon px-4 py-1.5">Our Purpose</span>
+            <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon mb-3 leading-tight drop-shadow-sm">
               A Sanctuary for the Soul
             </h2>
             {/* Decorative divider */}
@@ -112,7 +112,7 @@ export default async function HomePage() {
               <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
               <span className="block h-px w-20 md:w-32 bg-gradient-to-l from-transparent to-gold/60" />
             </div>
-            <p className="text-foreground/75 text-sm font-light leading-relaxed max-w-3xl mx-auto drop-shadow-sm">
+            <p className="text-base font-normal leading-relaxed max-w-3xl mx-auto drop-shadow-sm">
               {TEMPLE.mission} As a&nbsp;
               <strong className="text-maroon font-semibold tracking-wide">California Registered 501(c)(3) Non-Profit</strong>,
               every contribution goes directly toward serving the spiritual needs of our community.
@@ -144,20 +144,33 @@ export default async function HomePage() {
 
       {/* ─────────────────────── SERVICES ─────────────────────────── */}
       {services.length > 0 && (
-        <section className="py-8 md:py-6 px-4 bg-white relative">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
-              <div>
-                <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">What We Offer</span>
-                <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight drop-shadow-sm">
-                  Our Sacred Services
-                </h2>
+        <section className="py-12 md:py-16 px-4 relative overflow-hidden" style={{ background: "linear-gradient(160deg,#ffffff 0%,#FFF8F0 50%,#ffffff 100%)" }}>
+          <div className="absolute inset-0 pattern-bg opacity-20 pointer-events-none" />
+          <div className="max-w-7xl mx-auto relative">
+
+            {/* Centered header */}
+            <div className="text-center mb-10 md:mb-12">
+              <span className="badge-gold mb-4 inline-flex">What We Offer</span>
+              <h2 className="font-cinzel font-bold text-2xl md:text-3xl text-maroon mb-3 leading-tight drop-shadow-sm">
+                Our Sacred Services
+              </h2>
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
+                <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
+                <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
               </div>
-              <Link href="/services" className="btn-secondary px-6 py-2.5 text-xs md:text-sm shrink-0 self-start md:self-auto hover:-translate-y-0.5 transition-transform">
-                View All Services <ArrowRight className="inline w-3.5 h-3.5 ml-1" />
+              <p className="text-base max-w-2xl mx-auto leading-relaxed">
+                Experience the divine through our traditional Vedic rituals, performed by learned priests to bring peace, prosperity, and spiritual well-being to you and your family.
+              </p>
+            </div>
+
+            <ServiceSlider services={services} />
+
+            <div className="text-center mt-10">
+              <Link href="/services" className="btn-secondary inline-flex items-center gap-2 px-10 py-3">
+                View All Services <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <ServiceSlider services={services} />
           </div>
         </section>
       )}
@@ -177,7 +190,7 @@ export default async function HomePage() {
             <div>
               <span className="badge-gold mb-5 inline-flex">Who We Are</span>
 
-            <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
+            <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon mb-3 leading-tight drop-shadow-sm">
                 About Our Sacred Temple
               </h2>
 
@@ -186,11 +199,11 @@ export default async function HomePage() {
                 <span className="text-gold text-lg shrink-0">🪷</span>
               </div>
 
-              <p className="text-foreground/65 leading-relaxed mb-4 text-[15px]">
+              <p className="leading-relaxed mb-4 text-base">
                 Founded in 2024, Sri Veda Gayatri Temple is a spiritual and charitable non-profit
                 dedicated to serving the Hindu community in and around Manteca, California.
               </p>
-              <p className="text-foreground/65 leading-relaxed mb-8 text-[15px]">
+              <p className="leading-relaxed mb-8 text-base">
                 We offer daily pujas by trained priests, cultural programs in music, dance, Sanskrit,
                 and yoga, community events, and weekly Annadaanam (food offering).
               </p>
@@ -256,7 +269,7 @@ export default async function HomePage() {
             <span className="block h-px w-12 md:w-20 bg-linear-to-l from-transparent to-gold/50" />
           </div>
 
-          <p className="text-white/55 text-sm leading-relaxed mb-8 max-w-xl mx-auto">
+          <p className="text-white text-sm leading-relaxed mb-8 max-w-xl mx-auto">
             Every contribution sustains daily pujas, cultural programs, and community service.
           </p>
 
@@ -317,7 +330,7 @@ export default async function HomePage() {
           <div className="relative max-w-6xl mx-auto">
             <div className="text-center mb-8 md:mb-10">
               <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Leadership</span>
-              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
+              <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon leading-tight mb-3 drop-shadow-sm">
                 Board of Directors
               </h2>
               <div className="flex items-center justify-center gap-4">
@@ -367,7 +380,7 @@ export default async function HomePage() {
           <div className="relative max-w-7xl mx-auto">
             <div className="text-center mb-8 md:mb-10">
               <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Our Moments</span>
-              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
+              <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon leading-tight mb-3 drop-shadow-sm">
                 Gallery &amp; Media
               </h2>
               <div className="flex items-center justify-center gap-4">
@@ -408,7 +421,7 @@ export default async function HomePage() {
           <div className="relative max-w-3xl mx-auto">
             <div className="text-center mb-8 md:mb-10">
               <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Devotee Stories</span>
-              <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon leading-tight mb-3 drop-shadow-sm">
+              <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon leading-tight mb-3 drop-shadow-sm">
                 Blessings &amp; Testimonials
               </h2>
               <div className="flex items-center justify-center gap-4">
@@ -433,7 +446,7 @@ export default async function HomePage() {
             <div className="p-6 md:p-10">
               <div className="text-center mb-6">
                 <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Join Us</span>
-                <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
+                <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon mb-3 leading-tight drop-shadow-sm">
                   Become a Devotee
                 </h2>
                 <div className="flex items-center justify-center gap-4 mb-3">
@@ -441,7 +454,7 @@ export default async function HomePage() {
                   <span className="text-gold text-xl drop-shadow-md">🪷</span>
                   <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
                 </div>
-                <p className="text-foreground/55 text-sm max-w-lg mx-auto leading-relaxed">
+                <p className="text-base max-w-lg mx-auto leading-relaxed">
                   Create your free account to unlock all temple services, stay connected,
                   and receive your tax receipts digitally.
                 </p>
@@ -467,7 +480,7 @@ export default async function HomePage() {
                 <Link href="/auth/register" className="btn-primary px-10 shadow-md">
                   Register Free — It Only Takes a Minute
                 </Link>
-                <p className="text-foreground/40 text-xs mt-3">
+                <p className="text-sm mt-3">
                   Already a member?{" "}
                   <Link href="/auth/login" className="text-saffron hover:underline">Sign in here</Link>
                 </p>

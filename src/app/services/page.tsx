@@ -48,17 +48,7 @@ export default async function ServicesPage() {
             <span className="text-gold/60">›</span>
             <span className="text-gold/80">Services</span>
           </div>
-          <h1 className="font-cinzel font-bold text-2xl md:text-3xl text-white drop-shadow-md leading-tight">
-            Our Sacred Services
-          </h1>
-          <div className="flex items-center justify-center gap-3 my-2">
-            <span className="block h-px w-10 md:w-16 bg-linear-to-r from-transparent to-gold/60" />
-            <span className="text-gold text-base drop-shadow-sm">🪷</span>
-            <span className="block h-px w-10 md:w-16 bg-linear-to-l from-transparent to-gold/60" />
-          </div>
-          <p className="text-white/80 text-xs max-w-md mx-auto drop-shadow-sm">
-            Performed by trained and experienced priests with authentic Vedic procedures
-          </p>
+         
         </div>
       </section>
 

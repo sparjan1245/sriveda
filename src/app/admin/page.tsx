@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency } from "@/lib/utils";
-import { Users, BookOpen, Heart, MessageSquare, Calendar, Image, Settings, Layers, Megaphone, Users2, BarChart2, ShieldCheck, CalendarDays } from "lucide-react";
+import { Users, BookOpen, Heart, MessageSquare, Calendar, Image, Settings, Layers, Megaphone, Users2, BarChart2, ShieldCheck, CalendarDays, CalendarRange } from "lucide-react";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -24,6 +24,7 @@ export default async function AdminPage() {
     { label: "Devotees", href: "/admin/devotees", icon: <Users />, desc: "Manage devotee accounts" },
     { label: "Bookings", href: "/admin/bookings", icon: <BookOpen />, desc: "Service requests", badge: pendingBookings },
     { label: "Donations", href: "/admin/donations", icon: <Heart />, desc: "Donation records" },
+    { label: "Donation Tiers", href: "/admin/donation-tiers", icon: <Heart />, desc: "Manage public tier options" },
     { label: "Events", href: "/admin/events", icon: <Calendar />, desc: "Create & manage events" },
     { label: "Banners", href: "/admin/banners", icon: <Layers />, desc: "Hero slideshow images" },
     { label: "Gallery", href: "/admin/gallery", icon: <Image />, desc: "Upload photos" },
@@ -34,6 +35,8 @@ export default async function AdminPage() {
     { label: "Reports", href: "/admin/reports", icon: <BarChart2 />, desc: "Analytics & CSV exports" },
     { label: "Staff", href: "/admin/staff", icon: <ShieldCheck />, desc: "Manage roles & permissions" },
     { label: "Panchangam", href: "/admin/panchangam", icon: <CalendarDays />, desc: "Daily Hindu calendar entries" },
+    { label: "Calendar",   href: "/admin/calendar",   icon: <CalendarRange />, desc: "Annual calendar image uploads" },
+    { label: "Settings",  href: "/admin/settings",  icon: <Settings />,      desc: "Payment gateways & email config" },
   ];
 
   return (

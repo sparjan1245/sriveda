@@ -187,7 +187,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                     <span className="text-xs text-foreground/50 uppercase tracking-wide">Service Fee</span>
                     <span className="font-cinzel font-bold text-saffron text-xl">${service.price}</span>
                   </div>
-                  <BookingForm service={{ slug: service.slug, name: service.name, price: service.price }} />
+                  <BookingForm service={{ id: service.id, slug: service.slug, name: service.name, price: service.price }} />
                 </div>
               </div>
 
@@ -237,7 +237,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                     )}
                   </div>
 
-                  <BookingForm service={{ slug: service.slug, name: service.name, price: service.price }} />
+                  <BookingForm service={{ id: service.id, slug: service.slug, name: service.name, price: service.price }} />
                 </div>
               </div>
             </div>

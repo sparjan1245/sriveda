@@ -58,7 +58,7 @@ export default function HeroSlider({ slides, panchangam }: Props) {
   const isBanner = current.type === "banner";
 
   return (
-    <section className="relative min-h-155 md:min-h-180 flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-87.5 md:min-h-117.5 flex items-center justify-center overflow-hidden">
 
       {/* ── Background layer ── */}
       <div className="absolute inset-0">
