@@ -47,20 +47,30 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Inter', sans-serif;
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: justify;
 }
 
-p, li, td, blockquote {
-  text-align: justify;
-  hyphens: auto;
+@layer base {
+  p {
+    color: #111111;
+    font-size: 1rem;
+    line-height: 1.85;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  li, td, blockquote {
+    text-align: justify;
+    hyphens: auto;
+  }
 }
 
 /* Preserve explicit alignment overrides */
-.text-center, .text-center * { text-align: center !important; hyphens: none; }
-.text-left,   .text-left *   { text-align: left   !important; hyphens: none; }
-.text-right,  .text-right *  { text-align: right  !important; hyphens: none; }
+.text-center p, .text-center li { text-align: center; hyphens: none; }
+.text-left   p, .text-left   li { text-align: left;   hyphens: none; }
+.text-right  p, .text-right  li { text-align: right;  hyphens: none; }
 
 h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
 
@@ -239,7 +249,6 @@ h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
   box-shadow: 0 16px 40px rgba(107,15,26,0.1);
 }
 
-/* ── Badge ──────────────────────────────────── */
 .badge-gold {
   display: inline-flex;
   align-items: center;
@@ -247,12 +256,13 @@ h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
   background: rgba(212,160,23,0.15);
   color: #a07010;
   border: 1px solid rgba(212,160,23,0.4);
-  font-size: 0.7rem;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 0.25rem 0.7rem;
   border-radius: 99px;
+  font-weight: bold;
   font-family: 'Cinzel', serif;
 }
 

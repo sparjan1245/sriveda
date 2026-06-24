@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { ArrowLeft, Plus, Receipt } from "lucide-react";
+import DonationActions from "./DonationActions";
 
 export default async function AdminDonationsPage() {
   const session = await auth();
@@ -29,6 +30,9 @@ export default async function AdminDonationsPage() {
               <p className="text-xs text-foreground/50">Total Received</p>
               <p className="font-cinzel font-bold text-green-600 text-xl">{formatCurrency(total)}</p>
             </div>
+            <Link href="/admin/donation-tiers" className="btn-secondary flex items-center gap-2 text-sm px-4 py-2 whitespace-nowrap">
+              Manage Tiers
+            </Link>
             <Link href="/admin/donations/new" className="btn-primary flex items-center gap-2 text-sm px-4 py-2 whitespace-nowrap">
               <Plus className="w-4 h-4" /> Walk-in Donation
             </Link>
@@ -40,7 +44,7 @@ export default async function AdminDonationsPage() {
             <table className="w-full text-sm">
               <thead className="bg-cream border-b border-gold/20">
                 <tr>
-                  {["Donor", "Email", "Cause", "Amount", "Recurring", "Status", "Date", "Receipt"].map((h) => (
+                  {["Donor", "Email", "Cause", "Amount", "Recurring", "Status", "Date", "Receipt", ""].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-cinzel font-medium text-maroon text-xs">{h}</th>
                   ))}
                 </tr>
@@ -65,6 +69,9 @@ export default async function AdminDonationsPage() {
                           <Receipt className="w-3 h-3" /> {d.receiptNumber}
                         </Link>
                       ) : <span className="text-foreground/30 text-xs">—</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <DonationActions id={d.id} status={d.status} />
                     </td>
                   </tr>
                 ))}

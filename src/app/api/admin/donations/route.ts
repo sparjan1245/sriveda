@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatReceiptNumber } from "@/lib/utils";
+import { sendDonationEmails } from "@/lib/email";
+import { randomBytes } from "crypto";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -23,30 +25,36 @@ export async function POST(req: Request) {
     const guestName = `${firstName} ${lastName}`.trim();
 
     const counter = await db.counter.upsert({
-      where: { id: "receipt-donation" },
+      where:  { id: "receipt-donation" },
       update: { seq: { increment: 1 } },
       create: { id: "receipt-donation", seq: 1 },
     });
 
     const receiptNumber = formatReceiptNumber("DON", counter.seq);
+    // Token allows donor to download their receipt via the email link without an account
+    const guestToken = randomBytes(32).toString("hex");
 
     const donation = await db.donation.create({
       data: {
         guestName,
-        guestEmail: email || null,
-        guestPhone: phone || null,
-        address: address || null,
+        guestEmail:  email   || null,
+        guestPhone:  phone   || null,
+        guestToken,
+        address:     address  || null,
         cause,
-        amount: parseFloat(amount),
+        amount:      parseFloat(amount),
         paymentMode: paymentMode || "CASH",
-        checkRef: checkRef || null,
-        message: message || null,
+        checkRef:    checkRef    || null,
+        message:     message     || null,
         isAdminEntry: true,
         receiptNumber,
-        status: "COMPLETED",
-        createdAt: date ? new Date(date) : new Date(),
+        status:      "COMPLETED",
+        createdAt:   date ? new Date(date) : new Date(),
       },
     });
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000";
+    sendDonationEmails(donation.id, appUrl).catch(console.error);
 
     return NextResponse.json({ id: donation.id, receiptNumber });
   } catch (error) {

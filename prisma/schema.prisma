@@ -152,6 +152,10 @@ model Booking {
   isAdminEntry    Boolean       @default(false)
   receiptNumber   String?       @unique
   stripePaymentId String?
+  paymentGateway  String?
+  paypalOrderId   String?
+  squareOrderId   String?
+  guestToken      String?  @unique
   amount          Float
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -176,6 +180,10 @@ model Donation {
   receiptNumber   String?        @unique
   checkRef        String?
   stripePaymentId String?
+  paymentGateway  String?
+  paypalOrderId   String?
+  squareOrderId   String?
+  guestToken      String?        @unique
   receiptUrl      String?
   status          DonationStatus @default(PENDING)
   createdAt       DateTime       @default(now())
@@ -309,6 +317,17 @@ model GalleryVideo {
   createdAt DateTime @default(now())
 }
 
+model Calendar {
+  id          String   @id @default(cuid())
+  year        Int      @unique
+  title       String?
+  images      String[]
+  downloadUrl String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Panchangam {
   id          String   @id @default(cuid())
   date        DateTime @unique
@@ -330,4 +349,31 @@ model Panchangam {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model SiteSettings {
+  id                  String   @id @default("main")
+  // Stripe (values encrypted)
+  stripeEnabled       Boolean  @default(false)
+  stripePubKey        String?
+  stripeSecretKey     String?
+  stripeWebhookSecret String?
+  // PayPal (values encrypted)
+  paypalEnabled       Boolean  @default(false)
+  paypalClientId      String?
+  paypalSecret        String?
+  paypalMode          String   @default("sandbox")
+  // Square (values encrypted)
+  squareEnabled       Boolean  @default(false)
+  squareAccessToken   String?
+  squareAppId         String?
+  squareLocationId    String?
+  squareMode          String   @default("sandbox")
+  // Gmail SMTP (values encrypted)
+  gmailEnabled        Boolean  @default(false)
+  gmailUser           String?
+  gmailAppPassword    String?
+  adminEmails         String?  // comma-separated, plain text
+
+  updatedAt           DateTime @updatedAt
 }

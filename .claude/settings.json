@@ -45,7 +45,9 @@
       "Bash(curl -s -b /tmp/temple_cookies.txt -c /tmp/temple_cookies.txt -L -X POST http://localhost:4000/api/auth/callback/credentials -H 'Content-Type: application/x-www-form-urlencoded' -d 'csrfToken=f51ed7b866b743d16d0a4b6426e0e53e2c7431856faeca417620757b280a086b&email=vgcc%40srivedagayatritemple.org&password=admin123%21&redirect=false&callbackUrl=http%3A%2F%2Flocalhost%3A4000%2Fdashboard&json=true' -o /tmp/login_resp.html -w 'HTTP:%{http_code}')",
       "Read(//tmp/**)",
       "Bash(grep -v \"^$\")",
-      "Bash(curl -s -b /tmp/temple_cookies.txt -c /tmp/temple_cookies.txt -X POST http://localhost:4000/api/auth/callback/credentials -H 'Content-Type: application/x-www-form-urlencoded' -d 'csrfToken=f51ed7b866b743d16d0a4b6426e0e53e2c7431856faeca417620757b280a086b&email=vgcc%40srivedagayatritemple.org&password=admin123%21&redirect=false&callbackUrl=http%3A%2F%2Flocalhost%3A4000%2Fdashboard&json=true' -D /tmp/login_headers.txt -o /tmp/login_body.txt)"
+      "Bash(curl -s -b /tmp/temple_cookies.txt -c /tmp/temple_cookies.txt -X POST http://localhost:4000/api/auth/callback/credentials -H 'Content-Type: application/x-www-form-urlencoded' -d 'csrfToken=f51ed7b866b743d16d0a4b6426e0e53e2c7431856faeca417620757b280a086b&email=vgcc%40srivedagayatritemple.org&password=admin123%21&redirect=false&callbackUrl=http%3A%2F%2Flocalhost%3A4000%2Fdashboard&json=true' -D /tmp/login_headers.txt -o /tmp/login_body.txt)",
+      "WebFetch(domain:srivedagayatritemple.org)",
+      "Bash(node -e \"const crypto = require\\('crypto'\\); console.log\\(crypto.randomBytes\\(32\\).toString\\('hex'\\)\\);\")"
     ],
     "additionalDirectories": [
       "d:\\temple\\src\\app\\api\\services",

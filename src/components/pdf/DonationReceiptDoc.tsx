@@ -105,11 +105,15 @@ export default function DonationReceiptDoc(props: DonationReceiptDocProps) {
         <View style={s.titleArea}>
           <Text style={s.titleText}>OFFICIAL DONATION RECEIPT</Text>
           <View style={s.metaRow}>
-            <Text style={s.metaLabel}>Receipt No.</Text>
-            <Text style={s.metaNo}>{props.receiptNo}</Text>
+            <view style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={s.metaLabel}>Receipt No. </Text>
+              <Text style={s.metaNo}>{props.receiptNo}</Text>
+            </view>
             <Text style={s.metaLabel}>Date: {props.createdAt}</Text>
           </View>
         </View>
+            
+          
 
         {/* Body */}
         <View style={s.body}>
@@ -171,16 +175,7 @@ export default function DonationReceiptDoc(props: DonationReceiptDocProps) {
             <Text style={s.taxSub}>Tax ID (EIN): {props.taxId}</Text>
           </View>
 
-          {/* Signatures */}
-          <View style={s.sigRow}>
-            {(["Authorized Signatory", "Temple Priest"] as const).map((label) => (
-              <View key={label} style={s.sigItem}>
-                <View style={s.sigLine}>
-                  <Text style={s.sigLabel}>{label}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
+          
         </View>
 
         {/* Footer */}
