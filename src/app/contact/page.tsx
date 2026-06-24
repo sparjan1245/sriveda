@@ -30,16 +30,19 @@ export default function ContactPage() {
       </section>
 
       <section className="py-16 px-4 bg-cream pattern-bg">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12">
-            {/* Info */}
-            <div>
-              <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-3">Get in Touch</p>
+        <div className="max-w-3xl mx-auto text-center mb-12">
+           <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-3">Get in Touch</p>
               <h2 className="section-heading text-3xl font-bold mb-6 text-left">We&apos;d Love to Hear From You</h2>
               <p className="text-foreground/70 leading-relaxed mb-8">
                 Whether you have questions about our services, want to schedule a puja, or need
                 guidance on upcoming events — our team is always here to help you on your spiritual journey.
               </p>
+        </div>
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Info */}
+            <div>
+             
 
               <div className="space-y-5">
                 <div className="flex items-start gap-4 bg-white rounded-xl p-4 gold-border">

@@ -53,5 +53,5 @@ export function amountToWords(amount: number): string {
 
 export function formatReceiptNumber(type: "DON" | "BKG", seq: number): string {
   const yr = new Date().getFullYear().toString().slice(-2);
-  return `SVT-${type}${yr}-${String(seq).padStart(5, "0")}`;
+  return `VGCC/${type}${yr}/${String(seq).padStart(5, "0")}`;
 }

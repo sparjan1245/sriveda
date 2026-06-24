@@ -129,8 +129,10 @@ export default function BookingReceiptDoc(props: BookingReceiptDocProps) {
         <View style={s.titleArea}>
           <Text style={s.titleText}>SERVICE BOOKING RECEIPT</Text>
           <View style={s.metaRow}>
+            <view style={{ flexDirection: "column", alignItems: "center" }}>
             <Text style={s.metaLabel}>Receipt No.</Text>
             <Text style={s.metaNo}>{props.receiptNo}</Text>
+            </view>
             <Text style={s.metaLabel}>Date: {props.createdAt}</Text>
           </View>
         </View>
@@ -210,16 +212,7 @@ export default function BookingReceiptDoc(props: BookingReceiptDocProps) {
             <Text style={s.wordsVal}>{props.amountInWords}</Text>
           </View>
 
-          {/* Signatures */}
-          <View style={s.sigRow}>
-            {(["Authorized Signatory", "Temple Priest"] as const).map((label) => (
-              <View key={label} style={s.sigItem}>
-                <View style={s.sigLine}>
-                  <Text style={s.sigLabel}>{label}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
+          
         </View>
 
         {/* Footer */}

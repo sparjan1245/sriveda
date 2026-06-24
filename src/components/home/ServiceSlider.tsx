@@ -74,11 +74,14 @@ export function ServiceSlider({ services }: { services: any[] }) {
             <Link
               key={service.slug}
               href={`/services/${service.slug}`}
-              className="group relative bg-white rounded-3xl overflow-hidden border border-gold/20 shadow-sm hover:shadow-xl hover:border-gold/60 transition-all duration-300 flex flex-col hover:-translate-y-1 shrink-0"
+              className="group relative bg-white rounded-2xl overflow-hidden border border-gold/25 shadow-md hover:shadow-2xl hover:border-gold/50 transition-all duration-400 flex flex-col hover:-translate-y-2 shrink-0"
               style={{ width: cardWidth }}
             >
+              {/* Top gold accent line */}
+              <div className="h-0.5 w-full bg-linear-to-r from-saffron via-gold to-saffron opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
               {/* Image */}
-              <div className="relative h-56 overflow-hidden bg-cream">
+              <div className="relative h-52 overflow-hidden bg-cream shrink-0">
                 {service.image ? (
                   <Image
                     src={service.image}
@@ -87,39 +90,45 @@ export function ServiceSlider({ services }: { services: any[] }) {
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-5xl">
+                  <div className="w-full h-full flex items-center justify-center text-5xl bg-cream">
                     🛕
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-maroon/90 via-maroon/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                <div className="absolute inset-0 bg-linear-to-t from-maroon/85 via-maroon/20 to-transparent" />
 
-                <div className="absolute top-4 left-4">
-                  <span className="bg-white/95 backdrop-blur-sm text-maroon text-[10px] font-cinzel font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-md">
+                {/* Category badge */}
+                <div className="absolute top-3 left-3">
+                  <span className="bg-white/90 backdrop-blur-sm text-maroon text-[9px] font-cinzel font-bold px-2.5 py-1 rounded-full uppercase tracking-widest shadow-sm border border-gold/20">
                     {service.category || "Service"}
                   </span>
                 </div>
 
-                <div className="absolute bottom-4 left-4 right-4 translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="font-cinzel font-bold text-white text-[15px] leading-snug mb-1 drop-shadow-md truncate">
+                {/* Title over image */}
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3 className="font-cinzel font-bold text-white text-sm md:text-[15px] leading-snug drop-shadow-md line-clamp-2">
                     {service.name}
                   </h3>
-                  <span className="text-gold font-semibold text-xs drop-shadow-sm">
-                    From ${service.price}
-                  </span>
+                  {service.price && (
+                    <span className="inline-block mt-1 text-gold text-xs font-semibold drop-shadow-sm">
+                      From ${service.price}
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Body */}
-              <div className="flex flex-col flex-1 p-5 md:p-6 bg-white relative z-10">
-                <p className="text-foreground/70 text-[13px] leading-relaxed line-clamp-3 flex-1 mb-5 font-light">
+              <div className="flex flex-col flex-1 px-5 pt-4 pb-5">
+                <p className="text-sm leading-relaxed line-clamp-3 flex-1 mb-4">
                   {service.shortDesc || service.description}
                 </p>
-                <div className="flex items-center justify-between pt-4 border-t border-gold/15">
-                  <span className="text-[11px] font-medium text-foreground/40 uppercase tracking-wide">
-                    {service.duration}
-                  </span>
-                  <span className="text-[13px] font-semibold text-saffron group-hover:text-maroon flex items-center gap-1.5 transition-all">
-                    Book Now <ArrowRight className="w-3.5 h-3.5" />
+                <div className="flex items-center justify-between pt-3 border-t border-gold/15">
+                  {service.duration && (
+                    <span className="text-[11px] font-medium text-foreground/45 uppercase tracking-wide">
+                      {service.duration}
+                    </span>
+                  )}
+                  <span className="ml-auto text-xs font-semibold text-saffron group-hover:text-maroon flex items-center gap-1 transition-colors duration-200">
+                    Book Now <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
               </div>

@@ -3,9 +3,11 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidateTag } from "next/cache";
 
-export async function GET() {
-  const tiers = await db.donationTier
-    .findMany({ where: { active: true }, orderBy: { order: "asc" } })
+export async function GET(req: Request) {
+  const showAll = new URL(req.url).searchParams.get("all") === "true";
+  const where   = showAll ? {} : { active: true };
+  const tiers   = await db.donationTier
+    .findMany({ where, orderBy: { order: "asc" } })
     .catch(() => []);
   return NextResponse.json(tiers);
 }
