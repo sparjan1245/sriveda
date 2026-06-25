@@ -1,4 +1,12 @@
 {
   "buildCommand": "prisma generate && next build",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/receipts/booking/[id]/route.ts":  { "maxDuration": 30 },
+    "src/app/api/receipts/donation/[id]/route.ts": { "maxDuration": 30 },
+    "src/app/api/bookings/checkout/route.ts":      { "maxDuration": 30 },
+    "src/app/api/donations/checkout/route.ts":     { "maxDuration": 30 },
+    "src/app/api/admin/bookings/route.ts":         { "maxDuration": 30 },
+    "src/app/api/admin/donations/route.ts":        { "maxDuration": 30 }
+  }
 }

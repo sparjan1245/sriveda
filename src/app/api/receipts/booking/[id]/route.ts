@@ -7,6 +7,8 @@ import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import BookingReceiptDoc from "@/components/pdf/BookingReceiptDoc";
 
+export const maxDuration = 30;
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const token   = req.nextUrl.searchParams.get("token");
