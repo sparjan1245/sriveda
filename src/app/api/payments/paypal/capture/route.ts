@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { capturePayPalOrder } from "@/lib/payments/paypal";
-import { sendBookingEmails } from "@/lib/email";
+import { sendBookingEmails, sendDonationEmails } from "@/lib/email";
 
 // PayPal redirects here after user approves: ?token=ORDER_ID&bookingId=xxx[&token2=guestToken]
 export async function GET(req: NextRequest) {
@@ -53,6 +53,12 @@ export async function GET(req: NextRequest) {
 
     // ── Donation ─────────────────────────────────────────────────────────────
     if (donationId) {
+      const donRecord = await db.donation.findUnique({
+        where:  { id: donationId },
+        select: { guestToken: true },
+      });
+      const donTok = guestTok || donRecord?.guestToken || null;
+
       await db.donation.update({
         where: { id: donationId },
         data:  {
@@ -61,8 +67,12 @@ export async function GET(req: NextRequest) {
           paymentGateway: "paypal",
         },
       });
+
+      sendDonationEmails(donationId, appUrl).catch(console.error);
+
+      const tokenParam = donTok ? `&token=${donTok}` : "";
       return NextResponse.redirect(
-        `${appUrl}/donate?success=true&donationId=${donationId}`
+        `${appUrl}/donation-success?donationId=${donationId}${tokenParam}`
       );
     }
 

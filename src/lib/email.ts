@@ -396,3 +396,96 @@ export async function sendDonationEmails(
     attachments: attach,
   }).catch((e) => console.error("Email: admin donation send failed:", e));
 }
+
+export async function sendContactNotification(opts: {
+  name: string; email: string; phone?: string | null; message: string;
+}): Promise<void> {
+  const cfg = await getEmailConfig();
+  if (!cfg) { console.log("Email: Gmail not configured, skipping contact notification."); return; }
+
+  const transport = createTransport(cfg.user, cfg.pass);
+
+  // Notify admin
+  transport.sendMail({
+    from:    `"${TEMPLE.name}" <${cfg.user}>`,
+    to:      cfg.adminEmails.join(", "),
+    replyTo: opts.email,
+    subject: `📬 New Contact Message from ${opts.name}`,
+    html: `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+      body{font-family:Arial,sans-serif;color:#222;margin:0;padding:0}
+      .wrap{max-width:560px;margin:0 auto;padding:24px 18px}
+      .header{background:#7B1B1B;color:#fff;padding:16px 20px;border-radius:6px 6px 0 0}
+      .header h2{margin:0;font-size:16px}
+      .body{background:#f9f9f9;border:1px solid #ddd;border-top:none;padding:18px;border-radius:0 0 6px 6px}
+      .row{display:flex;padding:6px 0;border-bottom:1px solid #eee;font-size:13px}
+      .row:last-child{border:none} .label{width:110px;color:#777;flex-shrink:0} .value{font-weight:600}
+      .msg{background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:12px;margin-top:12px;font-size:13px;line-height:1.6;white-space:pre-wrap}
+    </style></head><body>
+    <div class="wrap">
+      <div class="header"><h2>📬 New Contact Message</h2></div>
+      <div class="body">
+        <div class="row"><span class="label">From</span><span class="value">${opts.name}</span></div>
+        <div class="row"><span class="label">Email</span><span class="value"><a href="mailto:${opts.email}" style="color:#C67C2C">${opts.email}</a></span></div>
+        ${opts.phone ? `<div class="row"><span class="label">Phone</span><span class="value">${opts.phone}</span></div>` : ""}
+        <div class="msg">${opts.message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+      </div>
+    </div></body></html>`,
+  }).catch((e) => console.error("Email: contact admin notify failed:", e));
+
+  // Auto-reply to sender
+  transport.sendMail({
+    from:    `"${TEMPLE.name}" <${cfg.user}>`,
+    to:      opts.email,
+    subject: `We received your message — ${TEMPLE.name}`,
+    html: `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${baseStyles}</style></head><body>
+    <div class="wrap">
+      <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${TEMPLE.address}</p></div>
+      <div class="body">
+        <p>Dear <strong>${opts.name}</strong>,</p>
+        <p>Namaste! Thank you for reaching out to <strong>${TEMPLE.name}</strong>. We have received your message and our team will get back to you within 1–2 business days.</p>
+        <hr class="divider">
+        <p style="font-size:13px;color:#555">If your matter is urgent, please call us directly:</p>
+        <p style="font-size:13px"><a href="tel:${TEMPLE.phones[0]}" style="color:#C67C2C">${TEMPLE.phones[0]}</a> · <a href="mailto:${TEMPLE.emails[0]}" style="color:#C67C2C">${TEMPLE.emails[0]}</a></p>
+        <p style="font-size:12px;color:#C67C2C;text-align:center;margin-top:16px">🙏 Jai Sri Veda Gayatri 🙏</p>
+      </div>
+      <div class="footer">&copy; ${YEAR} ${TEMPLE.name}</div>
+    </div></body></html>`,
+  }).catch((e) => console.error("Email: contact auto-reply failed:", e));
+}
+
+export async function sendPasswordResetEmail(opts: {
+  email: string; name?: string | null; resetUrl: string;
+}): Promise<void> {
+  const cfg = await getEmailConfig();
+  if (!cfg) { console.log(`[Password Reset] ${opts.email}: ${opts.resetUrl}`); return; }
+
+  const transport = createTransport(cfg.user, cfg.pass);
+  const name = opts.name || opts.email;
+
+  transport.sendMail({
+    from:    `"${TEMPLE.name}" <${cfg.user}>`,
+    to:      opts.email,
+    subject: `🔑 Reset Your Password — ${TEMPLE.name}`,
+    html: `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${baseStyles}
+      .reset-btn{display:inline-block;margin:20px 0 8px;padding:13px 32px;background:#7B1B1B;color:#fff;text-decoration:none;border-radius:6px;font-size:14px;font-family:Georgia,serif;letter-spacing:0.02em}
+      .notice{background:#FFF3CD;border:1px solid #FFDA6A;border-radius:6px;padding:10px 14px;font-size:12px;color:#856404;margin-top:14px}
+    </style></head><body>
+    <div class="wrap">
+      <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${TEMPLE.address}</p></div>
+      <div class="body">
+        <p>Dear <strong>${name}</strong>,</p>
+        <p>We received a request to reset the password for your account at <strong>${TEMPLE.name}</strong>.</p>
+        <p style="font-size:13px">Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
+        <div style="text-align:center">
+          <a href="${opts.resetUrl}" class="reset-btn">🔑 Reset My Password</a>
+        </div>
+        <div class="notice">If you did not request a password reset, you can safely ignore this email. Your account is secure.</div>
+        <hr class="divider">
+        <p style="font-size:12px;color:#666">If the button doesn't work, copy and paste this link into your browser:<br>
+          <a href="${opts.resetUrl}" style="color:#C67C2C;word-break:break-all">${opts.resetUrl}</a>
+        </p>
+      </div>
+      <div class="footer">&copy; ${YEAR} ${TEMPLE.name}</div>
+    </div></body></html>`,
+  }).catch((e) => console.error("Email: password reset send failed:", e));
+}

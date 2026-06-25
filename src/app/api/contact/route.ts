@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { sendContactNotification } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -15,8 +16,7 @@ export async function POST(req: Request) {
       data: { name, email, phone, message },
     });
 
-    // Optionally send email via Resend here
-    // await resend.emails.send({ ... })
+    sendContactNotification({ name, email, phone, message }).catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (error) {
