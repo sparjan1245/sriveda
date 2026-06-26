@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const svc = db.service as any;
@@ -32,6 +33,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   try {
     const service = await svc.update({ where: { id }, data: update });
+    revalidateTag("services", "max");
+    revalidatePath("/", "page");
+    revalidatePath("/services", "page");
     return NextResponse.json(service);
   } catch (err: unknown) {
     const e = err as { code?: string; message?: string };
@@ -50,6 +54,9 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   try {
     await svc.delete({ where: { id } });
+    revalidateTag("services", "max");
+    revalidatePath("/", "page");
+    revalidatePath("/services", "page");
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     const e = err as { code?: string; message?: string };

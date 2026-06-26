@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -38,6 +38,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   });
 
   revalidateTag("panchangam", "max");
+  revalidatePath("/", "page");
   return NextResponse.json(entry);
 }
 
@@ -51,5 +52,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   await db.panchangam.delete({ where: { id } });
 
   revalidateTag("panchangam", "max");
+  revalidatePath("/", "page");
   return new NextResponse(null, { status: 204 });
 }
