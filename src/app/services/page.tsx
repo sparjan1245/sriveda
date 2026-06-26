@@ -5,6 +5,8 @@ import { Clock, ArrowRight, Phone } from "lucide-react";
 import { IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Our Services",
   description: "Explore our sacred services including Archana, Abhishekam, Homams, Samskaras, and Astrological Consultations.",

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const svc = db.service as any;
@@ -42,6 +43,9 @@ export async function POST(req: Request) {
         order: count,
       },
     });
+    revalidateTag("services", "max");
+    revalidatePath("/", "page");
+    revalidatePath("/services", "page");
     return NextResponse.json(service);
   } catch (err: unknown) {
     const e = err as { code?: string; message?: string };

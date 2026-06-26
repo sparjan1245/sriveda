@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 export async function GET(req: Request) {
   const showAll = new URL(req.url).searchParams.get("all") === "true";
@@ -26,5 +26,7 @@ export async function POST(req: Request) {
     data: { name, description, amount: parseFloat(amount), recurring: !!recurring, order: order ?? count },
   });
   revalidateTag("donation-tiers", "max");
+  revalidatePath("/", "page");
+  revalidatePath("/donate", "page");
   return NextResponse.json(tier);
 }

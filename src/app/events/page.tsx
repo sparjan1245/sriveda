@@ -7,6 +7,8 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import RsvpButton from "./RsvpButton";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Events",
   description: "Upcoming temple events, festivals, and celebrations at Sri Veda Gayatri Temple.",

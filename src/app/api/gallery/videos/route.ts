@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 export async function GET() {
   const videos = await db.galleryVideo.findMany({ orderBy: { createdAt: "desc" } }).catch(() => []);
@@ -18,5 +18,6 @@ export async function POST(req: Request) {
 
   const video = await db.galleryVideo.create({ data: { url, title, thumbnail, category } });
   revalidateTag("gallery", "max");
+  revalidatePath("/", "page");
   return NextResponse.json(video, { status: 201 });
 }
