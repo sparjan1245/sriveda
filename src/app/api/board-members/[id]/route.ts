@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -12,6 +12,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const data = await req.json();
   const member = await db.boardMember.update({ where: { id }, data });
   revalidateTag("board-members", "max");
+  revalidatePath("/", "page");
   return NextResponse.json(member);
 }
 
@@ -23,5 +24,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const { id } = await params;
   await db.boardMember.delete({ where: { id } });
   revalidateTag("board-members", "max");
+  revalidatePath("/", "page");
   return NextResponse.json({ success: true });
 }

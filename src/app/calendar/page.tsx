@@ -1,24 +1,7 @@
 import { db } from "@/lib/db";
-import { unstable_cache } from "next/cache";
 import CalendarViewer from "./CalendarViewer";
 
-const getCalendarByYear = unstable_cache(
-  async (year: number) =>
-    db.calendar.findFirst({ where: { year, active: true } }).catch(() => null),
-  ["calendar-by-year"],
-  { tags: ["calendar"] }
-);
-
-const getCalendarYears = unstable_cache(
-  async () => {
-    const rows = await db.calendar
-      .findMany({ where: { active: true }, select: { year: true }, orderBy: { year: "desc" } })
-      .catch(() => []);
-    return rows.map((r) => r.year);
-  },
-  ["calendar-years"],
-  { tags: ["calendar"] }
-);
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Hindu Calendar — Sri Veda Gayatri Temple",
@@ -34,10 +17,13 @@ export default async function CalendarPage({
   const currentYear = new Date().getFullYear();
   const year = yearParam ? parseInt(yearParam) : currentYear;
 
-  const [calendar, years] = await Promise.all([
-    getCalendarByYear(year),
-    getCalendarYears(),
+  const [calendar, yearRows] = await Promise.all([
+    db.calendar.findFirst({ where: { year, active: true } }).catch(() => null),
+    db.calendar
+      .findMany({ where: { active: true }, select: { year: true }, orderBy: { year: "desc" } })
+      .catch(() => []),
   ]);
+  const years = yearRows.map((r) => r.year);
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">

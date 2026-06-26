@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 export async function GET() {
   const members = await db.boardMember.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []);
@@ -20,5 +20,6 @@ export async function POST(req: Request) {
     data: { name, title, image: image || null, bio: bio || null, order: order ?? 0, active: active ?? true },
   });
   revalidateTag("board-members", "max");
+  revalidatePath("/", "page");
   return NextResponse.json(member, { status: 201 });
 }

@@ -2,14 +2,9 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
-import { unstable_cache } from "next/cache";
 import DonateClient from "./DonateClient";
 
-const getActiveDonationTiers = unstable_cache(
-  () => db.donationTier.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
-  ["donation-tiers"],
-  { tags: ["donation-tiers"] }
-);
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Donate",
@@ -17,8 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default async function DonatePage() {
-  const dbTiers = await getActiveDonationTiers();
-  const tiers = dbTiers;
+  const tiers = await db.donationTier
+    .findMany({ where: { active: true }, orderBy: { order: "asc" } })
+    .catch(() => []);
 
   return (
     <div>

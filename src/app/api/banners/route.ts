@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 export async function GET() {
   const banners = await db.banner
@@ -24,5 +24,6 @@ export async function POST(req: Request) {
     data: { image, title, subtitle, description, ctaText, ctaLink, cta2Text, cta2Link, order: count },
   });
   revalidateTag("banners", "max");
+  revalidatePath("/", "page");
   return NextResponse.json(banner);
 }

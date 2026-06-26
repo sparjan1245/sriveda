@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -57,5 +57,6 @@ export async function POST(req: NextRequest) {
   });
 
   revalidateTag("panchangam", "max");
+  revalidatePath("/", "page");
   return NextResponse.json(entry, { status: 201 });
 }

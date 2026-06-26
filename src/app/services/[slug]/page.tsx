@@ -7,6 +7,8 @@ import { IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import BookingForm from "./BookingForm";
 
+export const dynamic = "force-dynamic";
+
 interface ServiceRow {
   id: string;
   slug: string;
