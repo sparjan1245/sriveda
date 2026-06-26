@@ -3,82 +3,34 @@ import Link from "next/link";
 import { Calendar, Heart, Star, Users, ArrowRight, CheckCircle } from "lucide-react";
 import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
-import { unstable_cache } from "next/cache";
 import HeroSlider, { type BannerSlide, type PanchangamData } from "@/components/home/HeroSlider";
 import { ServiceSlider } from "@/components/home/ServiceSlider";
 import { GallerySection } from "@/components/home/GallerySection";
 import TestimonialCarousel from "@/components/home/TestimonialCarousel";
 
-const getActiveBanners = unstable_cache(
-  () => db.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
-  ["banners"],
-  { tags: ["banners"] }
-);
-
-const getActiveServices = unstable_cache(
-  () => db.service.findMany({ where: { active: true }, orderBy: { createdAt: "desc" } }).catch(() => []),
-  ["services"],
-  { tags: ["services"] }
-);
-
-const getActiveDonationTiers = unstable_cache(
-  () => db.donationTier.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
-  ["donation-tiers"],
-  { tags: ["donation-tiers"] }
-);
-
-const getActiveTestimonials = unstable_cache(
-  () => db.testimonial.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
-  ["testimonials"],
-  { tags: ["testimonials"] }
-);
-
-const getActiveBoardMembers = unstable_cache(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  () => (db as any).boardMember.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
-  ["board-members"],
-  { tags: ["board-members"] }
-);
-
-const getGalleryImages = unstable_cache(
-  () => db.galleryImage.findMany({ orderBy: { createdAt: "desc" }, take: 8 }).catch(() => []),
-  ["gallery-images"],
-  { tags: ["gallery"] }
-);
-
-const getGalleryVideos = unstable_cache(
-  () => db.galleryVideo.findMany({ orderBy: { createdAt: "desc" }, take: 5 }).catch(() => []),
-  ["gallery-videos"],
-  { tags: ["gallery"] }
-);
-
-const getTodayPanchangam = unstable_cache(
-  async (dateStr: string): Promise<PanchangamData | null> => {
-    const [y, m, d] = dateStr.split("-").map(Number);
-    const start = new Date(Date.UTC(y, m - 1, d));
-    const end   = new Date(start.getTime() + 86400000);
-    const row = await db.panchangam
-      .findFirst({ where: { date: { gte: start, lt: end } } })
-      .catch(() => null);
-    if (!row) return null;
-    return { ...row, date: row.date.toISOString() };
-  },
-  ["panchangam-today"],
-  { tags: ["panchangam"] }
-);
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const todayStr = new Date().toISOString().split("T")[0];
-  const [dbBanners, dbServices, dbTiers, dbTestimonials, dbBoardMembers, dbGalleryImages, dbGalleryVideos, todayPanchangam] = await Promise.all([
-    getActiveBanners(),
-    getActiveServices(),
-    getActiveDonationTiers(),
-    getActiveTestimonials(),
-    getActiveBoardMembers(),
-    getGalleryImages(),
-    getGalleryVideos(),
-    getTodayPanchangam(todayStr),
+  const [y, m, d] = todayStr.split("-").map(Number);
+  const dayStart = new Date(Date.UTC(y, m - 1, d));
+  const dayEnd   = new Date(dayStart.getTime() + 86400000);
+
+  const [dbBanners, dbServices, dbTiers, dbTestimonials, dbBoardMembers, dbGalleryImages, dbGalleryVideos, panchangamRow] = await Promise.all([
+    db.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+    db.service.findMany({ where: { active: true }, orderBy: { createdAt: "desc" } }).catch(() => []),
+    db.donationTier.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+    db.testimonial.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (db as any).boardMember.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+    db.galleryImage.findMany({ orderBy: { createdAt: "desc" }, take: 8 }).catch(() => []),
+    db.galleryVideo.findMany({ orderBy: { createdAt: "desc" }, take: 5 }).catch(() => []),
+    db.panchangam.findFirst({ where: { date: { gte: dayStart, lt: dayEnd } } }).catch(() => null),
   ]);
+
+  const todayPanchangam: PanchangamData | null = panchangamRow
+    ? { ...panchangamRow, date: panchangamRow.date.toISOString() }
+    : null;
   const slides: BannerSlide[] = dbBanners;
   const services = dbServices;
   const donationTiers = dbTiers;
