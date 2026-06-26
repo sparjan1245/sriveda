@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 async function requireAdmin() {
   const session = await auth();
@@ -16,6 +16,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const update = Object.fromEntries(allowed.filter((k) => k in data).map((k) => [k, data[k]]));
   const banner = await db.banner.update({ where: { id }, data: update });
   revalidateTag("banners", "max");
+  revalidatePath("/", "page");
   return NextResponse.json(banner);
 }
 
@@ -24,5 +25,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const { id } = await params;
   await db.banner.delete({ where: { id } });
   revalidateTag("banners", "max");
+  revalidatePath("/", "page");
   return NextResponse.json({ success: true });
 }
