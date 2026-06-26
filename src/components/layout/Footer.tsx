@@ -3,7 +3,9 @@ import Image from "next/image";
 import { MapPin, Phone, Mail, Clock, ExternalLink } from "lucide-react";
 import { TEMPLE } from "@/lib/constants";
 
-export default function Footer() {
+interface ServiceLink { name: string; slug: string; }
+
+export default function Footer({ services = [] }: { services?: ServiceLink[] }) {
   return (
     <footer className="relative text-cream overflow-hidden" style={{ backgroundColor: "#1A0408" }}>
       {/* Gold top border */}
@@ -131,24 +133,29 @@ export default function Footer() {
             </h4>
             <div className="h-px bg-linear-to-r from-gold/40 to-transparent mb-4" />
             <ul className="space-y-2.5">
-              {[
-                { label: "Archana & Abhishekam",     href: "/services/archana-abhishekam" },
-                { label: "Special Pujas & Homams",   href: "/services/special-pujas-homams" },
-                { label: "Samskaras",                href: "/services/samskaras" },
-                { label: "Astrology Consultations",  href: "/services/astrology-consultations" },
-                { label: "Book a Service",           href: "/services" },
-                { label: "Sponsorship Sevas",        href: "/donate#sponsorship" },
-              ].map((link) => (
-                <li key={link.href}>
+              {services.map((s) => (
+                <li key={s.slug}>
                   <Link
-                    href={link.href}
-                    className="text-white/100 hover:text-gold text-xs transition-colors duration-150 flex items-center gap-2 group"
+                    href={`/services/${s.slug}`}
+                    className="text-white hover:text-gold text-xs transition-colors duration-150 flex items-center gap-2 group"
                   >
                     <span className="text-gold/30 group-hover:text-gold/80 transition-colors">›</span>
-                    {link.label}
+                    {s.name}
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/services" className="text-white hover:text-gold text-xs transition-colors duration-150 flex items-center gap-2 group">
+                  <span className="text-gold/30 group-hover:text-gold/80 transition-colors">›</span>
+                  Book a Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/donate#sponsorship" className="text-white hover:text-gold text-xs transition-colors duration-150 flex items-center gap-2 group">
+                  <span className="text-gold/30 group-hover:text-gold/80 transition-colors">›</span>
+                  Sponsorship Sevas
+                </Link>
+              </li>
             </ul>
           </div>
 
