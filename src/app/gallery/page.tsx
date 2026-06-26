@@ -4,6 +4,8 @@ import { IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import GalleryClient from "./GalleryClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Gallery",
   description: "Photo gallery of Sri Veda Gayatri Temple — rituals, festivals, and community events.",

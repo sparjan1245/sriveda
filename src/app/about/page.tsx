@@ -6,6 +6,8 @@ import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { BoardCarousel, type BoardMemberItem } from "@/components/about/BoardCarousel";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "About Us",
   description: "Learn about Sri Veda Gayatri Temple — our mission, history, and board of directors.",
