@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import QuickContact from "@/components/layout/QuickContact";
+import { db } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: {
@@ -37,18 +38,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const services = await (db as any).service
+    .findMany({ where: { active: true }, orderBy: { order: "asc" }, select: { name: true, slug: true } })
+    .catch(() => []) as { name: string; slug: string }[];
+
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>
         <SessionProvider>
-          <Header />
+          <Header services={services} />
           <main className="flex-1">{children}</main>
-          <Footer />
+          <Footer services={services} />
           <QuickContact />
         </SessionProvider>
       </body>

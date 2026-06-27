@@ -51,6 +51,8 @@ export default function HeroSlider({ slides, panchangam }: Props) {
     return () => clearInterval(timer);
   }, [total]);
 
+  if (total === 0) return null;
+
   const goToPrevious = () => setCurrentIndex((prev) => (prev === 0 ? total - 1 : prev - 1));
   const goToNext    = () => setCurrentIndex((prev) => (prev + 1) % total);
 

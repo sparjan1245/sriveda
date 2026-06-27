@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, RefreshCw, Lock, ShieldCheck } from "lucide-react";
+import { Loader2, RefreshCw, Lock, ShieldCheck, CheckCircle, XCircle, X } from "lucide-react";
 import { PaymentGateway } from "@/components/payment/PaymentGateway";
 
 interface Tier {
@@ -25,15 +25,18 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
   const [gateway, setGateway]             = useState("stripe");
   const [loading, setLoading]             = useState(false);
   const [error, setError]                 = useState("");
-  const [squareWaiting, setSquareWaiting] = useState(false);
+  const [squareWaiting, setSquareWaiting]       = useState(false);
+  const [squareResult, setSquareResult]         = useState<null | "success" | "cancelled">(null);
+  const [squareSuccessUrl, setSquareSuccessUrl] = useState<string | null>(null);
 
+  const prefilledRef = useRef(false);
   useEffect(() => {
-    if (session?.user) {
-      const parts = (session.user?.name || "").split(" ");
-      setFirstName((prev) => prev || parts[0] || "");
-      setLastName((prev)  => prev || parts.slice(1).join(" ") || "");
-      setEmail((prev)     => prev || session.user?.email || "");
-    }
+    if (!session?.user || prefilledRef.current) return;
+    prefilledRef.current = true;
+    const parts = (session.user?.name || "").split(" ");
+    setFirstName((prev) => prev || parts[0] || "");
+    setLastName((prev)  => prev || parts.slice(1).join(" ") || "");
+    setEmail((prev)     => prev || session.user?.email || "");
   }, [session]);
 
   const selectedTier = tiers.find((t) => t.id === selected);
@@ -72,14 +75,22 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
         const popup = window.open(data.url, "square-donation", "width=620,height=720,scrollbars=yes,resizable=yes");
         if (!popup) { window.location.href = data.url; return; }
         setSquareWaiting(true);
+        setSquareResult(null);
+        setSquareSuccessUrl(data.squareSuccessUrl || null);
         const interval = setInterval(() => {
           try {
-            if (popup.closed) { clearInterval(interval); setSquareWaiting(false); return; }
+            if (popup.closed) {
+              clearInterval(interval);
+              setSquareResult("cancelled");
+              setTimeout(() => { setSquareWaiting(false); setSquareResult(null); }, 2500);
+              return;
+            }
             const href = popup.location.href;
             if (href && href.includes("/donation-success")) {
               clearInterval(interval);
               popup.close();
-              window.location.href = href;
+              setSquareResult("success");
+              setTimeout(() => { window.location.href = href; }, 1800);
             }
           } catch { /* cross-origin — Square's domain */ }
         }, 600);
@@ -299,22 +310,65 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
         </div>
       </div>
 
-      {/* Square waiting overlay */}
+      {/* Square payment overlay */}
       {squareWaiting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
-            <ShieldCheck className="w-10 h-10 text-saffron mx-auto mb-4" />
-            <p className="font-cinzel font-semibold text-maroon text-lg mb-2">Complete Payment</p>
-            <p className="text-foreground/60 text-sm mb-6">
-              Finish your donation in the Square window. This page will update automatically once payment is confirmed.
-            </p>
-            <Loader2 className="w-6 h-6 animate-spin text-saffron mx-auto mb-4" />
-            <button
-              onClick={() => setSquareWaiting(false)}
-              className="text-xs text-foreground/40 hover:text-maroon transition-colors mt-2"
-            >
-              Cancel
-            </button>
+
+            {squareResult === "success" ? (
+              <>
+                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                  <CheckCircle className="w-7 h-7 text-green-600" />
+                </div>
+                <p className="font-cinzel font-bold text-maroon text-lg mb-2">Donation Received!</p>
+                <p className="text-foreground/60 text-sm mb-6 leading-relaxed">
+                  Thank you for your generous contribution. Redirecting you now…
+                </p>
+                <div className="flex items-center justify-center gap-2 text-green-600">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm font-medium">Redirecting…</span>
+                </div>
+              </>
+            ) : squareResult === "cancelled" ? (
+              <>
+                <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                  <XCircle className="w-7 h-7 text-red-500" />
+                </div>
+                <p className="font-cinzel font-bold text-maroon text-lg mb-2">Payment Cancelled</p>
+                <p className="text-foreground/60 text-sm leading-relaxed">
+                  You closed the payment window. You can try again when ready.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-14 h-14 bg-saffron/10 rounded-full flex items-center justify-center mx-auto mb-5">
+                  <ShieldCheck className="w-7 h-7 text-saffron" />
+                </div>
+                <p className="font-cinzel font-semibold text-maroon text-lg mb-2">Complete Payment</p>
+                <p className="text-foreground/60 text-sm mb-6 leading-relaxed">
+                  Finish your donation in the Square window. This page will update automatically once payment is confirmed.
+                </p>
+                <div className="flex items-center justify-center gap-2 text-saffron mb-4">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm font-medium">Waiting for payment…</span>
+                </div>
+                {squareSuccessUrl && (
+                  <button
+                    onClick={() => { window.location.href = squareSuccessUrl; }}
+                    className="w-full mb-3 py-2 px-4 rounded-lg bg-saffron/10 hover:bg-saffron/20 text-saffron text-sm font-medium transition-colors"
+                  >
+                    I completed my payment ↗
+                  </button>
+                )}
+                <button
+                  onClick={() => setSquareWaiting(false)}
+                  className="flex items-center gap-2 mx-auto text-xs text-foreground/40 hover:text-maroon transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" /> Cancel
+                </button>
+              </>
+            )}
+
           </div>
         </div>
       )}
