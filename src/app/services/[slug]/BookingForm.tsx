@@ -17,8 +17,9 @@ export default function BookingForm({ service }: { service: Service }) {
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState("");
   const [gateway, setGateway]         = useState("stripe");
-  const [squareWaiting, setSquareWaiting] = useState(false);
-  const [squareResult, setSquareResult]   = useState<null | "success" | "cancelled">(null);
+  const [squareWaiting, setSquareWaiting]     = useState(false);
+  const [squareResult, setSquareResult]       = useState<null | "success" | "cancelled">(null);
+  const [squareSuccessUrl, setSquareSuccessUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     firstName: "",
     lastName:  "",
@@ -88,6 +89,7 @@ export default function BookingForm({ service }: { service: Service }) {
         }
         setSquareWaiting(true);
         setSquareResult(null);
+        setSquareSuccessUrl(data.squareSuccessUrl || null);
 
         // Poll popup until Square redirects back to our success URL (same-origin)
         const interval = setInterval(() => {
@@ -240,10 +242,18 @@ export default function BookingForm({ service }: { service: Service }) {
                 <p className="text-foreground/60 text-sm mb-6 leading-relaxed">
                   A Square payment window has opened. Complete your payment there — this page will update automatically once done.
                 </p>
-                <div className="flex items-center justify-center gap-2 text-saffron mb-6">
+                <div className="flex items-center justify-center gap-2 text-saffron mb-4">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm font-medium">Waiting for payment…</span>
                 </div>
+                {squareSuccessUrl && (
+                  <button
+                    onClick={() => { window.location.href = squareSuccessUrl; }}
+                    className="w-full mb-3 py-2 px-4 rounded-lg bg-saffron/10 hover:bg-saffron/20 text-saffron text-sm font-medium transition-colors"
+                  >
+                    I completed my payment ↗
+                  </button>
+                )}
                 <button
                   onClick={() => setSquareWaiting(false)}
                   className="flex items-center gap-2 mx-auto text-xs text-foreground/40 hover:text-maroon transition-colors"

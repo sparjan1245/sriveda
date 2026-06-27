@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Loader2, RefreshCw, Lock, ShieldCheck, CheckCircle, XCircle, X } from "lucide-react";
 import { PaymentGateway } from "@/components/payment/PaymentGateway";
@@ -25,16 +25,18 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
   const [gateway, setGateway]             = useState("stripe");
   const [loading, setLoading]             = useState(false);
   const [error, setError]                 = useState("");
-  const [squareWaiting, setSquareWaiting] = useState(false);
-  const [squareResult, setSquareResult]   = useState<null | "success" | "cancelled">(null);
+  const [squareWaiting, setSquareWaiting]       = useState(false);
+  const [squareResult, setSquareResult]         = useState<null | "success" | "cancelled">(null);
+  const [squareSuccessUrl, setSquareSuccessUrl] = useState<string | null>(null);
 
+  const prefilledRef = useRef(false);
   useEffect(() => {
-    if (session?.user) {
-      const parts = (session.user?.name || "").split(" ");
-      setFirstName((prev) => prev || parts[0] || "");
-      setLastName((prev)  => prev || parts.slice(1).join(" ") || "");
-      setEmail((prev)     => prev || session.user?.email || "");
-    }
+    if (!session?.user || prefilledRef.current) return;
+    prefilledRef.current = true;
+    const parts = (session.user?.name || "").split(" ");
+    setFirstName((prev) => prev || parts[0] || "");
+    setLastName((prev)  => prev || parts.slice(1).join(" ") || "");
+    setEmail((prev)     => prev || session.user?.email || "");
   }, [session]);
 
   const selectedTier = tiers.find((t) => t.id === selected);
@@ -74,6 +76,7 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
         if (!popup) { window.location.href = data.url; return; }
         setSquareWaiting(true);
         setSquareResult(null);
+        setSquareSuccessUrl(data.squareSuccessUrl || null);
         const interval = setInterval(() => {
           try {
             if (popup.closed) {
@@ -345,10 +348,18 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
                 <p className="text-foreground/60 text-sm mb-6 leading-relaxed">
                   Finish your donation in the Square window. This page will update automatically once payment is confirmed.
                 </p>
-                <div className="flex items-center justify-center gap-2 text-saffron mb-6">
+                <div className="flex items-center justify-center gap-2 text-saffron mb-4">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm font-medium">Waiting for payment…</span>
                 </div>
+                {squareSuccessUrl && (
+                  <button
+                    onClick={() => { window.location.href = squareSuccessUrl; }}
+                    className="w-full mb-3 py-2 px-4 rounded-lg bg-saffron/10 hover:bg-saffron/20 text-saffron text-sm font-medium transition-colors"
+                  >
+                    I completed my payment ↗
+                  </button>
+                )}
                 <button
                   onClick={() => setSquareWaiting(false)}
                   className="flex items-center gap-2 mx-auto text-xs text-foreground/40 hover:text-maroon transition-colors"
