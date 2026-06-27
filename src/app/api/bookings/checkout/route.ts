@@ -115,7 +115,7 @@ export async function POST(req: Request) {
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await db.booking.update({ where: { id: booking.id }, data: { squareOrderId: orderId } as any });
-        return NextResponse.json({ url: checkoutUrl });
+        return NextResponse.json({ url: checkoutUrl, squareSuccessUrl: `${successBase}&gateway=square` });
       } catch (squareErr) {
         await db.booking.delete({ where: { id: booking.id } }).catch(() => {});
         const msg = squareErr instanceof Error ? squareErr.message : "Square checkout failed";

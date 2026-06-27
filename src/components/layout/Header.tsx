@@ -11,27 +11,30 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  {
-    label: "Services",
-    href: "/services",
-    children: [
-      { label: "Archana & Abhishekam", href: "/services/archana-abhishekam" },
-      { label: "Special Pujas & Homams", href: "/services/special-pujas-homams" },
-      { label: "Samskaras", href: "/services/samskaras" },
-      { label: "Astrology Consultations", href: "/services/astrology-consultations" },
-    ],
-  },
-  { label: "Events", href: "/events" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Calendar", href: "/calendar" },
-  { label: "Donate", href: "/donate" },
-  { label: "Contact", href: "/contact" },
-];
+interface ServiceLink { name: string; slug: string; }
 
-export default function Header() {
+function buildNavLinks(services: ServiceLink[]) {
+  return [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    {
+      label: "Services",
+      href: "/services",
+      children: services.map((s) => ({
+        label: s.name,
+        href: `/services/${s.slug}`,
+      })),
+    },
+    { label: "Events", href: "/events" },
+    { label: "Gallery", href: "/gallery" },
+    { label: "Calendar", href: "/calendar" },
+    { label: "Donate", href: "/donate" },
+    { label: "Contact", href: "/contact" },
+  ];
+}
+
+export default function Header({ services = [] }: { services?: ServiceLink[] }) {
+  const navLinks = buildNavLinks(services);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const pathname = usePathname();
