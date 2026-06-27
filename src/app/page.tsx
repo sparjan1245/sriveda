@@ -44,6 +44,57 @@ export default async function HomePage() {
 
       
 
+      {/* ─────────────────── FEATURED EVENT FLYER ─────────────────── */}
+      <section className="relative py-10 md:py-14 px-4 overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#FDF3E3 50%,#FFF8F0 100%)" }}>
+        <div className="absolute inset-0 pattern-bg opacity-30 pointer-events-none" />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(212,160,23,0.10), transparent 70%)" }} />
+
+        <div className="relative max-w-5xl mx-auto">
+          {/* Section header */}
+          <div className="text-center mb-8">
+            <span className="badge-gold mb-4 inline-flex animate-pulse">Upcoming Event</span>
+            <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon mb-2 leading-tight">
+              Moola Vigraha Pratishtha Mahotsavam
+            </h2>
+            <div className="flex items-center justify-center gap-4 mb-3">
+              <span className="block h-px w-16 md:w-28 bg-gradient-to-r from-transparent to-gold/60" />
+              <span className="text-gold text-2xl">🪷</span>
+              <span className="block h-px w-16 md:w-28 bg-gradient-to-l from-transparent to-gold/60" />
+            </div>
+            <p className="text-base text-foreground/70 max-w-xl mx-auto leading-relaxed">
+              A grand 3-day celebration — July 4 to 6, 2026 at Sri Veda Gayatri Temple, Manteca, CA.
+              All devotees are cordially invited.
+            </p>
+          </div>
+
+          {/* Flyer image card */}
+          <div className="flex justify-center">
+            <div className="relative rounded-3xl overflow-hidden gold-border shadow-2xl max-w-lg w-full group">
+              <div className="h-1 bg-gradient-to-r from-saffron via-gold to-saffron" />
+              <Image
+                src="/flayer.jpeg"
+                alt="Moola Vigraha Pratishtha Mahotsavam — July 4–6 2026"
+                width={600}
+                height={850}
+                className="w-full h-auto object-contain block"
+                priority
+              />
+              <div className="h-1 bg-gradient-to-r from-saffron via-gold to-saffron" />
+            </div>
+          </div>
+
+          {/* CTA row */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+            <Link href="/events" className="btn-primary px-10 py-3 shadow-lg">
+              View All Events
+            </Link>
+            <Link href="/contact" className="btn-secondary px-10 py-3">
+              Contact Us
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ─────────────────────── PURPOSE + STATS ──────────────────── */}
       <section className="relative py-8 md:py-6 px-4 overflow-hidden" style={{ background: "linear-gradient(160deg, #FFF8F0 0%, #F5EBD8 50%, #FFF8F0 100%)" }}>
         {/* Decorative OM watermark */}
