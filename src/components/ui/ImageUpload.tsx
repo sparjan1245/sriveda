@@ -67,7 +67,7 @@ export default function ImageUpload({
   return (
     <div className={className}>
       <label className="block text-sm font-medium text-maroon/80 mb-1">{label}</label>
-      <div className={`relative ${aspectClass} w-full rounded-lg overflow-hidden border-2 border-dashed border-gold/40 bg-cream/60 flex items-center justify-center group`}>
+      <div  style={{height:"100px"}} className={`relative ${aspectClass} w-full rounded-lg overflow-hidden border-2 border-dashed border-gold/40 bg-cream/60 flex items-center justify-center group`}>
         {preview ? (
           <>
             <Image src={preview} alt={label} fill className="object-cover" unoptimized={preview.startsWith("blob:")} />

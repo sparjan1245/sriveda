@@ -80,7 +80,7 @@ export default async function EventsPage() {
                       </div>
                     )}
                   </div>
-                  <p className="text-white/70 text-sm font-light leading-relaxed mb-4 line-clamp-2">
+                  <p className="text-white/90 text-sm leading-relaxed mb-4">
                     {featuredEvent.description}
                   </p>
                   <div className="w-48">
@@ -120,7 +120,7 @@ export default async function EventsPage() {
           {otherEvents.length === 0 && !featuredEvent ? (
             <div className="text-center py-16 bg-white rounded-2xl gold-border">
               <div className="text-4xl mb-3">📅</div>
-              <p className="text-foreground/55 text-sm font-light">No upcoming events at the moment. Check back soon.</p>
+              <p className="text-foreground text-sm">No upcoming events at the moment. Check back soon.</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -164,19 +164,19 @@ export default async function EventsPage() {
                         {event.title}
                       </h3>
                       <div className="space-y-1 mb-3">
-                        <div className="flex items-center gap-2 text-xs text-foreground/55 font-light">
+                        <div className="flex items-center gap-2 text-xs text-foreground">
                           <Clock className="w-3 h-3 text-gold shrink-0" />
                           {d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                           {" · "}{d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
                         </div>
                         {event.location && (
-                          <div className="flex items-center gap-2 text-xs text-foreground/55 font-light">
+                          <div className="flex items-center gap-2 text-xs text-foreground">
                             <MapPin className="w-3 h-3 text-gold shrink-0" />
                             {event.location}
                           </div>
                         )}
                       </div>
-                      <p className="text-foreground/60 text-xs font-light leading-relaxed flex-1 mb-4 line-clamp-2">
+                      <p className="text-foreground text-xs leading-relaxed flex-1 mb-4">
                         {event.description}
                       </p>
                       <RsvpButton eventId={event.id} userId={userId} />
@@ -222,7 +222,7 @@ export default async function EventsPage() {
                 <div className="font-cinzel font-bold text-maroon text-xs w-20 shrink-0 pt-0.5 uppercase tracking-wide">{row.month}</div>
                 <div className="flex flex-wrap gap-1.5">
                   {row.festivals.map((f) => (
-                    <span key={f} className="bg-white text-foreground/65 text-[11px] font-light px-2.5 py-1 rounded-full border border-gold/20 hover:border-gold/50 transition-colors">
+                    <span key={f} className="bg-white text-foreground text-[11px] px-2.5 py-1 rounded-full border border-gold/20 hover:border-gold/50 transition-colors">
                       {f}
                     </span>
                   ))}
@@ -247,7 +247,7 @@ export default async function EventsPage() {
             <span className="text-gold/80 tracking-widest">✦</span>
             <span className="block h-px w-12 bg-linear-to-l from-transparent to-gold/50" />
           </div>
-          <p className="text-white/70 text-sm font-light mb-6 max-w-md mx-auto leading-relaxed">
+          <p className="text-white/90 text-sm mb-6 max-w-md mx-auto leading-relaxed">
             Register as a devotee to receive event reminders and festival notifications directly to your inbox.
           </p>
           <Link href="/auth/register" className="btn-primary px-10 py-2.5">

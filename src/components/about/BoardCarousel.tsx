@@ -101,7 +101,7 @@ export function BoardCarousel({ members }: { members: BoardMemberItem[] }) {
                   <p className="text-saffron text-[11px] font-medium tracking-wide mb-2">
                     {member.title}
                   </p>
-                  <p className="text-foreground/50 text-[11px] font-light leading-relaxed">
+                  <p className="text-foreground text-[11px] leading-relaxed">
                     {member.bio || "Dedicated to serving the spiritual and cultural needs of our community."}
                   </p>
                 </div>

@@ -124,21 +124,21 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 <div className="bg-cream rounded-xl p-4 gold-border text-center">
                   <Tag className="w-4 h-4 text-saffron mx-auto mb-1.5" />
                   <div className="font-cinzel font-bold text-saffron text-xl leading-none">${service.price}</div>
-                  <div className="text-[11px] text-foreground/50 mt-1 uppercase tracking-wide font-light">Price</div>
+                  <div className="text-[11px] text-foreground/70 mt-1 uppercase tracking-wide">Price</div>
                 </div>
                 <div className="bg-cream rounded-xl p-4 gold-border text-center">
                   <Clock className="w-4 h-4 text-saffron mx-auto mb-1.5" />
                   <div className="font-cinzel font-bold text-maroon text-sm leading-tight">
                     {service.duration || "Flexible"}
                   </div>
-                  <div className="text-[11px] text-foreground/50 mt-1 uppercase tracking-wide font-light">Duration</div>
+                  <div className="text-[11px] text-foreground/70 mt-1 uppercase tracking-wide">Duration</div>
                 </div>
                 <div className="bg-cream rounded-xl p-4 gold-border text-center">
                   <Star className="w-4 h-4 text-saffron mx-auto mb-1.5" />
                   <div className="font-cinzel font-bold text-maroon text-xs leading-tight line-clamp-1">
                     {service.category || "Sacred Service"}
                   </div>
-                  <div className="text-[11px] text-foreground/50 mt-1 uppercase tracking-wide font-light">Category</div>
+                  <div className="text-[11px] text-foreground/70 mt-1 uppercase tracking-wide">Category</div>
                 </div>
               </div>
 
@@ -153,11 +153,11 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                   <span className="text-gold">🪷</span>
                 </div>
                 {service.shortDesc && (
-                  <p className="text-foreground/80 text-sm font-medium leading-relaxed mb-3 pb-3 border-b border-gold/15">
+                  <p className="text-foreground text-sm font-semibold leading-relaxed mb-3 pb-3 border-b border-gold/15">
                     {service.shortDesc}
                   </p>
                 )}
-                <p className="text-foreground/65 text-sm font-light leading-relaxed">
+                <p className="text-foreground text-base leading-relaxed">
                   {service.description || service.shortDesc || ""}
                 </p>
               </div>
@@ -168,11 +168,11 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-4 leading-tight drop-shadow-sm">
                   What to Expect
                 </h2>
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {includes.map((item) => (
-                    <div key={item.text} className="flex items-start gap-3 bg-white/70 rounded-xl p-3">
-                      <span className="text-base shrink-0">{item.icon}</span>
-                      <span className="text-foreground/70 text-xs font-light leading-relaxed">{item.text}</span>
+                    <div key={item.text} className="flex flex-col items-center text-center gap-2 bg-white/70 rounded-xl p-3">
+                      <span className="text-2xl shrink-0">{item.icon}</span>
+                      <span className="text-foreground text-xs leading-snug">{item.text}</span>
                     </div>
                   ))}
                 </div>
@@ -184,9 +184,9 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 <div className="p-5">
                   <span className="badge-gold mb-3 inline-flex text-xs px-3 py-1">Reserve Your Spot</span>
                   <h3 className="font-cinzel font-bold text-maroon text-lg mb-1 leading-tight">Book This Service</h3>
-                  <p className="text-foreground/55 text-xs font-light mb-4">Fill in the details and proceed to payment.</p>
+                  <p className="text-foreground text-sm mb-4">Fill in the details and proceed to payment.</p>
                   <div className="flex items-center justify-between bg-cream rounded-xl px-4 py-3 mb-4 gold-border">
-                    <span className="text-xs text-foreground/50 uppercase tracking-wide">Service Fee</span>
+                    <span className="text-xs text-foreground/70 uppercase tracking-wide">Service Fee</span>
                     <span className="font-cinzel font-bold text-saffron text-xl">${service.price}</span>
                   </div>
                   <BookingForm service={{ id: service.id, slug: service.slug, name: service.name, price: service.price }} />
@@ -221,19 +221,19 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                   <h3 className="font-cinzel font-bold text-maroon text-lg mb-1 leading-tight drop-shadow-sm">
                     Book This Service
                   </h3>
-                  <p className="text-foreground/55 text-xs font-light mb-4">
+                  <p className="text-foreground text-sm mb-4">
                     Fill in the details below and proceed to secure payment.
                   </p>
 
                   {/* Price + duration summary */}
                   <div className="grid grid-cols-2 gap-2 mb-4">
                     <div className="bg-cream rounded-xl px-3 py-2.5 gold-border text-center">
-                      <p className="text-[10px] text-foreground/40 uppercase tracking-wide leading-none mb-1">From</p>
+                      <p className="text-[10px] text-foreground/60 uppercase tracking-wide leading-none mb-1">From</p>
                       <p className="font-cinzel font-bold text-saffron text-lg leading-none">${service.price}</p>
                     </div>
                     {service.duration && (
                       <div className="bg-cream rounded-xl px-3 py-2.5 gold-border text-center">
-                        <p className="text-[10px] text-foreground/40 uppercase tracking-wide leading-none mb-1">Duration</p>
+                        <p className="text-[10px] text-foreground/60 uppercase tracking-wide leading-none mb-1">Duration</p>
                         <p className="font-cinzel font-bold text-maroon text-xs leading-tight">{service.duration}</p>
                       </div>
                     )}
@@ -295,12 +295,12 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                     <div className="flex items-center justify-between mb-3">
                       <span className="font-cinzel font-bold text-saffron text-base">${r.price}</span>
                       {r.duration && (
-                        <span className="flex items-center gap-1 text-foreground/45 text-[11px]">
+                        <span className="flex items-center gap-1 text-foreground/70 text-[11px]">
                           <Clock className="w-3 h-3" /> {r.duration}
                         </span>
                       )}
                     </div>
-                    <p className="text-foreground/55 text-xs font-light leading-relaxed line-clamp-2 flex-1 mb-3">
+                    <p className="text-foreground text-sm leading-relaxed line-clamp-2 flex-1 mb-3">
                       {r.shortDesc || r.description}
                     </p>
                     <div className="text-xs text-saffron font-medium group-hover:text-maroon transition-colors flex items-center gap-1">

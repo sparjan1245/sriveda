@@ -81,21 +81,38 @@ export default async function AboutPage() {
                 <span className="block h-px w-16 bg-linear-to-r from-transparent to-gold/60" />
                 <span className="text-gold text-xl drop-shadow-md">🪷</span>
               </div>
-              <p className="text-foreground/70 text-sm font-light leading-relaxed mb-3">
-                Sri Veda Gayatri Temple was founded in {TEMPLE.founded} with a singular vision: to create a
-                spiritual home for the Hindu community in California&apos;s Central Valley. Located in
-                Manteca, CA, our temple serves as a beacon of spirituality, culture, and community.
+              <p className="text-foreground text-base leading-relaxed mb-3">
+                Sri Veda Gayatri Temple was founded in {TEMPLE.founded} with a singular vision to establish
+                a sacred spiritual home that preserves and promotes the timeless values of Sanatana Dharma
+                while serving the growing Hindu community in California&apos;s Central Valley. Located at{" "}
+                <strong className="text-maroon font-semibold">702 W Yosemite Ave, Manteca, CA</strong>, the
+                temple stands as a beacon of devotion, spirituality, culture, and community, welcoming people
+                of all ages to experience the richness of Vedic traditions.
               </p>
-              <p className="text-foreground/70 text-sm font-light leading-relaxed mb-3">
-                As a <strong className="text-maroon font-semibold">California Registered 501(c)(3) Non-Profit</strong> (Tax ID: {TEMPLE.taxId}),
-                we are committed to transparency, service, and the highest standards of Vedic tradition.
-                All donations are fully tax-deductible under U.S. law.
+              <p className="text-foreground text-base leading-relaxed mb-3">
+                As a <strong className="text-maroon font-semibold">California Registered 501(c)(3) Non-Profit
+                Organization</strong> (Tax ID: {TEMPLE.taxId}), Sri Veda Gayatri Temple is dedicated to serving
+                the community with integrity, transparency, and the highest standards of Vedic worship and
+                spiritual practices. Every donation made to the temple is fully tax-deductible under U.S. law
+                and directly supports our religious, educational, and charitable initiatives.
               </p>
-              <p className="text-foreground/70 text-sm font-light leading-relaxed mb-6">
-                Our offerings include daily pujas, sacred homams, life-cycle samskaras, Vedic astrology,
-                cultural programs in classical music, Kuchipudi dance, Sanskrit, and yoga — along with
-                weekly Annadaanam (food offering) and vibrant community events.
+              <p className="text-foreground text-base leading-relaxed mb-5">
+                Our temple offers a wide range of spiritual and cultural services, including daily pujas,
+                sacred homams, life cycle samskaras, Vedic astrology consultations, and religious observances.
+                The temple organizes festivals, community gatherings, and charitable outreach programs that
+                bring families together in devotion and service.
               </p>
+
+              {/* Quote */}
+              <blockquote className="relative bg-cream rounded-2xl p-4 gold-border shadow-sm mb-6">
+                <span className="absolute -top-3 left-4 text-5xl text-gold/15 font-serif leading-none select-none">&ldquo;</span>
+                <p className="font-cinzel text-maroon text-sm italic leading-relaxed relative z-10">
+                  Lokah Samastah Sukhino Bhavantu
+                </p>
+                <p className="text-foreground/80 text-xs mt-1">May all beings, everywhere, be happy and live in peace.</p>
+                <div className="divider-gold mt-3" />
+                <p className="text-foreground/70 text-[11px] mt-2 font-semibold tracking-wide">— VGCC Team</p>
+              </blockquote>
 
               {/* Live stats row */}
               <div className="grid grid-cols-4 gap-2">
@@ -103,7 +120,7 @@ export default async function AboutPage() {
                   <div key={s.label} className="bg-cream rounded-xl py-3 px-2 gold-border text-center">
                     <div className="text-saffron flex justify-center mb-1">{s.icon}</div>
                     <div className="font-cinzel font-bold text-sm md:text-base text-maroon leading-none mb-1">{s.value}</div>
-                    <div className="text-foreground/50 text-[10px] uppercase tracking-wide font-medium leading-tight">{s.label}</div>
+                    <div className="text-foreground/80 text-[10px] uppercase tracking-wide font-medium leading-tight">{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -144,7 +161,7 @@ export default async function AboutPage() {
                 <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
                 <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
               </div>
-              <p className="text-foreground/60 text-sm font-light max-w-xl mx-auto">
+              <p className="text-foreground text-sm max-w-xl mx-auto">
                 Our dedicated board guides the temple with wisdom, devotion, and an unwavering
                 commitment to serving our community.
               </p>
@@ -188,11 +205,11 @@ export default async function AboutPage() {
                 <div className="divider-gold mb-2 w-8 mx-auto" />
                 {item.href ? (
                   <a href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer"
-                    className="text-foreground/60 text-xs font-light leading-relaxed hover:text-saffron transition-colors">
+                    className="text-foreground text-xs leading-relaxed hover:text-saffron transition-colors">
                     {item.content}
                   </a>
                 ) : (
-                  <p className="text-foreground/60 text-xs font-light leading-relaxed">{item.content}</p>
+                  <p className="text-foreground text-xs leading-relaxed">{item.content}</p>
                 )}
               </div>
             ))}
@@ -204,7 +221,7 @@ export default async function AboutPage() {
             <div className="flex flex-col sm:flex-row gap-3">
               {TEMPLE.emails.map((email) => (
                 <a key={email} href={`mailto:${email}`}
-                  className="text-xs font-light text-foreground/60 hover:text-saffron transition-colors">
+                  className="text-xs text-foreground hover:text-saffron transition-colors">
                   {email}
                 </a>
               ))}
@@ -230,7 +247,7 @@ export default async function AboutPage() {
             <span className="text-gold/80 text-sm tracking-widest">✦</span>
             <span className="block h-px w-12 md:w-20 bg-linear-to-l from-transparent to-gold/50" />
           </div>
-          <p className="text-white/70 text-sm font-light mb-6 max-w-xl mx-auto leading-relaxed">
+          <p className="text-white/90 text-sm mb-6 max-w-xl mx-auto leading-relaxed">
             Register as a devotee to access all temple services, stay updated on events, and be part
             of our growing community.
           </p>
