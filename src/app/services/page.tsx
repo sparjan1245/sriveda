@@ -56,7 +56,7 @@ export default async function ServicesPage() {
 
       {/* ── Intro strip ── */}
       <div className="bg-linear-to-r from-saffron/10 via-gold/10 to-saffron/10 border-y border-gold/20 py-4 px-4">
-        <p className="text-center text-foreground/70 text-xs md:text-sm max-w-2xl mx-auto font-cinzel tracking-wide font-light">
+        <p className="text-center text-foreground text-xs md:text-sm max-w-2xl mx-auto font-cinzel tracking-wide">
           🙏 &nbsp; Each service is a sacred opportunity to connect with the Divine and seek blessings
           for you and your loved ones &nbsp; 🙏
         </p>
@@ -67,7 +67,7 @@ export default async function ServicesPage() {
         <div className="max-w-7xl mx-auto">
           {services.length === 0 ? (
             <div className="text-center py-16 bg-cream rounded-2xl gold-border">
-              <p className="text-foreground/40 font-cinzel text-sm">
+              <p className="text-foreground/70 font-cinzel text-sm">
                 No services available at this time. Please check back soon.
               </p>
             </div>
@@ -111,7 +111,7 @@ export default async function ServicesPage() {
                     {/* Price + Duration row */}
                     <div className="flex items-center justify-between mb-3 pb-3 border-b border-gold/20">
                       <div>
-                        <p className="text-[10px] text-foreground/40 uppercase tracking-wide leading-none mb-1">
+                        <p className="text-[10px] text-foreground/60 uppercase tracking-wide leading-none mb-1">
                           Starting from
                         </p>
                         <p className="font-cinzel font-bold text-saffron text-xl leading-none">
@@ -119,7 +119,7 @@ export default async function ServicesPage() {
                         </p>
                       </div>
                       {service.duration && (
-                        <div className="flex items-center gap-1.5 bg-cream rounded-lg px-3 py-2 text-foreground/55 text-xs">
+                        <div className="flex items-center gap-1.5 bg-cream rounded-lg px-3 py-2 text-foreground text-xs">
                           <Clock className="w-3 h-3 text-gold shrink-0" />
                           {service.duration}
                         </div>
@@ -127,7 +127,7 @@ export default async function ServicesPage() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-foreground/60 text-xs font-light leading-relaxed flex-1 mb-4 line-clamp-2">
+                    <p className="text-foreground text-xs leading-relaxed flex-1 mb-4 line-clamp-2">
                       {service.shortDesc || service.description}
                     </p>
 
@@ -140,7 +140,7 @@ export default async function ServicesPage() {
                     </Link>
                     <Link
                       href={`/services/${service.slug}`}
-                      className="text-center text-[11px] text-foreground/35 hover:text-saffron transition-colors mt-2"
+                      className="text-center text-[11px] text-foreground/60 hover:text-saffron transition-colors mt-2"
                     >
                       View Details →
                     </Link>
@@ -174,7 +174,7 @@ export default async function ServicesPage() {
               <div key={item.label} className="bg-white rounded-2xl p-4 gold-border text-center shadow-sm">
                 <div className="text-2xl mb-2">{item.icon}</div>
                 <div className="font-cinzel font-semibold text-maroon text-xs mb-1">{item.label}</div>
-                <div className="text-foreground/50 text-[11px] font-light">{item.desc}</div>
+                <div className="text-foreground text-[11px]">{item.desc}</div>
               </div>
             ))}
           </div>
@@ -194,7 +194,7 @@ export default async function ServicesPage() {
                 <span className="text-gold">🪷</span>
                 <span className="block h-px w-12 bg-linear-to-l from-transparent to-gold/60" />
               </div>
-              <p className="text-foreground/65 text-sm font-light mb-6 max-w-md mx-auto leading-relaxed">
+              <p className="text-foreground text-sm mb-6 max-w-md mx-auto leading-relaxed">
                 Our priests can perform home visits for special ceremonies and rituals.
                 Contact us to discuss your specific spiritual needs.
               </p>

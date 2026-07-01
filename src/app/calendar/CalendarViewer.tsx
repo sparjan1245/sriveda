@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ChevronLeft, ChevronRight, Download, X, ZoomIn, CalendarDays, ImageOff,
 } from "lucide-react";
@@ -54,14 +55,21 @@ export default function CalendarViewer({ calendar, currentYear, availableYears }
         <h1 className="font-cinzel font-bold text-2xl md:text-3xl text-maroon mb-2">
           {calendar?.title || `${currentYear} Hindu Calendar`}
         </h1>
-        <div className="flex items-center justify-center gap-3 mb-4">
+        <div className="flex items-center justify-center gap-3 mb-6">
           <span className="block h-px w-16 bg-gold/50" />
           <span className="text-gold text-xl">🪷</span>
           <span className="block h-px w-16 bg-gold/50" />
         </div>
-        <p className="text-foreground/50 text-sm">
-          {total > 0 ? `${total} pages` : "No pages uploaded yet"}
-        </p>
+        <div className="flex justify-center">
+          <Image
+            src="/cal.webp"
+            alt="Hindu Calendar"
+            width={900}
+            height={500}
+            className="rounded-2xl shadow-lg gold-border object-cover w-full max-w-3xl"
+            priority
+          />
+        </div>
       </div>
 
       {/* ── Year navigation + Download ── */}

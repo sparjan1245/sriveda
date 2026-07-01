@@ -18,7 +18,7 @@ export default async function HomePage() {
 
   const [dbBanners, dbServices, dbTiers, dbTestimonials, dbBoardMembers, dbGalleryImages, dbGalleryVideos, panchangamRow] = await Promise.all([
     db.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
-    db.service.findMany({ where: { active: true }, orderBy: { createdAt: "desc" } }).catch(() => []),
+    db.service.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }).catch(() => []),
     db.donationTier.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
     db.testimonial.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,52 +45,95 @@ export default async function HomePage() {
       
 
       {/* ─────────────────── FEATURED EVENT FLYER ─────────────────── */}
-      <section className="relative py-10 md:py-14 px-4 overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#FDF3E3 50%,#FFF8F0 100%)" }}>
+      <section className="relative py-12 md:py-18 px-4 overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
+        {/* Decorations */}
         <div className="absolute inset-0 pattern-bg opacity-30 pointer-events-none" />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(212,160,23,0.10), transparent 70%)" }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 50%, rgba(212,160,23,0.08), transparent 70%)" }} />
+        <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-gold/40 to-transparent" />
+        <div className="absolute bottom-0 inset-x-0 h-px bg-linear-to-r from-transparent via-gold/40 to-transparent" />
 
-        <div className="relative max-w-5xl mx-auto">
-          {/* Section header */}
-          <div className="text-center mb-8">
-            <span className="badge-gold mb-4 inline-flex animate-pulse">Upcoming Event</span>
-            <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon mb-2 leading-tight">
-              Moola Vigraha Pratishtha Mahotsavam
-            </h2>
-            <div className="flex items-center justify-center gap-4 mb-3">
-              <span className="block h-px w-16 md:w-28 bg-gradient-to-r from-transparent to-gold/60" />
-              <span className="text-gold text-2xl">🪷</span>
-              <span className="block h-px w-16 md:w-28 bg-gradient-to-l from-transparent to-gold/60" />
-            </div>
-            <p className="text-base text-foreground/70 max-w-xl mx-auto leading-relaxed">
-              A grand 3-day celebration — July 4 to 6, 2026 at Sri Veda Gayatri Temple, Manteca, CA.
-              All devotees are cordially invited.
-            </p>
-          </div>
+        <div className="relative max-w-7xl mx-auto">
 
-          {/* Flyer image card */}
-          <div className="flex justify-center">
-            <div className="relative rounded-3xl overflow-hidden gold-border shadow-2xl max-w-lg w-full group">
-              <div className="h-1 bg-gradient-to-r from-saffron via-gold to-saffron" />
-              <Image
-                src="/flayer.jpeg"
-                alt="Moola Vigraha Pratishtha Mahotsavam — July 4–6 2026"
-                width={600}
-                height={850}
-                className="w-full h-auto object-contain block"
-                priority
-              />
-              <div className="h-1 bg-gradient-to-r from-saffron via-gold to-saffron" />
+          {/* ── "Upcoming Event" highlighted banner ── */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex items-center gap-3 bg-gold text-maroon font-cinzel font-bold text-sm md:text-base px-7 py-2.5 rounded-full shadow-lg shadow-gold/30 tracking-widest uppercase">
+              <span className="w-2 h-2 rounded-full bg-maroon animate-ping" />
+              Upcoming Event
+              <span className="w-2 h-2 rounded-full bg-maroon animate-ping" />
             </div>
           </div>
 
-          {/* CTA row */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-            <Link href="/events" className="btn-primary px-10 py-3 shadow-lg">
-              View All Events
-            </Link>
-            <Link href="/contact" className="btn-secondary px-10 py-3">
-              Contact Us
-            </Link>
+          {/* ── Two-column: flyer left, text right ── */}
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+
+            {/* LEFT — flyer image */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] border-2 border-gold/50 max-w-md w-full">
+                <div className="h-1.5 bg-linear-to-r from-saffron via-gold to-saffron" />
+                <Image
+                  src="/flayer.jpeg"
+                  alt="Moola Vigraha Pratishtha Mahotsavam — July 4–6 2026"
+                  width={600}
+                  height={850}
+                  className="w-full h-auto object-contain block"
+                  priority
+                />
+                <div className="h-1.5 bg-linear-to-r from-saffron via-gold to-saffron" />
+              </div>
+            </div>
+
+            {/* RIGHT — text content */}
+            <div className="text-center lg:text-left">
+              {/* Date badge */}
+              <div className="inline-flex items-center gap-2 border border-saffron/40 bg-saffron/10 text-saffron text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6">
+                <Calendar className="w-3.5 h-3.5" />
+                July 4 – 6, 2026 · 3 Days
+              </div>
+
+              <h2 className="font-cinzel font-bold text-2xl md:text-3xl lg:text-4xl text-maroon mb-3 leading-tight">
+                Moola Vigraha<br />
+                <span className="text-saffron">Pratishtha Mahotsavam</span>
+              </h2>
+
+              <div className="flex items-center lg:justify-start justify-center gap-3 mb-5">
+                <span className="block h-px w-12 bg-gold/50" />
+                <span className="text-gold text-xl">🪷</span>
+                <span className="block h-px w-12 bg-gold/50" />
+              </div>
+
+              <p className="text-foreground/70 text-sm md:text-base leading-relaxed mb-4">
+                With the divine blessings of our revered Guru, the <strong className="text-maroon">Moola Vigraha Pratishtha Mahotsavam</strong> will be grandly celebrated at Sri Veda Gayatri Temple.
+              </p>
+              <p className="text-foreground/60 text-sm leading-relaxed mb-8">
+                All devotees are cordially invited to participate in these sacred rituals at{" "}
+                <strong className="text-maroon">702 W Yosemite Ave, Manteca, CA 95337</strong>.
+              </p>
+
+              {/* Info tiles */}
+              <div className="grid grid-cols-3 gap-3 mb-8">
+                {[
+                  { label: "Day 1", value: "July 4", sub: "Saturday" },
+                  { label: "Day 2", value: "July 5", sub: "Sunday" },
+                  { label: "Day 3", value: "July 6", sub: "Monday" },
+                ].map((d) => (
+                  <div key={d.label} className="rounded-xl border border-gold/30 bg-white shadow-sm text-center py-3 px-2">
+                    <div className="text-saffron/70 text-[10px] uppercase tracking-widest mb-0.5">{d.label}</div>
+                    <div className="font-cinzel font-bold text-maroon text-sm">{d.value}</div>
+                    <div className="text-foreground/40 text-[10px]">{d.sub}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link href="/events" className="btn-primary px-10 py-3 shadow-md">
+                  View All Events
+                </Link>
+                <Link href="/contact" className="btn-secondary px-10 py-3">
+                  Contact Us
+                </Link>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

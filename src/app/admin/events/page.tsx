@@ -9,6 +9,7 @@ import { IMAGES } from "@/lib/constants";
 import EventForm from "./EventForm";
 import DeleteEventButton from "./DeleteEventButton";
 import EditEventButton from "./EditEventButton";
+import RsvpListButton from "./RsvpListButton";
 
 export default async function AdminEventsPage() {
   const session = await auth();
@@ -16,7 +17,13 @@ export default async function AdminEventsPage() {
 
   const events = await db.event.findMany({
     orderBy: { date: "asc" },
-    include: { _count: { select: { rsvps: true } } },
+    include: {
+      _count: { select: { rsvps: true } },
+      rsvps: {
+        include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        orderBy: { createdAt: "asc" },
+      },
+    },
   }).catch(() => []);
 
   const now = new Date();
@@ -146,8 +153,7 @@ export default async function AdminEventsPage() {
 
                         {/* RSVPs */}
                         <td className="px-4 py-3 align-middle">
-                          <span className="font-semibold text-maroon text-sm">{event._count.rsvps}</span>
-                          <span className="text-foreground/40 text-xs ml-1">RSVP{event._count.rsvps !== 1 ? "s" : ""}</span>
+                          <RsvpListButton rsvps={event.rsvps as Array<{ id: string; createdAt: Date; user: { id: string; name: string | null; email: string | null; image: string | null } }>} />
                         </td>
 
                         {/* Actions */}
