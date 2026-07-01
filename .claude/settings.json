@@ -47,7 +47,11 @@
       "Bash(grep -v \"^$\")",
       "Bash(curl -s -b /tmp/temple_cookies.txt -c /tmp/temple_cookies.txt -X POST http://localhost:4000/api/auth/callback/credentials -H 'Content-Type: application/x-www-form-urlencoded' -d 'csrfToken=f51ed7b866b743d16d0a4b6426e0e53e2c7431856faeca417620757b280a086b&email=vgcc%40srivedagayatritemple.org&password=admin123%21&redirect=false&callbackUrl=http%3A%2F%2Flocalhost%3A4000%2Fdashboard&json=true' -D /tmp/login_headers.txt -o /tmp/login_body.txt)",
       "WebFetch(domain:srivedagayatritemple.org)",
-      "Bash(node -e \"const crypto = require\\('crypto'\\); console.log\\(crypto.randomBytes\\(32\\).toString\\('hex'\\)\\);\")"
+      "Bash(node -e \"const crypto = require\\('crypto'\\); console.log\\(crypto.randomBytes\\(32\\).toString\\('hex'\\)\\);\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d[k] for k in ['scripts','dependencies','devDependencies'] if k in d}, indent=2\\)\\)\")",
+      "Bash(node -e \"const d=require\\('./package.json'\\); console.log\\(JSON.stringify\\({scripts:d.scripts,next:d.dependencies.next},null,2\\)\\)\")",
+      "Bash(git rm *)",
+      "Bash(find d:\\\\\\\\temple\\\\\\\\src\\\\\\\\app\\\\\\\\api -type f -name \"*.ts\")"
     ],
     "additionalDirectories": [
       "d:\\temple\\src\\app\\api\\services",

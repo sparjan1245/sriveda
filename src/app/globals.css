@@ -11,7 +11,7 @@
   --cream: #FFF8F0;
   --cream-dark: #F5EBD8;
   --background: #FFF8F0;
-  --foreground: #1A1A1A;
+  --foreground: #0A0A0A;
 }
 
 @theme inline {
@@ -57,13 +57,25 @@ body {
     color: #111111;
     font-size: 1rem;
     line-height: 1.85;
+    font-weight: 400;
     text-align: justify;
     hyphens: auto;
   }
 
-  li, td, blockquote {
+  li {
+    color: #111111;
     text-align: justify;
     hyphens: auto;
+  }
+
+  td, blockquote {
+    color: #111111;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  span, label, a {
+    font-weight: inherit;
   }
 }
 
@@ -253,17 +265,17 @@ h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: rgba(212,160,23,0.15);
-  color: #a07010;
-  border: 1px solid rgba(212,160,23,0.4);
+  background: rgba(212,160,23,0.22);
+  color: #5C2D00;
+  border: 1.5px solid rgba(212,160,23,0.65);
   font-size: 18px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  padding: 0.25rem 0.7rem;
+  padding: 0.3rem 0.85rem;
   border-radius: 99px;
-  font-weight: bold;
+  font-weight: 800;
   font-family: 'Cinzel', serif;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
 }
 
 /* ── Scroll-reveal (JS-free fade) ───────────── */
