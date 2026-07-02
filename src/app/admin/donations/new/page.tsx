@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { ArrowLeft } from "lucide-react";
@@ -16,7 +16,7 @@ export default async function NewDonationPage() {
           <ArrowLeft className="w-4 h-4" /> Donations
         </Link>
         <div className="mb-8">
-          <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Walk-in Entry</p>
+          <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-1">Walk-in Entry</p>
           <h1 className="font-cinzel font-bold text-3xl text-maroon">New Donation</h1>
           <p className="text-foreground/60 mt-1 text-sm">Record a donation from a devotee visiting the temple. A receipt will be generated immediately.</p>
         </div>

@@ -83,7 +83,12 @@ export default function Header({ services = [] }: { services?: ServiceLink[] }) 
               <a href="mailto:vgcc@srivedagayatritemple.org" className="hover:text-maroon transition-colors">
                 vgcc@srivedagayatritemple.org
               </a>
+              <span className="text-maroon/30">|</span>
+              <a className="hover:text-maroon transition-colors">
+                501(c)(3) Nonprofit
+              </a>
             </div>
+            
           </div>
           <span className="text-maroon font-serif" style={{ fontSize: "2.5rem", lineHeight: 1 }}>ॐ</span>
         </div>

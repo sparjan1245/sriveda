@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Pencil, Trash2, Loader2, CalendarRange, ChevronLeft, ExternalLink, Download } from "lucide-react";
@@ -43,7 +43,7 @@ export default function AdminCalendarPage() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
-            <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Admin</p>
+            <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-1">Admin</p>
             <h1 className="font-cinzel font-bold text-3xl text-maroon flex items-center gap-3">
               <CalendarRange className="w-8 h-8 text-saffron" />
               Calendar Management

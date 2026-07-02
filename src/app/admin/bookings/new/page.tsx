@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -23,7 +23,7 @@ export default async function NewBookingPage() {
           <ArrowLeft className="w-4 h-4" /> Bookings
         </Link>
         <div className="mb-8">
-          <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Walk-in Entry</p>
+          <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-1">Walk-in Entry</p>
           <h1 className="font-cinzel font-bold text-3xl text-maroon">New Booking</h1>
           <p className="text-foreground/60 mt-1 text-sm">Record a service booking for a devotee at the temple. A receipt will be generated immediately.</p>
         </div>

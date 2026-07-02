@@ -103,32 +103,53 @@ export default function GalleryClient({ images, videos }: Props) {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-            {videos.map((v, i) => (
-              <Link
-                key={i}
-                href={v.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={v.title}
-                className="group relative rounded-2xl overflow-hidden border border-gold/20 hover:border-gold/50 shadow-sm hover:shadow-md transition-all duration-300"
-              >
-                <div className="relative aspect-video overflow-hidden bg-maroon/10">
-                  <Image
-                    src={v.thumbnail}
-                    alt={v.title}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-maroon/45 group-hover:bg-maroon/30 transition-colors duration-300" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-gold/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300 ring-4 ring-white/20">
-                      <div className="w-0 h-0 border-t-8 border-t-transparent border-l-14 border-l-white border-b-8 border-b-transparent ml-1" />
+            {videos.map((v, i) => {
+              const isCloudinary = v.href.includes("res.cloudinary.com");
+              if (isCloudinary) {
+                return (
+                  <div key={i} className="rounded-2xl overflow-hidden border border-gold/20 shadow-sm">
+                    <video
+                      src={v.href}
+                      controls
+                      preload="metadata"
+                      className="w-full aspect-video bg-black"
+                      title={v.title}
+                    />
+                    {v.title && (
+                      <div className="px-3 py-2 bg-white">
+                        <p className="text-xs font-cinzel font-semibold text-maroon truncate">{v.title}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              return (
+                <Link
+                  key={i}
+                  href={v.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={v.title}
+                  className="group relative rounded-2xl overflow-hidden border border-gold/20 hover:border-gold/50 shadow-sm hover:shadow-md transition-all duration-300"
+                >
+                  <div className="relative aspect-video overflow-hidden bg-maroon/10">
+                    <Image
+                      src={v.thumbnail}
+                      alt={v.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-maroon/45 group-hover:bg-maroon/30 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-gold/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300 ring-4 ring-white/20">
+                        <div className="w-0 h-0 border-t-8 border-t-transparent border-l-14 border-l-white border-b-8 border-b-transparent ml-1" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )
       )}

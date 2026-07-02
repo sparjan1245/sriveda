@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Banner } from "@prisma/client";
@@ -30,7 +30,7 @@ export default async function AdminBannersPage() {
 
         <div className="flex items-center justify-between mb-2">
           <div>
-            <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Admin</p>
+            <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-1">Admin</p>
             <h1 className="font-cinzel font-bold text-3xl text-maroon">Hero Banners</h1>
           </div>
           <BannerForm />

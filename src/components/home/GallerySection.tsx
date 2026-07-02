@@ -186,31 +186,51 @@ export function GallerySection({ photos, videos }: Props) {
               transition: "transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
             }}
           >
-            {videos.map((v, i) => (
-              <Link
-                key={i}
-                href={v.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative shrink-0 rounded-2xl overflow-hidden gold-border shadow-md card-hover"
-                style={{ width: videoCardW }}
-              >
-                <div className="relative aspect-video bg-maroon/10 overflow-hidden">
-                  <Image
-                    src={v.thumbnail}
-                    alt={v.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-maroon/45 group-hover:bg-maroon/35 transition-colors duration-300" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-14 h-14 rounded-full bg-gold/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300 ring-4 ring-white/20">
-                      <div className="w-0 h-0 border-t-[9px] border-t-transparent border-l-[16px] border-l-white border-b-[9px] border-b-transparent ml-1" />
+            {videos.map((v, i) => {
+              const isCloudinary = v.href.includes("res.cloudinary.com");
+              if (isCloudinary) {
+                return (
+                  <div
+                    key={i}
+                    className="shrink-0 rounded-2xl overflow-hidden gold-border shadow-md"
+                    style={{ width: videoCardW }}
+                  >
+                    <video
+                      src={v.href}
+                      controls
+                      preload="metadata"
+                      className="w-full aspect-video bg-black"
+                      title={v.title}
+                    />
+                  </div>
+                );
+              }
+              return (
+                <Link
+                  key={i}
+                  href={v.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative shrink-0 rounded-2xl overflow-hidden gold-border shadow-md card-hover"
+                  style={{ width: videoCardW }}
+                >
+                  <div className="relative aspect-video bg-maroon/10 overflow-hidden">
+                    <Image
+                      src={v.thumbnail}
+                      alt={v.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-maroon/45 group-hover:bg-maroon/35 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-full bg-gold/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300 ring-4 ring-white/20">
+                        <div className="w-0 h-0 border-t-[9px] border-t-transparent border-l-16 border-l-white border-b-[9px] border-b-transparent ml-1" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
 

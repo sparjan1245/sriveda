@@ -58,12 +58,15 @@ export default function HeroSlider({ slides, panchangam }: Props) {
 
   const current = allSlides[currentIndex];
   const isBanner = current.type === "banner";
+  const bannerData = isBanner ? (current.data as BannerSlide) : null;
+  // Slide has no text content — image itself carries the message, skip overlays
+  const isImageOnly = isBanner && !bannerData?.title && !bannerData?.subtitle && !bannerData?.description;
 
   return (
-    <section className="relative min-h-87.5 md:min-h-117.5 flex items-center justify-center overflow-hidden">
+    <section className="relative w-full aspect-24/9 flex items-center justify-center overflow-hidden">
 
       {/* ── Background layer ── */}
-      <div className="absolute inset-0">
+      <div className={`absolute inset-0 ${isImageOnly ? "bg-black" : ""}`}>
         <AnimatePresence initial={false}>
           <motion.div
             key={currentIndex}
@@ -78,7 +81,7 @@ export default function HeroSlider({ slides, panchangam }: Props) {
                 src={(current.data as BannerSlide).image}
                 alt={(current.data as BannerSlide).title || "Sri Veda Gayatri Temple"}
                 fill
-                className="object-cover"
+                className={isImageOnly ? "object-contain" : "object-cover"}
                 priority={currentIndex === 0}
               />
             ) : (
@@ -88,8 +91,8 @@ export default function HeroSlider({ slides, panchangam }: Props) {
         </AnimatePresence>
       </div>
 
-      {/* ── Dark overlays — banner only ── */}
-      {isBanner && (
+      {/* ── Dark overlays — banner only, skipped for image-only slides ── */}
+      {isBanner && !isImageOnly && (
         <>
           <div className="absolute inset-0 z-1" style={{ background: "linear-gradient(to bottom, rgba(20,5,8,0.55) 0%, rgba(107,15,26,0.35) 40%, rgba(30,8,12,0.80) 100%)" }} />
           <div className="absolute inset-0 z-2" style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(10,2,4,0.45) 100%)" }} />
@@ -138,7 +141,7 @@ export default function HeroSlider({ slides, panchangam }: Props) {
 
       {/* ── Slide content ── */}
       <AnimatePresence mode="wait">
-        {isBanner ? (
+        {isBanner && isImageOnly ? null : isBanner ? (
           <motion.div
             key={`banner-${currentIndex}`}
             initial={{ opacity: 0, y: 28 }}
@@ -217,8 +220,8 @@ export default function HeroSlider({ slides, panchangam }: Props) {
         )}
       </AnimatePresence>
 
-      {/* ── Scroll cue — banner only ── */}
-      {isBanner && (
+      {/* ── Scroll cue — banner only, not on image-only slides ── */}
+      {isBanner && !isImageOnly && (
         <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 animate-bounce">
           <div className="w-5 h-8 border-2 border-white/30 rounded-full flex items-start justify-center pt-1.5">
             <div className="w-0.5 h-1.5 bg-white/50 rounded-full" />

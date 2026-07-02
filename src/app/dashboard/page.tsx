@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 py-10">
         {/* Header */}
         <div className="mb-8">
-          <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Devotee Portal</p>
+          <p className="text-saffron font-cinzel text-base font-bold uppercase tracking-widest mb-1">Devotee Portal</p>
           <h1 className="font-cinzel font-bold text-3xl text-maroon">
             Welcome, {session.user.name?.split(" ")[0]} 🙏
           </h1>
