@@ -106,12 +106,12 @@ export default async function AboutPage() {
               {/* Quote */}
               <blockquote className="relative bg-cream rounded-2xl p-4 gold-border shadow-sm mb-6">
                 <span className="absolute -top-3 left-4 text-5xl text-gold/15 font-serif leading-none select-none">&ldquo;</span>
-                <p className="font-cinzel text-maroon text-sm italic leading-relaxed relative z-10">
+                <p className="font-cinzel text-maroon text-md italic leading-relaxed relative z-10 font-semibold">
                   Lokah Samastah Sukhino Bhavantu
                 </p>
-                <p className="text-foreground/80 text-xs mt-1">May all beings, everywhere, be happy and live in peace.</p>
+                <p className="text-foreground text-md mt-1">May all beings, everywhere, be happy and live in peace.</p>
                 <div className="divider-gold mt-3" />
-                <p className="text-foreground/70 text-[11px] mt-2 font-semibold tracking-wide">— VGCC Team</p>
+                <p className="text-foreground text-[11px] mt-2 font-semibold tracking-wide">— VGCC Team</p>
               </blockquote>
 
               {/* Live stats row */}

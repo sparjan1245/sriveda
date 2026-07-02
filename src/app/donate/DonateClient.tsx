@@ -136,7 +136,7 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
                 ${tier.amount}
                 {tier.recurring ? <span className="text-base font-normal">/mo</span> : ""}
               </div>
-              <p className="text-foreground/60 text-xs leading-relaxed">{tier.description}</p>
+              <p className="text-foreground font-semibold text-xs leading-relaxed">{tier.description}</p>
               {selected === tier.id && (
                 <div className="mt-3 pt-2 border-t border-gold/20 text-xs text-saffron font-medium">
                   ✓ Selected
@@ -158,7 +158,7 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
               Custom Amount
             </div>
             <div className="font-bold text-2xl text-saffron mb-1">Any Amount</div>
-            <p className="text-foreground/60 text-xs">Enter any amount of your choosing.</p>
+            <p className="text-foreground font-semibold text-xs">Enter any amount of your choosing.</p>
             {selected === "custom" && (
               <div className="mt-3 pt-2 border-t border-gold/20 text-xs text-saffron font-medium">
                 ✓ Selected
