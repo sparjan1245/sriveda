@@ -63,26 +63,26 @@ export default function TestimonialCarousel({ items }: { items: Testimonial[] })
             animate="center"
             exit="exit"
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="group relative bg-white rounded-3xl px-8 py-10 md:px-14 md:py-12 gold-border shadow-lg flex flex-col items-center text-center"
+            className="group relative bg-white rounded-3xl px-6 py-6 md:px-10 md:py-8 gold-border shadow-lg flex flex-col items-center text-center"
           >
             {/* Large quote mark */}
             <span className="absolute top-6 left-8 text-7xl text-gold/10 font-serif leading-none select-none pointer-events-none">&ldquo;</span>
             <span className="absolute bottom-6 right-8 text-7xl text-gold/10 font-serif leading-none select-none pointer-events-none">&rdquo;</span>
 
             {/* Stars */}
-            <div className="flex gap-1 mb-6">
+            <div className="flex gap-1 mb-4">
               {Array.from({ length: item.rating }).map((_, i) => (
                 <Star key={i} className="w-4 h-4 fill-gold text-gold" />
               ))}
             </div>
 
             {/* Quote text */}
-            <p className="text-foreground/70 text-base md:text-lg leading-relaxed italic max-w-2xl mx-auto mb-8 relative z-10">
+            <p className="text-foreground text-base md:text-lg leading-relaxed italic max-w-2xl mx-auto mb-5 relative z-10">
               &ldquo;{item.text}&rdquo;
             </p>
 
             {/* Divider */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-4">
               <span className="block h-px w-10 bg-gold/40" />
               <span className="text-gold text-sm">🪷</span>
               <span className="block h-px w-10 bg-gold/40" />
@@ -96,9 +96,9 @@ export default function TestimonialCarousel({ items }: { items: Testimonial[] })
                 </span>
               </div>
               <div>
-                <p className="font-cinzel font-semibold text-maroon text-sm leading-snug">{item.name}</p>
+                <p className="font-cinzel font-bold text-maroon text-sm leading-snug">{item.name}</p>
                 {item.location && (
-                  <p className="text-foreground/45 text-xs mt-0.5">{item.location}</p>
+                  <p className="text-foreground/70 font-bold text-xs mt-0.5">{item.location}</p>
                 )}
               </div>
             </div>
