@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import type { Metadata } from "next";
 import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
@@ -41,7 +41,7 @@ export default async function DonatePage() {
       <section className="py-16 px-4 bg-cream pattern-bg">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-3">Ways to Give</p>
+            <p className="text-saffron font-cinzel text-base font-bold uppercase tracking-widest mb-3">Ways to Give</p>
             <h2 className="section-heading text-3xl font-bold mb-4">Choose Your Offering</h2>
             <p className="text-foreground/60 max-w-xl mx-auto">
               Every contribution, large or small, helps us serve the community and preserve our sacred traditions.
@@ -53,27 +53,99 @@ export default async function DonatePage() {
 
       {/* Sponsorship Tiers */}
       <section className="py-16 px-4 bg-white" id="sponsorship">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-3">Major Giving</p>
-            <h2 className="section-heading text-3xl font-bold mb-4">Sponsorship Tiers</h2>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Sacred Giving</span>
+            <h2 className="font-cinzel font-bold text-2xl md:text-3xl text-maroon mb-3">Seva Sponsorship Tiers</h2>
+            <div className="flex items-center justify-center gap-4 mb-3">
+              <span className="block h-px w-20 bg-linear-to-r from-transparent to-gold/60" />
+              <span className="text-gold text-xl">🪷</span>
+              <span className="block h-px w-20 bg-linear-to-l from-transparent to-gold/60" />
+            </div>
+            <p className="text-foreground text-sm max-w-xl mx-auto">Every contribution, large or small, is a sacred act of devotion that sustains our temple and community.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+
+          {/* Row 1 — lower tiers */}
+          <div className="grid md:grid-cols-3 gap-5 mb-5">
             {[
-              { name: "Bronze Sponsor", range: "$51 – $999", color: "#CD7F32", benefits: ["Name listed in temple announcements", "Special blessing at events", "Annual recognition"] },
-              { name: "Silver Sponsor", range: "$2,500 – $4,999", color: "#C0C0C0", benefits: ["All Bronze benefits", "Dedicated puja on a festival day", "Certificate of appreciation", "Priority event seating"] },
-              { name: "Gold Sponsor", range: "$5,000 – $9,999", color: "#D4A017", benefits: ["All Silver benefits", "Naming rights for a temple event", "Personal meeting with board", "Lifetime recognition plaque", "Featured in all publications"] },
+              {
+                icon: "🙏", name: "Devotee Seva", range: "$51 – $999",
+                color: "#E8610A", bg: "#FFF4EE", border: "#E8610A33",
+                benefits: ["Support daily poojas and temple maintenance", "Name listed in weekly announcements", "Special blessing at events"],
+              },
+              {
+                icon: "🏅", name: "Bronze Seva", range: "$1,000 – $2,499",
+                color: "#B87333", bg: "#FDF5EC", border: "#B8733333",
+                benefits: ["All Devotee benefits", "Dedicated pooja on a monthly festival", "Annual recognition in temple newsletter"],
+              },
+              {
+                icon: "⭐", name: "Silver Seva", range: "$2,500 – $4,999",
+                color: "#607D8B", bg: "#F0F4F6", border: "#607D8B33",
+                benefits: ["Sponsor festivals, pooja materials, or lighting", "Certificate of appreciation", "Priority event seating", "Family name on temple board"],
+              },
             ].map((tier) => (
-              <div key={tier.name} className="bg-cream rounded-2xl p-6 shadow-sm card-hover border" style={{ borderColor: tier.color + "40" }}>
-                <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-xl font-bold" style={{ background: tier.color }}>
-                  ★
+              <div
+                key={tier.name}
+                className="rounded-2xl p-6 card-hover flex flex-col"
+                style={{ background: tier.bg, border: `1.5px solid ${tier.border}` }}
+              >
+                <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center text-2xl shadow-sm" style={{ background: tier.color + "18", border: `1.5px solid ${tier.color}40` }}>
+                  {tier.icon}
                 </div>
-                <h3 className="font-cinzel font-bold text-maroon text-xl text-center mb-1">{tier.name}</h3>
-                <p className="text-center font-semibold mb-4" style={{ color: tier.color }}>{tier.range}</p>
-                <ul className="space-y-2">
+                <h3 className="font-cinzel font-bold text-maroon text-base text-center mb-1">{tier.name}</h3>
+                <p className="text-center font-bold text-sm mb-4" style={{ color: tier.color }}>{tier.range}</p>
+                <ul className="space-y-2 flex-1">
                   {tier.benefits.map((b) => (
-                    <li key={b} className="text-sm text-foreground/70 flex items-start gap-2">
-                      <span style={{ color: tier.color }}>✓</span> {b}
+                    <li key={b} className="text-foreground text-xs flex items-start gap-2">
+                      <span className="mt-0.5 shrink-0" style={{ color: tier.color }}>⮚</span> {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Row 2 — higher tiers */}
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                icon: "✨", name: "Gold Seva", range: "$5,000 – $9,999",
+                color: "#C5960A", bg: "#FFFBEF", border: "#D4A01740",
+                benefits: ["Sponsor homams, sanctum preparation, or mandapam upgrades", "Naming rights for a temple event", "Personal meeting with board"],
+              },
+              {
+                icon: "💎", name: "Platinum Seva", range: "$10,000 – $24,999",
+                color: "#4A6FA0", bg: "#EFF3FA", border: "#4A6FA033",
+                benefits: ["Sponsor deity installation or Maha Kumbhabhishekam rituals", "Family participation in key ceremonies", "Lifetime recognition plaque", "Featured in all publications"],
+              },
+              {
+                icon: "👑", name: "Diamond Seva", range: "$25,000+",
+                color: "#7B1FA2", bg: "linear-gradient(135deg,#FDF6FF 0%,#F3E8FF 100%)", border: "#7B1FA240",
+                benefits: ["Sponsor major renovation phase or Prana Pratishta", "Donor recognition as per temple guidelines", "Highest honour from the board", "Permanent dedication plaque"],
+                highlight: true,
+              },
+            ].map((tier) => (
+              <div
+                key={tier.name}
+                className={`rounded-2xl p-6 flex flex-col card-hover relative ${tier.highlight ? "shadow-xl" : ""}`}
+                style={{ background: tier.bg, border: `1.5px solid ${tier.border}` }}
+              >
+                {tier.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-purple-700 text-white text-[10px] font-cinzel font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow">
+                      Highest Honour
+                    </span>
+                  </div>
+                )}
+                <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center text-2xl shadow-sm" style={{ background: tier.color + "18", border: `1.5px solid ${tier.color}40` }}>
+                  {tier.icon}
+                </div>
+                <h3 className="font-cinzel font-bold text-maroon text-base text-center mb-1">{tier.name}</h3>
+                <p className="text-center font-bold text-sm mb-4" style={{ color: tier.color }}>{tier.range}</p>
+                <ul className="space-y-2 flex-1">
+                  {tier.benefits.map((b) => (
+                    <li key={b} className="text-foreground text-xs flex items-start gap-2">
+                      <span className="mt-0.5 shrink-0" style={{ color: tier.color }}>⮚</span> {b}
                     </li>
                   ))}
                 </ul>

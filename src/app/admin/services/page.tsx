@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
@@ -56,7 +56,7 @@ export default async function AdminServicesPage() {
 
         <div className="flex items-center justify-between mb-8">
           <div>
-            <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Admin</p>
+            <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-1">Admin</p>
             <h1 className="font-cinzel font-bold text-3xl text-maroon">Services</h1>
           </div>
           <div className="flex items-center gap-3">

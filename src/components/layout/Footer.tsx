@@ -40,7 +40,7 @@ export default function Footer({ services = [] }: { services?: ServiceLink[] }) 
               <div className="font-cinzel font-semibold text-white/90 text-[11px] leading-tight mb-1">Cultural Center</div>
               <div className="flex items-center gap-2">
                 <span className="block h-px w-8 bg-gold/30" />
-                <span className="font-cinzel text-gold/60 text-[9px] tracking-[0.25em] uppercase">Est. 2024</span>
+                <span className="font-cinzel text-gold text-[9px] leading-tight tracking-[0.25em] uppercase">Est. 2024</span>
                 <span className="block h-px w-8 bg-gold/30" />
               </div>
             </div>
@@ -218,7 +218,7 @@ export default function Footer({ services = [] }: { services?: ServiceLink[] }) 
                   href={`https://maps.google.com/?q=${encodeURIComponent(TEMPLE.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[11px] text-gold/65 hover:text-gold border border-gold/25 hover:border-gold/55 rounded-lg px-3 py-1.5 transition-all duration-200 mt-1"
+                  className="inline-flex items-center gap-1.5 text-[11px] text-gold/100 hover:text-gold border border-gold/100 hover:border-gold/55 rounded-lg px-3 py-1.5 transition-all duration-200 mt-1"
                 >
                   <ExternalLink className="w-3 h-3" />
                   Get Directions
@@ -235,7 +235,7 @@ export default function Footer({ services = [] }: { services?: ServiceLink[] }) 
           <p className="text-[11px] text-white/100" suppressHydrationWarning>
             © {new Date().getFullYear()} {TEMPLE.fullName}. All rights reserved.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-cream/35">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-white">
             <Link href="/privacy" className="hover:text-cream/60 transition-colors">Privacy Policy</Link>
             <span className="text-white/15">|</span>
             <Link href="/terms" className="hover:text-cream/60 transition-colors">Terms of Use</Link>

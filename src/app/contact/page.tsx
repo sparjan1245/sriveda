@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import type { Metadata } from "next";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { TEMPLE, IMAGES } from "@/lib/constants";
@@ -31,9 +31,9 @@ export default function ContactPage() {
 
       <section className="py-16 px-4 bg-cream pattern-bg">
         <div className="max-w-3xl mx-auto text-center mb-12">
-           <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-3">Get in Touch</p>
+           <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-3">Get in Touch</p>
               <h2 className="section-heading text-3xl font-bold mb-6 text-left">We&apos;d Love to Hear From You</h2>
-              <p className="text-foreground/70 leading-relaxed mb-8">
+              <p className="text-foreground leading-relaxed mb-8">
                 Whether you have questions about our services, want to schedule a puja, or need
                 guidance on upcoming events — our team is always here to help you on your spiritual journey.
               </p>
@@ -51,8 +51,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-cinzel font-semibold text-maroon mb-1">Temple Address</h4>
-                    <p className="text-foreground/70 text-sm">{TEMPLE.address}</p>
-                    <p className="text-foreground/50 text-xs mt-1">Mailing: {TEMPLE.mailingAddress}</p>
+                    <p className="text-foreground text-sm">{TEMPLE.address}</p>
+                    <p className="text-foreground text-xs mt-1">Mailing: {TEMPLE.mailingAddress}</p>
                   </div>
                 </div>
 
@@ -62,7 +62,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-cinzel font-semibold text-maroon mb-1">Temple Hours</h4>
-                    <p className="text-foreground/70 text-sm">{TEMPLE.hours}</p>
+                    <p className="text-foreground text-sm">{TEMPLE.hours}</p>
                   </div>
                 </div>
 
@@ -73,7 +73,7 @@ export default function ContactPage() {
                   <div>
                     <h4 className="font-cinzel font-semibold text-maroon mb-1">Phone</h4>
                     {TEMPLE.phones.map((phone) => (
-                      <a key={phone} href={`tel:${phone.replace(/\D/g, "")}`} className="block text-foreground/70 text-sm hover:text-saffron transition-colors">
+                      <a key={phone} href={`tel:${phone.replace(/\D/g, "")}`} className="block text-foreground text-sm hover:text-saffron transition-colors">
                         {phone}
                       </a>
                     ))}
@@ -87,7 +87,7 @@ export default function ContactPage() {
                   <div>
                     <h4 className="font-cinzel font-semibold text-maroon mb-1">Email</h4>
                     {TEMPLE.emails.map((email) => (
-                      <a key={email} href={`mailto:${email}`} className="block text-foreground/70 text-sm hover:text-saffron transition-colors break-all">
+                      <a key={email} href={`mailto:${email}`} className="block text-foreground text-sm hover:text-saffron transition-colors break-all">
                         {email}
                       </a>
                     ))}
@@ -114,7 +114,7 @@ export default function ContactPage() {
             <div>
               <div className="bg-white rounded-2xl p-8 gold-border shadow-sm">
                 <h3 className="font-cinzel font-semibold text-maroon text-2xl mb-2">Send a Message</h3>
-                <p className="text-foreground/60 text-sm mb-6">We&apos;ll respond within 24 hours.</p>
+                <p className="text-foreground text-sm mb-6">We&apos;ll respond within 24 hours.</p>
                 <ContactForm />
               </div>
             </div>

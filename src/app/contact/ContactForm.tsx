@@ -76,7 +76,7 @@ export default function ContactForm() {
       </div>
       <div>
         <label className={labelClass}>Message *</label>
-        <textarea name="message" value={form.message} onChange={handleChange} required rows={5} className={inputClass} placeholder="How can we help you?" />
+        <textarea name="message" value={form.message} onChange={handleChange} required rows={12} className={inputClass} placeholder="How can we help you?" />
       </div>
       {error && (
         <p className="text-red-500 text-sm bg-red-50 border border-red-200 p-3 rounded-lg">{error}</p>

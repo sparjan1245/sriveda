@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { decrypt, mask } from "@/lib/encryption";
@@ -46,7 +46,7 @@ export default async function SettingsPage() {
     <div className="min-h-screen bg-cream pattern-bg">
       <div className="max-w-4xl mx-auto px-4 py-10">
         <div className="mb-8">
-          <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Admin Panel</p>
+          <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-1">Admin Panel</p>
           <h1 className="font-cinzel font-bold text-3xl text-maroon">Payment &amp; Email Settings</h1>
           <p className="text-foreground/60 text-sm mt-1">
             Configure payment gateways and email credentials. All secrets are encrypted before storage.

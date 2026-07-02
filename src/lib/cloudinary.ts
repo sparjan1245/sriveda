@@ -29,6 +29,23 @@ export async function uploadToCloudinary(
   });
 }
 
+export async function uploadVideoToCloudinary(
+  buffer: Buffer,
+  folder: string = "temple/gallery/videos"
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        { folder, resource_type: "video" },
+        (error, result) => {
+          if (error || !result) return reject(error ?? new Error("Upload failed"));
+          resolve(result.secure_url);
+        }
+      )
+      .end(buffer);
+  });
+}
+
 export async function uploadRawToCloudinary(
   buffer: Buffer,
   folder: string = "temple/docs"

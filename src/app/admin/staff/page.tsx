@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -24,7 +24,7 @@ export default async function StaffPage() {
           <ArrowLeft className="w-4 h-4" /> Admin Dashboard
         </Link>
         <div className="mb-8">
-          <p className="text-gold font-cinzel text-sm uppercase tracking-widest mb-1">Admin</p>
+          <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-1">Admin</p>
           <h1 className="font-cinzel font-bold text-3xl text-maroon">Staff Management</h1>
           <p className="text-foreground/50 text-sm mt-2">Manage roles for Admins, Staff, and Priests. To add a new staff member, first ask them to register as a devotee, then promote their role here.</p>
         </div>
