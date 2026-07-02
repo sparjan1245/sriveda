@@ -101,10 +101,10 @@ export default async function HomePage() {
                 <span className="block h-px w-12 bg-gold/50" />
               </div>
 
-              <p className="text-foreground/70 text-sm md:text-base leading-relaxed mb-4">
+              <p className="text-foreground text-sm md:text-base leading-relaxed mb-4">
                 With the divine blessings of our revered Guru, the <strong className="text-maroon">Moola Vigraha Pratishtha Mahotsavam</strong> will be grandly celebrated at Sri Veda Gayatri Temple.
               </p>
-              <p className="text-foreground/60 text-sm leading-relaxed mb-8">
+              <p className="text-foreground text-sm leading-relaxed mb-8">
                 All devotees are cordially invited to participate in these sacred rituals at{" "}
                 <strong className="text-maroon">702 W Yosemite Ave, Manteca, CA 95337</strong>.
               </p>
@@ -112,14 +112,14 @@ export default async function HomePage() {
               {/* Info tiles */}
               <div className="grid grid-cols-3 gap-3 mb-8">
                 {[
-                  { label: "Day 1", value: "July 4", sub: "Saturday" },
-                  { label: "Day 2", value: "July 5", sub: "Sunday" },
-                  { label: "Day 3", value: "July 6", sub: "Monday" },
+                  { label: "Devata Ahvanam", value: "July 4", sub: "Saturday" },
+                  { label: "Adhivasa Mahotsvam", value: "July 5", sub: "Sunday" },
+                  { label: "Pratishta Mahotsvam", value: "July 6", sub: "Monday" },
                 ].map((d) => (
                   <div key={d.label} className="rounded-xl border border-gold/30 bg-white shadow-sm text-center py-3 px-2">
-                    <div className="text-saffron/70 text-[10px] uppercase tracking-widest mb-0.5">{d.label}</div>
+                    <div className="text-black text-[10px] uppercase tracking-widest mb-0.5 font-bold">{d.label}</div>
                     <div className="font-cinzel font-bold text-maroon text-sm">{d.value}</div>
-                    <div className="text-foreground/40 text-[10px]">{d.sub}</div>
+                    <div className="text-foreground text-[10px]">{d.sub}</div>
                   </div>
                 ))}
               </div>
@@ -256,7 +256,7 @@ export default async function HomePage() {
 
               <blockquote className="relative bg-white rounded-2xl p-5 gold-border shadow-sm mb-8">
                 <span className="absolute -top-4 left-5 text-6xl text-gold/15 font-serif leading-none select-none">&ldquo;</span>
-                <p className="font-cinzel text-maroon text-sm md:text-[15px] italic leading-relaxed relative z-10">
+                <p className="font-cinzel text-maroon text-sm md:text-[15px] italic font-bold leading-relaxed relative z-10">
                   {TEMPLE.quote}
                 </p>
                 <div className="divider-gold mt-4" />
@@ -459,14 +459,14 @@ export default async function HomePage() {
 
       {/* ─────────────────────── TESTIMONIALS ─────────────────────── */}
       {testimonials.length > 0 && (
-        <section className="py-8 md:py-6 px-4 relative overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
+        <section className="py-4 px-4 relative overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
           <div className="absolute inset-0 pattern-bg opacity-40 pointer-events-none" />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
             <span className="text-maroon/3 font-cinzel leading-none" style={{ fontSize: "min(65vw,560px)" }}>ॐ</span>
           </div>
           <div className="relative max-w-3xl mx-auto">
-            <div className="text-center mb-8 md:mb-10">
-              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Devotee Stories</span>
+            <div className="text-center mb-5">
+              <span className="badge-gold mb-3 inline-flex text-xs md:text-sm px-4 py-1.5 font-bold">Devotee Stories</span>
               <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon leading-tight mb-3 drop-shadow-sm">
                 Blessings &amp; Testimonials
               </h2>
@@ -517,7 +517,7 @@ export default async function HomePage() {
                 ].map((benefit) => (
                   <div key={benefit} className="flex items-start gap-2.5 bg-cream/60 rounded-xl p-3 border border-gold/15">
                     <CheckCircle className="w-3.5 h-3.5 text-saffron shrink-0 mt-0.5" />
-                    <span className="text-xs text-foreground/70 leading-snug">{benefit}</span>
+                    <span className="text-md text-foreground leading-snug">{benefit}</span>
                   </div>
                 ))}
               </div>
@@ -528,7 +528,7 @@ export default async function HomePage() {
                 </Link>
                 <p className="text-sm mt-3">
                   Already a member?{" "}
-                  <Link href="/auth/login" className="text-saffron hover:underline">Sign in here</Link>
+                  <Link href="/auth/login" className="text-maroon font-semibold hover:underline">Sign in here</Link>
                 </p>
               </div>
             </div>

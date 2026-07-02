@@ -41,9 +41,9 @@ export default async function DonatePage() {
       <section className="py-16 px-4 bg-cream pattern-bg">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-saffron font-cinzel text-base font-bold uppercase tracking-widest mb-3">Ways to Give</p>
+            <p className="text-maroon font-cinzel text-base font-bold uppercase tracking-widest mb-3">Ways to Give</p>
             <h2 className="section-heading text-3xl font-bold mb-4">Choose Your Offering</h2>
-            <p className="text-foreground/60 max-w-xl mx-auto">
+            <p className="text-foreground font-bold max-w-xl mx-auto">
               Every contribution, large or small, helps us serve the community and preserve our sacred traditions.
             </p>
           </div>
