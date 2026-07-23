@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency, amountToWords } from "@/lib/utils";
-import { TEMPLE } from "@/lib/constants";
+import { getContactInfo } from "@/lib/contact";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import BookingReceiptDoc from "@/components/pdf/BookingReceiptDoc";
@@ -35,6 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const receiptNo   = booking.receiptNumber || `VGCC/BKG/${id.slice(-6).toUpperCase()}`;
   const devoteeName = booking.user?.name || booking.guestName || "Devotee";
+  const contact     = await getContactInfo();
 
   const proto   = req.headers.get("x-forwarded-proto") ?? "http";
   const host    = req.headers.get("host") ?? "localhost:4000";
@@ -60,9 +61,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       notes:           booking.notes       || undefined,
       amountFormatted: formatCurrency(booking.amount),
       amountInWords:   amountToWords(booking.amount),
-      templeAddress:   TEMPLE.address,
-      templePhone:     TEMPLE.phones[0],
-      templeEmail:     TEMPLE.emails[0],
+      templeAddress:   contact.address,
+      templePhone:     contact.phones[0],
+      templeEmail:     contact.emails[0],
     })
   ) as Buffer;
 

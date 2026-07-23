@@ -3,19 +3,54 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft, Plus, Receipt } from "lucide-react";
 import DonationActions from "./DonationActions";
+import ListSearch from "@/components/admin/ListSearch";
+import FilterSelect from "@/components/admin/FilterSelect";
+import SortableHeader from "@/components/admin/SortableHeader";
+import PaginationBar from "@/components/admin/PaginationBar";
 
-export default async function AdminDonationsPage() {
+const SORTABLE_FIELDS = ["amount", "status", "cause", "createdAt"] as const;
+const STATUS_OPTIONS = ["PENDING", "COMPLETED", "FAILED", "REFUNDED"];
+
+export default async function AdminDonationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const donations = await db.donation.findMany({
-    include: { user: true },
-    orderBy: { createdAt: "desc" },
-  }).catch(() => []);
+  const { page, pageSize, skip, take, q, sortBy, sortDir, filter } = parseListParams(await searchParams, {
+    sortableFields: SORTABLE_FIELDS,
+    pageSize: 15,
+  });
 
-  const total = donations.filter((d: { status: string }) => d.status === "COMPLETED").reduce((sum: number, d: { amount: number }) => sum + d.amount, 0);
+  const where = {
+    ...(STATUS_OPTIONS.includes(filter) ? { status: filter as "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED" } : {}),
+    ...(q
+      ? {
+          OR: [
+            { guestName: { contains: q, mode: "insensitive" as const } },
+            { guestEmail: { contains: q, mode: "insensitive" as const } },
+            { cause: { contains: q, mode: "insensitive" as const } },
+            { receiptNumber: { contains: q, mode: "insensitive" as const } },
+            { user: { name: { contains: q, mode: "insensitive" as const } } },
+            { user: { email: { contains: q, mode: "insensitive" as const } } },
+          ],
+        }
+      : {}),
+  };
+  const orderBy = sortBy ? { [sortBy]: sortDir } : { createdAt: "desc" as const };
+
+  const [donations, total, totalReceivedAgg] = await Promise.all([
+    db.donation.findMany({ where, include: { user: true }, orderBy, skip, take }).catch(() => []),
+    db.donation.count({ where }).catch(() => 0),
+    db.donation.aggregate({ where: { status: "COMPLETED" }, _sum: { amount: true } }).catch(() => ({ _sum: { amount: 0 } })),
+  ]);
+
+  const totalReceived = totalReceivedAgg._sum.amount || 0;
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">
@@ -28,7 +63,7 @@ export default async function AdminDonationsPage() {
           <div className="flex items-center gap-4">
             <div className="bg-white rounded-xl px-5 py-3 gold-border shadow-sm text-center">
               <p className="text-xs text-foreground/50">Total Received</p>
-              <p className="font-cinzel font-bold text-green-600 text-xl">{formatCurrency(total)}</p>
+              <p className="font-cinzel font-bold text-green-600 text-xl">{formatCurrency(totalReceived)}</p>
             </div>
             <Link href="/admin/donation-tiers" className="btn-secondary flex items-center gap-2 text-sm px-4 py-2 whitespace-nowrap">
               Manage Tiers
@@ -39,14 +74,25 @@ export default async function AdminDonationsPage() {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <ListSearch placeholder="Search by donor, cause, or receipt…" />
+          <FilterSelect paramKey="filter" allLabel="All Statuses" options={STATUS_OPTIONS.map((s) => ({ value: s, label: s }))} />
+        </div>
+
         <div className="bg-white rounded-2xl gold-border shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-cream border-b border-gold/20">
                 <tr>
-                  {["Donor", "Email", "Cause", "Amount", "Recurring", "Status", "Date", "Receipt", ""].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left font-cinzel font-medium text-maroon text-xs">{h}</th>
-                  ))}
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Donor</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Email</th>
+                  <SortableHeader field="cause" label="Cause" />
+                  <SortableHeader field="amount" label="Amount" defaultDir="desc" />
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Recurring</th>
+                  <SortableHeader field="status" label="Status" />
+                  <SortableHeader field="createdAt" label="Date" defaultDir="desc" />
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Receipt</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold/10">
@@ -78,9 +124,12 @@ export default async function AdminDonationsPage() {
               </tbody>
             </table>
           </div>
-          {donations.length === 0 && (
-            <p className="text-center text-foreground/50 py-12">No donations yet.</p>
+          {total === 0 && (
+            <p className="text-center text-foreground/50 py-12">
+              {q || filter ? "No donations match your filters." : "No donations yet."}
+            </p>
           )}
+          <PaginationBar page={page} pageSize={pageSize} total={total} />
         </div>
       </div>
     </div>

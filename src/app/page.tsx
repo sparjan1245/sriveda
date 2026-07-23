@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Calendar, Heart, Star, Users, ArrowRight, CheckCircle } from "lucide-react";
 import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
+import { getContactInfo } from "@/lib/contact";
 import HeroSlider, { type BannerSlide, type PanchangamData } from "@/components/home/HeroSlider";
 import { ServiceSlider } from "@/components/home/ServiceSlider";
 import { GallerySection } from "@/components/home/GallerySection";
@@ -27,10 +28,16 @@ export default async function HomePage() {
     db.galleryVideo.findMany({ orderBy: { createdAt: "desc" }, take: 5 }).catch(() => []),
     db.panchangam.findFirst({ where: { date: { gte: dayStart, lt: dayEnd } } }).catch(() => null),
   ]);
+  const contact = await getContactInfo();
 
   const todayPanchangam: PanchangamData | null = panchangamRow
     ? { ...panchangamRow, date: panchangamRow.date.toISOString() }
     : null;
+  const panchangamContact = {
+    address: contact.address,
+    phone: contact.phones[1] || contact.phones[0],
+    email: contact.emails[0],
+  };
   const slides: BannerSlide[] = dbBanners;
   const services = dbServices;
   const donationTiers = dbTiers;
@@ -40,7 +47,7 @@ export default async function HomePage() {
     <div className="overflow-x-hidden">
 
       {/* ─────────────────────────── HERO ─────────────────────────── */}
-      <HeroSlider slides={slides} panchangam={todayPanchangam} />
+      <HeroSlider slides={slides} panchangam={todayPanchangam} contact={panchangamContact} />
 
       
 
@@ -72,7 +79,7 @@ export default async function HomePage() {
                 <div className="h-1.5 bg-linear-to-r from-saffron via-gold to-saffron" />
                 <Image
                   src="/flayer.jpeg"
-                  alt="Moola Vigraha Pratishtha Mahotsavam — July 4–6 2026"
+                  alt="Moola Vigraha Pratishtha Mahotsavam — August 14–16 2026"
                   width={600}
                   height={850}
                   className="w-full h-auto object-contain block"
@@ -87,7 +94,7 @@ export default async function HomePage() {
               {/* Date badge */}
               <div className="inline-flex items-center gap-2 border border-saffron/40 bg-saffron/10 text-saffron text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6">
                 <Calendar className="w-3.5 h-3.5" />
-                July 4 – 6, 2026 · 3 Days
+                August 14 – 16, 2026 · 3 Days
               </div>
 
               <h2 className="font-cinzel font-bold text-2xl md:text-3xl lg:text-4xl text-maroon mb-3 leading-tight">
@@ -112,9 +119,9 @@ export default async function HomePage() {
               {/* Info tiles */}
               <div className="grid grid-cols-3 gap-3 mb-8">
                 {[
-                  { label: "Devata Ahvanam", value: "July 4", sub: "Saturday" },
-                  { label: "Adhivasa Mahotsvam", value: "July 5", sub: "Sunday" },
-                  { label: "Pratishta Mahotsvam", value: "July 6", sub: "Monday" },
+                  { label: "Devata Ahvanam", value: "Aug 14", sub: "Friday" },
+                  { label: "Adhivasa Mahotsvam", value: "Aug 15", sub: "Saturday" },
+                  { label: "Pratishta Mahotsvam", value: "Aug 16", sub: "Sunday" },
                 ].map((d) => (
                   <div key={d.label} className="rounded-xl border border-gold/30 bg-white shadow-sm text-center py-3 px-2">
                     <div className="text-black text-[10px] uppercase tracking-widest mb-0.5 font-bold">{d.label}</div>

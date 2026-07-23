@@ -25,12 +25,19 @@ type SlideItem =
   | { type: "banner";     data: BannerSlide }
   | { type: "panchangam"; data: PanchangamData };
 
+export interface PanchangamContact {
+  address: string;
+  phone: string;
+  email: string;
+}
+
 interface Props {
   slides: BannerSlide[];
   panchangam?: PanchangamData | null;
+  contact?: PanchangamContact;
 }
 
-export default function HeroSlider({ slides, panchangam }: Props) {
+export default function HeroSlider({ slides, panchangam, contact }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const allSlides: SlideItem[] = (() => {
@@ -215,7 +222,7 @@ export default function HeroSlider({ slides, panchangam }: Props) {
             transition={{ duration: 0.55 }}
             className="absolute inset-0 z-3"
           >
-            <PanchangamSlide data={(current.data as PanchangamData)} />
+            <PanchangamSlide data={(current.data as PanchangamData)} contact={contact} />
           </motion.div>
         )}
       </AnimatePresence>

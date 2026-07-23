@@ -4,7 +4,11 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ArrowLeft, Pin } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import { parseListParams } from "@/lib/list-query";
 import { NewAnnouncementButton, EditAnnouncementButton, DeleteAnnouncementButton } from "./AnnouncementForm";
+import ListSearch from "@/components/admin/ListSearch";
+import FilterSelect from "@/components/admin/FilterSelect";
+import PaginationBar from "@/components/admin/PaginationBar";
 
 const TYPE_COLORS: Record<string, string> = {
   INFO: "bg-blue-100 text-blue-700",
@@ -12,14 +16,40 @@ const TYPE_COLORS: Record<string, string> = {
   EVENT: "bg-purple-100 text-purple-700",
   NOTICE: "bg-gold/20 text-amber-700",
 };
+const TYPE_OPTIONS = ["INFO", "WARNING", "EVENT", "NOTICE"];
+const SORTABLE_FIELDS = ["title", "type", "createdAt", "pinned"] as const;
 
-export default async function AnnouncementsPage() {
+export default async function AnnouncementsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const items = await db.announcement.findMany({
-    orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
-  }).catch(() => []);
+  const { page, pageSize, skip, take, q, sortBy, sortDir, filter } = parseListParams(await searchParams, {
+    sortableFields: SORTABLE_FIELDS,
+    pageSize: 10,
+  });
+
+  const where = {
+    ...(TYPE_OPTIONS.includes(filter) ? { type: filter } : {}),
+    ...(q
+      ? {
+          OR: [
+            { title: { contains: q, mode: "insensitive" as const } },
+            { content: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+  // Default view keeps pinned items first; an explicit column sort overrides that.
+  const orderBy = sortBy ? { [sortBy]: sortDir } : [{ pinned: "desc" as const }, { createdAt: "desc" as const }];
+
+  const [items, total] = await Promise.all([
+    db.announcement.findMany({ where, orderBy, skip, take }).catch(() => []),
+    db.announcement.count({ where }).catch(() => 0),
+  ]);
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">
@@ -35,10 +65,23 @@ export default async function AnnouncementsPage() {
           <NewAnnouncementButton />
         </div>
 
-        {items.length === 0 ? (
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <ListSearch placeholder="Search by title or content…" />
+          <FilterSelect paramKey="filter" allLabel="All Types" options={TYPE_OPTIONS.map((t) => ({ value: t, label: t }))} />
+          <FilterSelect
+            paramKey="sort"
+            allLabel="Pinned First"
+            options={[
+              { value: "createdAt", label: "Newest First" },
+              { value: "title", label: "By Title" },
+            ]}
+          />
+        </div>
+
+        {total === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl gold-border">
             <div className="text-4xl mb-4">📢</div>
-            <p className="text-foreground/50">No announcements yet.</p>
+            <p className="text-foreground/50">{q || filter ? "No announcements match your filters." : "No announcements yet."}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -60,6 +103,12 @@ export default async function AnnouncementsPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {total > 0 && (
+          <div className="bg-white rounded-2xl gold-border shadow-sm mt-4">
+            <PaginationBar page={page} pageSize={pageSize} total={total} />
           </div>
         )}
       </div>

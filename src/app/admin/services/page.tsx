@@ -4,9 +4,15 @@ import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency } from "@/lib/utils";
+import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft, BookOpen, Layers } from "lucide-react";
 import ServiceForm from "./ServiceForm";
 import ServiceActions from "./ServiceActions";
+import ListSearch from "@/components/admin/ListSearch";
+import SortableHeader from "@/components/admin/SortableHeader";
+import PaginationBar from "@/components/admin/PaginationBar";
+
+const SORTABLE_FIELDS = ["name", "category", "price", "duration", "order", "createdAt"] as const;
 
 interface ServiceRow {
   id: string;
@@ -23,14 +29,38 @@ interface ServiceRow {
   createdAt: Date;
 }
 
-export default async function AdminServicesPage() {
+export default async function AdminServicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
+  const { page, pageSize, skip, take, q, sortBy, sortDir } = parseListParams(await searchParams, {
+    sortableFields: SORTABLE_FIELDS,
+    pageSize: 10,
+  });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const raw = await (db.service as any)
-    .findMany({ orderBy: { order: "asc" } })
-    .catch(() => []);
+  const model = db.service as any;
+  const where = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { slug: { contains: q, mode: "insensitive" } },
+          { shortDesc: { contains: q, mode: "insensitive" } },
+          { category: { contains: q, mode: "insensitive" } },
+        ],
+      }
+    : {};
+  const orderBy = sortBy ? { [sortBy]: sortDir } : { order: "asc" };
+
+  const [raw, total, activeCount] = await Promise.all([
+    model.findMany({ where, orderBy, skip, take }).catch(() => []),
+    model.count({ where }).catch(() => 0),
+    model.count({ where: { active: true } }).catch(() => 0),
+  ]);
   const services = raw as ServiceRow[];
 
   const bookingCounts = await db.booking
@@ -42,7 +72,6 @@ export default async function AdminServicesPage() {
   );
 
   const totalBookings = bookingCounts.reduce((sum, b) => sum + b._count.id, 0);
-  const activeCount = services.filter((s) => s.active).length;
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">
@@ -72,14 +101,24 @@ export default async function AdminServicesPage() {
           </div>
         </div>
 
-        {services.length === 0 ? (
+        <div className="mb-4">
+          <ListSearch placeholder="Search by name, slug, or category…" />
+        </div>
+
+        {total === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl gold-border">
             <Layers className="w-12 h-12 text-gold/40 mx-auto mb-4" />
-            <p className="text-foreground/50 mb-2 font-cinzel">No services yet.</p>
-            <p className="text-foreground/40 text-sm mb-6">
-              Add your first service to start accepting bookings from the public site.
-            </p>
-            <ServiceForm />
+            {q ? (
+              <p className="text-foreground/50 mb-2 font-cinzel">No services match &ldquo;{q}&rdquo;.</p>
+            ) : (
+              <>
+                <p className="text-foreground/50 mb-2 font-cinzel">No services yet.</p>
+                <p className="text-foreground/40 text-sm mb-6">
+                  Add your first service to start accepting bookings from the public site.
+                </p>
+                <ServiceForm />
+              </>
+            )}
           </div>
         ) : (
           <div className="bg-white rounded-2xl gold-border shadow-sm overflow-hidden">
@@ -90,18 +129,10 @@ export default async function AdminServicesPage() {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-20">
                       Image
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-32">
-                      Category
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-24">
-                      Price
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-28">
-                      Duration
-                    </th>
+                    <SortableHeader field="name" label="Name" />
+                    <SortableHeader field="category" label="Category" className="w-32" />
+                    <SortableHeader field="price" label="Price" className="w-24" />
+                    <SortableHeader field="duration" label="Duration" className="w-28" />
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-24">
                       Status
                     </th>
@@ -207,6 +238,7 @@ export default async function AdminServicesPage() {
                 </tbody>
               </table>
             </div>
+            <PaginationBar page={page} pageSize={pageSize} total={total} />
           </div>
         )}
       </div>

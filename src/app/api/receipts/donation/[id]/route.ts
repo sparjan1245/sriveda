@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency, amountToWords } from "@/lib/utils";
 import { TEMPLE } from "@/lib/constants";
+import { getContactInfo } from "@/lib/contact";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import DonationReceiptDoc from "@/components/pdf/DonationReceiptDoc";
@@ -35,6 +36,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const receiptNo = donation.receiptNumber || `VGCC/DON/${id.slice(-6).toUpperCase()}`;
   const donorName = donation.user?.name || donation.guestName || "Devotee";
+  const contact   = await getContactInfo();
 
   const proto   = req.headers.get("x-forwarded-proto") ?? "http";
   const host    = req.headers.get("host") ?? "localhost:4000";
@@ -57,9 +59,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       amountFormatted: formatCurrency(donation.amount),
       amountInWords:   amountToWords(donation.amount),
       taxId:           TEMPLE.taxId,
-      templeAddress:   TEMPLE.address,
-      templePhone:     TEMPLE.phones[0],
-      templeEmail:     TEMPLE.emails[0],
+      templeAddress:   contact.address,
+      templePhone:     contact.phones[0],
+      templeEmail:     contact.emails[0],
     })
   ) as Buffer;
 

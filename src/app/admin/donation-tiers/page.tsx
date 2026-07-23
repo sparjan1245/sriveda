@@ -3,22 +3,48 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency } from "@/lib/utils";
+import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft, RefreshCw, Heart } from "lucide-react";
 import TierForm from "./TierForm";
 import TierActions from "./TierActions";
 import TierToggle from "./TierToggle";
+import ListSearch from "@/components/admin/ListSearch";
+import SortableHeader from "@/components/admin/SortableHeader";
+import PaginationBar from "@/components/admin/PaginationBar";
 
 export const dynamic = "force-dynamic";
 
-export default async function DonationTiersPage() {
+const SORTABLE_FIELDS = ["name", "amount", "order", "createdAt"] as const;
+
+export default async function DonationTiersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const tiers = await db.donationTier
-    .findMany({ orderBy: { order: "asc" } })
-    .catch(() => []);
+  const { page, pageSize, skip, take, q, sortBy, sortDir } = parseListParams(await searchParams, {
+    sortableFields: SORTABLE_FIELDS,
+    pageSize: 10,
+  });
 
-  const activeCount = tiers.filter(t => t.active).length;
+  const where = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" as const } },
+          { description: { contains: q, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+  const orderBy = sortBy ? { [sortBy]: sortDir } : { order: "asc" as const };
+
+  const [tiers, total, activeCount, totalAll] = await Promise.all([
+    db.donationTier.findMany({ where, orderBy, skip, take }).catch(() => []),
+    db.donationTier.count({ where }).catch(() => 0),
+    db.donationTier.count({ where: { active: true } }).catch(() => 0),
+    db.donationTier.count().catch(() => 0),
+  ]);
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">
@@ -38,21 +64,31 @@ export default async function DonationTiersPage() {
               <div className="text-xs text-foreground/50">Active</div>
             </div>
             <div className="bg-white rounded-xl px-4 py-2 gold-border text-center">
-              <div className="font-cinzel font-bold text-xl text-maroon">{tiers.length}</div>
+              <div className="font-cinzel font-bold text-xl text-maroon">{totalAll}</div>
               <div className="text-xs text-foreground/50">Total</div>
             </div>
-            <TierForm nextOrder={tiers.length} />
+            <TierForm nextOrder={totalAll} />
           </div>
         </div>
 
-        {tiers.length === 0 ? (
+        <div className="mb-4">
+          <ListSearch placeholder="Search by name or description…" />
+        </div>
+
+        {total === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl gold-border">
             <Heart className="w-12 h-12 text-gold/40 mx-auto mb-4" />
-            <p className="text-foreground/50 mb-2 font-cinzel">No donation tiers yet.</p>
-            <p className="text-foreground/40 text-sm mb-6">
-              Add tiers to let devotees choose a donation amount on the public donate page.
-            </p>
-            <TierForm nextOrder={0} />
+            {q ? (
+              <p className="text-foreground/50 mb-2 font-cinzel">No tiers match &ldquo;{q}&rdquo;.</p>
+            ) : (
+              <>
+                <p className="text-foreground/50 mb-2 font-cinzel">No donation tiers yet.</p>
+                <p className="text-foreground/40 text-sm mb-6">
+                  Add tiers to let devotees choose a donation amount on the public donate page.
+                </p>
+                <TierForm nextOrder={0} />
+              </>
+            )}
           </div>
         ) : (
           <div className="bg-white rounded-2xl gold-border shadow-sm overflow-hidden">
@@ -60,19 +96,13 @@ export default async function DonationTiersPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gold/20 bg-cream/50">
-                    {[
-                      { label: "Order",    w: "w-16" },
-                      { label: "Name",     w: "" },
-                      { label: "Amount",   w: "w-28" },
-                      { label: "Type",     w: "w-28" },
-                      { label: "Description", w: "w-56" },
-                      { label: "Status",   w: "w-24" },
-                      { label: "Actions",  w: "w-24" },
-                    ].map(h => (
-                      <th key={h.label} className={`text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider ${h.w}`}>
-                        {h.label}
-                      </th>
-                    ))}
+                    <SortableHeader field="order" label="Order" className="w-16" />
+                    <SortableHeader field="name" label="Name" />
+                    <SortableHeader field="amount" label="Amount" className="w-28" />
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-28">Type</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-56">Description</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-24">Status</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-24">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gold/10">
@@ -112,6 +142,7 @@ export default async function DonationTiersPage() {
                 </tbody>
               </table>
             </div>
+            <PaginationBar page={page} pageSize={pageSize} total={total} />
           </div>
         )}
       </div>

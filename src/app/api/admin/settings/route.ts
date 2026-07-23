@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { encrypt, decrypt, mask } from "@/lib/encryption";
+import { getContactInfo } from "@/lib/contact";
 
 // Admin GET — returns masked secrets for display
 export async function GET() {
@@ -11,6 +12,7 @@ export async function GET() {
   }
 
   const s = await db.siteSettings.findUnique({ where: { id: "main" } });
+  const contact = await getContactInfo();
 
   return NextResponse.json({
     stripe: {
@@ -32,11 +34,36 @@ export async function GET() {
       locationId:  s?.squareLocationId  ? decrypt(s.squareLocationId)  : "",
       mode:        s?.squareMode        ?? "sandbox",
     },
-    gmail: {
-      enabled:     s?.gmailEnabled     ?? false,
-      user:        s?.gmailUser        ? decrypt(s.gmailUser)        : "",
-      appPassword: s?.gmailAppPassword ? mask(decrypt(s.gmailAppPassword)) : "",
-      adminEmails: s?.adminEmails      ?? "",
+    email: {
+      provider: s?.emailProvider === "hostinger" ? "hostinger" : "gmail",
+      gmail: {
+        enabled:     s?.gmailEnabled     ?? false,
+        user:        s?.gmailUser        ? decrypt(s.gmailUser)        : "",
+        appPassword: s?.gmailAppPassword ? mask(decrypt(s.gmailAppPassword)) : "",
+      },
+      hostinger: {
+        enabled:  s?.hostingerEnabled  ?? false,
+        host:     s?.hostingerHost     ?? "smtp.hostinger.com",
+        port:     s?.hostingerPort     ?? 465,
+        secure:   s?.hostingerSecure   ?? true,
+        user:     s?.hostingerUser     ? decrypt(s.hostingerUser)     : "",
+        password: s?.hostingerPassword ? mask(decrypt(s.hostingerPassword)) : "",
+      },
+      adminEmails: s?.adminEmails ?? "",
+    },
+    contact: {
+      address:        contact.address,
+      mailingAddress: contact.mailingAddress,
+      phones:         contact.phones,
+      emails:         contact.emails,
+      hours:          contact.hours,
+    },
+    social: {
+      facebook:  contact.social.facebook  ?? "",
+      instagram: contact.social.instagram ?? "",
+      youtube:   contact.social.youtube   ?? "",
+      twitter:   contact.social.twitter   ?? "",
+      whatsapp:  contact.social.whatsapp  ?? "",
     },
   });
 }
@@ -59,6 +86,9 @@ export async function PUT(req: Request) {
     return encrypt(newVal);
   }
 
+  const cleanList = (arr: unknown): string[] =>
+    Array.isArray(arr) ? arr.map((v) => String(v).trim()).filter(Boolean) : [];
+
   await db.siteSettings.upsert({
     where: { id: "main" },
     create: {
@@ -76,10 +106,27 @@ export async function PUT(req: Request) {
       squareAppId:         body.square?.appId         ? encrypt(body.square.appId)         : null,
       squareLocationId:    body.square?.locationId    ? encrypt(body.square.locationId)    : null,
       squareMode:          body.square?.mode          ?? "sandbox",
-      gmailEnabled:        body.gmail?.enabled        ?? false,
-      gmailUser:           body.gmail?.user           ? encrypt(body.gmail.user)           : null,
-      gmailAppPassword:    resolveSecret(body.gmail?.appPassword, existing?.gmailAppPassword),
-      adminEmails:         body.gmail?.adminEmails    ?? null,
+      emailProvider:       body.email?.provider === "hostinger" ? "hostinger" : "gmail",
+      gmailEnabled:        body.email?.gmail?.enabled        ?? false,
+      gmailUser:           body.email?.gmail?.user           ? encrypt(body.email.gmail.user) : null,
+      gmailAppPassword:    resolveSecret(body.email?.gmail?.appPassword, existing?.gmailAppPassword),
+      hostingerEnabled:    body.email?.hostinger?.enabled    ?? false,
+      hostingerHost:       body.email?.hostinger?.host       || "smtp.hostinger.com",
+      hostingerPort:       body.email?.hostinger?.port       || 465,
+      hostingerSecure:     body.email?.hostinger?.secure     ?? true,
+      hostingerUser:       body.email?.hostinger?.user       ? encrypt(body.email.hostinger.user) : null,
+      hostingerPassword:   resolveSecret(body.email?.hostinger?.password, existing?.hostingerPassword),
+      adminEmails:         body.email?.adminEmails    ?? null,
+      contactAddress:        body.contact?.address        || null,
+      contactMailingAddress: body.contact?.mailingAddress || null,
+      contactPhones:         cleanList(body.contact?.phones),
+      contactEmails:         cleanList(body.contact?.emails),
+      contactHours:          body.contact?.hours          || null,
+      facebookUrl:  body.social?.facebook  || null,
+      instagramUrl: body.social?.instagram || null,
+      youtubeUrl:   body.social?.youtube   || null,
+      twitterUrl:   body.social?.twitter   || null,
+      whatsappNumber: body.social?.whatsapp || null,
     },
     update: {
       stripeEnabled:       body.stripe?.enabled       ?? false,
@@ -95,10 +142,27 @@ export async function PUT(req: Request) {
       squareAppId:         body.square?.appId         ? encrypt(body.square.appId)         : existing?.squareAppId,
       squareLocationId:    body.square?.locationId    ? encrypt(body.square.locationId)    : existing?.squareLocationId,
       squareMode:          body.square?.mode          ?? "sandbox",
-      gmailEnabled:        body.gmail?.enabled        ?? false,
-      gmailUser:           body.gmail?.user           ? encrypt(body.gmail.user)           : existing?.gmailUser,
-      gmailAppPassword:    resolveSecret(body.gmail?.appPassword, existing?.gmailAppPassword),
-      adminEmails:         body.gmail?.adminEmails !== undefined ? body.gmail.adminEmails : existing?.adminEmails,
+      emailProvider:       body.email?.provider === "hostinger" ? "hostinger" : "gmail",
+      gmailEnabled:        body.email?.gmail?.enabled        ?? false,
+      gmailUser:           body.email?.gmail?.user           ? encrypt(body.email.gmail.user) : existing?.gmailUser,
+      gmailAppPassword:    resolveSecret(body.email?.gmail?.appPassword, existing?.gmailAppPassword),
+      hostingerEnabled:    body.email?.hostinger?.enabled    ?? false,
+      hostingerHost:       body.email?.hostinger?.host       || existing?.hostingerHost || "smtp.hostinger.com",
+      hostingerPort:       body.email?.hostinger?.port       || existing?.hostingerPort || 465,
+      hostingerSecure:     body.email?.hostinger?.secure     ?? true,
+      hostingerUser:       body.email?.hostinger?.user       ? encrypt(body.email.hostinger.user) : existing?.hostingerUser,
+      hostingerPassword:   resolveSecret(body.email?.hostinger?.password, existing?.hostingerPassword),
+      adminEmails:         body.email?.adminEmails !== undefined ? body.email.adminEmails : existing?.adminEmails,
+      contactAddress:        body.contact?.address        || null,
+      contactMailingAddress: body.contact?.mailingAddress || null,
+      contactPhones:         cleanList(body.contact?.phones),
+      contactEmails:         cleanList(body.contact?.emails),
+      contactHours:          body.contact?.hours          || null,
+      facebookUrl:  body.social?.facebook  || null,
+      instagramUrl: body.social?.instagram || null,
+      youtubeUrl:   body.social?.youtube   || null,
+      twitterUrl:   body.social?.twitter   || null,
+      whatsappNumber: body.social?.whatsapp || null,
     },
   });
 

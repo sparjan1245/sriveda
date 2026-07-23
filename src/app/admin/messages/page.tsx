@@ -3,17 +3,45 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime } from "@/lib/utils";
+import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft } from "lucide-react";
 import MarkReadButton from "./MarkReadButton";
 import DeleteMessageButton from "./DeleteMessageButton";
+import ListSearch from "@/components/admin/ListSearch";
+import FilterSelect from "@/components/admin/FilterSelect";
+import PaginationBar from "@/components/admin/PaginationBar";
 
-export default async function AdminMessagesPage() {
+export default async function AdminMessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const messages = await db.contactMessage.findMany({
-    orderBy: { createdAt: "desc" },
-  }).catch(() => []);
+  const { page, pageSize, skip, take, q, sortDir, filter } = parseListParams(await searchParams, {
+    sortableFields: [],
+    pageSize: 10,
+  });
+
+  const where = {
+    ...(filter === "unread" ? { read: false } : filter === "read" ? { read: true } : {}),
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { email: { contains: q, mode: "insensitive" as const } },
+            { message: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+
+  const [messages, total, unreadCount] = await Promise.all([
+    db.contactMessage.findMany({ where, orderBy: { createdAt: sortDir }, skip, take }).catch(() => []),
+    db.contactMessage.count({ where }).catch(() => 0),
+    db.contactMessage.count({ where: { read: false } }).catch(() => 0),
+  ]);
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">
@@ -24,13 +52,19 @@ export default async function AdminMessagesPage() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-cinzel font-bold text-3xl text-maroon">Contact Messages</h1>
           <span className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded-full font-medium">
-            {messages.filter((m: { read: boolean }) => !m.read).length} Unread
+            {unreadCount} Unread
           </span>
         </div>
 
-        {messages.length === 0 ? (
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <ListSearch placeholder="Search by name, email, or message…" />
+          <FilterSelect paramKey="filter" allLabel="All Messages" options={[{ value: "unread", label: "Unread" }, { value: "read", label: "Read" }]} />
+          <FilterSelect paramKey="dir" allLabel="Newest First" options={[{ value: "asc", label: "Oldest First" }]} />
+        </div>
+
+        {total === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl gold-border">
-            <p className="text-foreground/50">No messages yet.</p>
+            <p className="text-foreground/50">{q || filter ? "No messages match your filters." : "No messages yet."}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -59,6 +93,12 @@ export default async function AdminMessagesPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {total > 0 && (
+          <div className="bg-white rounded-2xl gold-border shadow-sm mt-4">
+            <PaginationBar page={page} pageSize={pageSize} total={total} />
           </div>
         )}
       </div>
