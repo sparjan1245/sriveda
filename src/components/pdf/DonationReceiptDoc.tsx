@@ -94,7 +94,7 @@ export default function DonationReceiptDoc(props: DonationReceiptDocProps) {
         {/* Header */}
         <View style={s.header}>
           <Image src={props.logoUrl} style={s.logo} />
-          <Text style={s.hName}>Sri Veda Gayatri Cultural Center</Text>
+          <Text style={s.hName}>Veda Gayatri Cultural Center</Text>
           <Text style={s.hSub}>{props.templeAddress}</Text>
           <Text style={s.hSub}>{props.templePhone}  ·  {props.templeEmail}</Text>
         </View>

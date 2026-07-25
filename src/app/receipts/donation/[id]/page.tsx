@@ -70,7 +70,7 @@ export default async function DonationReceiptPage({
           <div style={{ background: "linear-gradient(135deg,#6B0F1A 0%,#4A0A12 100%)" }} className="px-8 py-6 text-white text-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Sri Veda Gayatri Temple" className="h-16 w-auto mx-auto mb-3" />
-            <p className="font-cinzel font-bold text-lg tracking-wide text-white">Sri Veda Gayatri Cultural Center</p>
+            <p className="font-cinzel font-bold text-lg tracking-wide text-white">Veda Gayatri Cultural Center</p>
             <p className="text-white/70 text-xs mt-0.5">{contact.address}</p>
             <p className="text-white/70 text-xs">{contact.phones[0]} · {contact.emails[0]}</p>
           </div>
