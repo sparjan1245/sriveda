@@ -11,9 +11,10 @@ interface TierData {
   order: string;
   recurring: boolean;
   active: boolean;
+  highlighted: boolean;
 }
 
-const BLANK: TierData = { name: "", description: "", amount: "", order: "0", recurring: false, active: true };
+const BLANK: TierData = { name: "", description: "", amount: "", order: "0", recurring: false, active: true, highlighted: false };
 
 export default function TierForm({ nextOrder }: { nextOrder: number }) {
   const router          = useRouter();
@@ -80,6 +81,10 @@ export default function TierForm({ nextOrder }: { nextOrder: number }) {
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} className="accent-saffron w-4 h-4" />
               <span className="text-maroon/80">Active</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" checked={form.highlighted} onChange={e => setForm(f => ({ ...f, highlighted: e.target.checked }))} className="accent-saffron w-4 h-4" />
+              <span className="text-maroon/80">Highlighted</span>
             </label>
           </div>
           {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>}

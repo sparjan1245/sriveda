@@ -68,5 +68,8 @@ Secrets stored in `SiteSettings` (Stripe/PayPal/Square keys, Gmail SMTP creds) a
 ### Node-only packages
 `@react-pdf/renderer`, `nodemailer`, and `canvas` are listed in `serverExternalPackages` in [next.config.ts](next.config.ts) because they use native bindings / Node APIs (`net`, `tls`) incompatible with the edge runtime — don't import them from code that might run on the edge.
 
+### Admin list pages
+The ~10 admin list pages (`/admin/staff`, `/services`, `/messages`, `/gallery`, `/events`, `/donations`, `/donation-tiers`, `/devotees`, `/bookings`, `/announcements`) all share one convention: `parseListParams()` in [src/lib/list-query.ts](src/lib/list-query.ts) reads `page`/`q`/`sort`/`dir`/`filter` from `searchParams` and returns `{ skip, take, sortBy, sortDir, ... }` ready to spread into a Prisma `findMany`. When adding a new admin list page, follow this pattern rather than hand-rolling pagination.
+
 ### UI
 Tailwind v4 + shadcn-style primitives wrapping Radix UI in [src/components/ui/](src/components/ui/). `cn()` in [src/lib/utils.ts](src/lib/utils.ts) is the standard `clsx` + `tailwind-merge` helper used throughout for conditional class composition.

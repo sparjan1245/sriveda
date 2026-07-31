@@ -12,7 +12,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   const { id } = await params;
   const data = await req.json();
-  const allowed = ["name", "description", "amount", "recurring", "order", "active"] as const;
+  const allowed = ["name", "description", "amount", "recurring", "order", "active", "highlighted"] as const;
   const update = Object.fromEntries(allowed.filter((k) => k in data).map((k) => [k, data[k]]));
   const tier = await db.donationTier.update({ where: { id }, data: update });
   revalidateTag("donation-tiers", "max");

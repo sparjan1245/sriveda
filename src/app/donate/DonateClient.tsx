@@ -11,6 +11,7 @@ interface Tier {
   description: string | null;
   amount: number;
   recurring: boolean;
+  highlighted: boolean;
 }
 
 export default function DonateClient({ tiers }: { tiers: Tier[] }) {
@@ -38,6 +39,9 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
     setLastName((prev)  => prev || parts.slice(1).join(" ") || "");
     setEmail((prev)     => prev || session.user?.email || "");
   }, [session]);
+
+  const highlightedTiers = tiers.filter((t) => t.highlighted);
+  const regularTiers = tiers.filter((t) => !t.highlighted);
 
   const selectedTier = tiers.find((t) => t.id === selected);
   const amount = selected === "custom" ? parseFloat(customAmount) || 0 : selectedTier?.amount || 0;
@@ -107,12 +111,77 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
   const inputClass =
     "w-full px-3 py-2.5 border border-gold/30 rounded-lg text-sm focus:outline-none focus:border-saffron transition-colors";
 
+  const customAmountCard = (
+    <button
+      key="custom"
+      onClick={() => setSelected("custom")}
+      className={`text-left p-5 rounded-2xl border-2 transition-all duration-200 ${
+        selected === "custom"
+          ? "border-saffron bg-white shadow-lg ring-1 ring-saffron/20"
+          : "border-gold/20 bg-white hover:border-gold/50 hover:shadow-sm"
+      }`}
+    >
+      <div className="font-cinzel font-semibold text-maroon text-sm mb-2">
+        Custom Amount
+      </div>
+      <div className="font-bold text-2xl text-saffron mb-1">Any Amount</div>
+      <p className="text-foreground font-semibold text-xs">Enter any amount of your choosing.</p>
+      {selected === "custom" && (
+        <div className="mt-3 pt-2 border-t border-gold/20 text-xs text-saffron font-medium">
+          ✓ Selected
+        </div>
+      )}
+    </button>
+  );
+
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Tier cards */}
       <div className="lg:col-span-2">
+        {highlightedTiers.length > 0 && (
+          <div
+            className="rounded-3xl border-2 border-gold/60 p-5 mb-4"
+            style={{ background: "linear-gradient(135deg,#FFFDF8 0%,#FFF8E8 100%)" }}
+          >
+            <div className="grid sm:grid-cols-2 gap-4">
+              {highlightedTiers.map((tier) => (
+                <button
+                  key={tier.id}
+                  onClick={() => setSelected(tier.id)}
+                  className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-200 overflow-hidden bg-white ${
+                    selected === tier.id
+                      ? "border-saffron shadow-xl ring-2 ring-saffron/30"
+                      : "border-gold/40 shadow-sm hover:shadow-md hover:border-saffron/60"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2 gap-2 pr-2">
+                    <span className="font-cinzel font-semibold text-maroon text-sm leading-tight">
+                      {tier.name}
+                    </span>
+                    {tier.recurring && (
+                      <span className="flex items-center gap-1 bg-saffron/10 text-saffron text-xs px-2 py-0.5 rounded-full shrink-0">
+                        <RefreshCw className="w-3 h-3" /> Monthly
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-bold text-2xl text-saffron mb-1">
+                    ${tier.amount}
+                    {tier.recurring ? <span className="text-base font-normal">/mo</span> : ""}
+                  </div>
+                  <p className="text-foreground font-semibold text-xs leading-relaxed">{tier.description}</p>
+                  {selected === tier.id && (
+                    <div className="mt-3 pt-2 border-t border-gold/30 text-xs text-saffron font-medium">
+                      ✓ Selected
+                    </div>
+                  )}
+                </button>
+              ))}
+              {customAmountCard}
+            </div>
+          </div>
+        )}
         <div className="grid sm:grid-cols-2 gap-4">
-          {tiers.map((tier) => (
+          {regularTiers.map((tier) => (
             <button
               key={tier.id}
               onClick={() => setSelected(tier.id)}
@@ -145,26 +214,7 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
             </button>
           ))}
 
-          {/* Custom amount card */}
-          <button
-            onClick={() => setSelected("custom")}
-            className={`text-left p-5 rounded-2xl border-2 transition-all duration-200 ${
-              selected === "custom"
-                ? "border-saffron bg-white shadow-lg ring-1 ring-saffron/20"
-                : "border-gold/20 bg-white hover:border-gold/50 hover:shadow-sm"
-            }`}
-          >
-            <div className="font-cinzel font-semibold text-maroon text-sm mb-2">
-              Custom Amount
-            </div>
-            <div className="font-bold text-2xl text-saffron mb-1">Any Amount</div>
-            <p className="text-foreground font-semibold text-xs">Enter any amount of your choosing.</p>
-            {selected === "custom" && (
-              <div className="mt-3 pt-2 border-t border-gold/20 text-xs text-saffron font-medium">
-                ✓ Selected
-              </div>
-            )}
-          </button>
+          {highlightedTiers.length === 0 && customAmountCard}
         </div>
       </div>
 
@@ -172,9 +222,24 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
       <div className="lg:col-span-1">
         <div className="bg-white rounded-2xl p-6 gold-border shadow-sm lg:sticky lg:top-24">
           <h3 className="font-cinzel font-semibold text-maroon text-xl mb-1">Your Donation</h3>
-          <p className="text-foreground/50 text-xs mb-5">
+          <p className="text-foreground/50 text-xs mb-3">
             All donations are 100% tax-deductible.
           </p>
+
+          {amount > 0 && (
+            <div className="bg-linear-to-r from-saffron/10 to-gold/10 border border-saffron/30 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-cinzel font-semibold text-maroon text-sm truncate">
+                  {selectedTier?.name || "Custom Donation"}
+                </p>
+                <p className="text-[10px] text-foreground/45">Tax ID: 99-4945072</p>
+              </div>
+              <div className="font-bold text-saffron text-xl shrink-0">
+                ${amount}
+                {selectedTier?.recurring ? <span className="text-xs font-normal">/mo</span> : ""}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -265,25 +330,6 @@ export default function DonateClient({ tiers }: { tiers: Tier[] }) {
 
             {/* Payment gateway selector */}
             <PaymentGateway onGatewayChange={handleGatewayChange} />
-
-            {amount > 0 && (
-              <div className="bg-cream rounded-xl p-4 space-y-1.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-foreground/60">
-                    {selectedTier?.name || "Custom Donation"}
-                  </span>
-                  <span className="font-bold text-maroon">
-                    ${amount}
-                    {selectedTier?.recurring ? (
-                      <span className="text-xs font-normal">/mo</span>
-                    ) : ""}
-                  </span>
-                </div>
-                <p className="text-xs text-foreground/50">
-                  Tax-deductible · 501(c)(3) · Tax ID: 99-4945072
-                </p>
-              </div>
-            )}
 
             {error && (
               <p className="text-red-500 text-xs bg-red-50 border border-red-200 p-3 rounded-lg">

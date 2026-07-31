@@ -12,15 +12,15 @@ export default function EditTierPage() {
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState("");
   const [form, setForm] = useState({
-    name: "", description: "", amount: "", order: "0", recurring: false, active: true,
+    name: "", description: "", amount: "", order: "0", recurring: false, active: true, highlighted: false,
   });
 
   useEffect(() => {
     fetch(`/api/donation-tiers?all=true`)
       .then(r => r.json())
-      .then((tiers: { id: string; name: string; description: string | null; amount: number; order: number; recurring: boolean; active: boolean }[]) => {
+      .then((tiers: { id: string; name: string; description: string | null; amount: number; order: number; recurring: boolean; active: boolean; highlighted: boolean }[]) => {
         const t = tiers.find(x => x.id === id);
-        if (t) setForm({ name: t.name, description: t.description || "", amount: String(t.amount), order: String(t.order), recurring: t.recurring, active: t.active });
+        if (t) setForm({ name: t.name, description: t.description || "", amount: String(t.amount), order: String(t.order), recurring: t.recurring, active: t.active, highlighted: t.highlighted });
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -79,6 +79,10 @@ export default function EditTierPage() {
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} className="accent-saffron w-4 h-4" />
                 <span className="text-maroon/80">Active</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={form.highlighted} onChange={e => setForm(f => ({ ...f, highlighted: e.target.checked }))} className="accent-saffron w-4 h-4" />
+                <span className="text-maroon/80">Highlighted</span>
               </label>
             </div>
             {error && <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>}

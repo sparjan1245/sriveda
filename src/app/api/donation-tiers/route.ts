@@ -17,13 +17,13 @@ export async function POST(req: Request) {
   if ((session?.user as { role?: string })?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
-  const { name, description, amount, recurring, order } = await req.json();
+  const { name, description, amount, recurring, order, highlighted } = await req.json();
   if (!name || !amount) {
     return NextResponse.json({ error: "Name and amount are required." }, { status: 400 });
   }
   const count = await db.donationTier.count();
   const tier = await db.donationTier.create({
-    data: { name, description, amount: parseFloat(amount), recurring: !!recurring, order: order ?? count },
+    data: { name, description, amount: parseFloat(amount), recurring: !!recurring, order: order ?? count, highlighted: !!highlighted },
   });
   revalidateTag("donation-tiers", "max");
   revalidatePath("/", "page");

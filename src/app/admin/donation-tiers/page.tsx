@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency } from "@/lib/utils";
 import { parseListParams } from "@/lib/list-query";
-import { ArrowLeft, RefreshCw, Heart } from "lucide-react";
+import { ArrowLeft, RefreshCw, Heart, Star } from "lucide-react";
 import TierForm from "./TierForm";
 import TierActions from "./TierActions";
 import TierToggle from "./TierToggle";
@@ -114,7 +114,10 @@ export default async function DonationTiersPage({
                         </span>
                       </td>
                       <td className="px-4 py-3 align-middle">
-                        <p className="font-cinzel font-semibold text-maroon text-sm">{tier.name}</p>
+                        <p className="font-cinzel font-semibold text-maroon text-sm flex items-center gap-1.5">
+                          {tier.name}
+                          {tier.highlighted && <Star className="w-3.5 h-3.5 text-gold fill-gold" />}
+                        </p>
                       </td>
                       <td className="px-4 py-3 align-middle">
                         <span className="font-bold text-saffron">{formatCurrency(tier.amount)}</span>

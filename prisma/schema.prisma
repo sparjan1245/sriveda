@@ -294,6 +294,7 @@ model DonationTier {
   recurring   Boolean @default(false)
   order       Int     @default(0)
   active      Boolean @default(true)
+  highlighted Boolean @default(false)
 }
 
 model Testimonial {
