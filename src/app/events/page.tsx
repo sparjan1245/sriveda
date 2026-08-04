@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Calendar, MapPin, Clock } from "lucide-react";
+import { Calendar, MapPin, Clock, Heart } from "lucide-react";
 import { IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import RsvpButton from "./RsvpButton";
+import EventRegisterModal from "./EventRegisterModal";
 
 export const dynamic = "force-dynamic";
 
@@ -83,8 +83,16 @@ export default async function EventsPage() {
                   <p className="text-white/90 text-sm leading-relaxed mb-4">
                     {featuredEvent.description}
                   </p>
-                  <div className="w-48">
-                    <RsvpButton eventId={featuredEvent.id} userId={userId} />
+                  <div className="flex gap-2 max-w-md">
+                    <div className="flex-1">
+                      <EventRegisterModal eventId={featuredEvent.id} eventTitle={featuredEvent.title} userId={userId} />
+                    </div>
+                    <Link
+                      href={`/events/${featuredEvent.id}/register`}
+                      className="flex-1 py-2.5 text-sm font-semibold rounded-md flex items-center justify-center gap-2 bg-white text-maroon hover:bg-cream transition-colors"
+                    >
+                      <Heart className="w-4 h-4" /> Register
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -179,7 +187,17 @@ export default async function EventsPage() {
                       <p className="text-foreground text-xs leading-relaxed flex-1 mb-4">
                         {event.description}
                       </p>
-                      <RsvpButton eventId={event.id} userId={userId} />
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <EventRegisterModal eventId={event.id} eventTitle={event.title} userId={userId} />
+                        </div>
+                        <Link
+                          href={`/events/${event.id}/register`}
+                          className="flex-1 py-2.5 text-sm font-semibold rounded-md flex items-center justify-center gap-1.5 border border-gold/30 text-maroon hover:bg-cream transition-colors"
+                        >
+                          <Heart className="w-3.5 h-3.5" /> Register
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 );

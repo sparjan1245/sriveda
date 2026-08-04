@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
     "canvas",
   ],
 
+  // Limits Next's jest-worker child-process pool to 1. On memory-constrained
+  // machines the default multi-process pool intermittently fails to spawn,
+  // surfacing as "Jest worker encountered N child process exceptions".
+  experimental: {
+    cpus: 1,
+  },
+
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "srivedagayatritemple.org" },

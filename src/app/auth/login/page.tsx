@@ -28,7 +28,13 @@ function LoginForm() {
     if (result?.ok) {
       router.push(redirect);
     } else {
-      setError("Invalid email or password. Please try again.");
+      if (result?.code === "no-account") {
+        setError("No account exists with this email. Please register first.");
+      } else if (result?.code === "wrong-password") {
+        setError("Incorrect password. Please try again.");
+      } else {
+        setError("Invalid email or password. Please try again.");
+      }
       setLoading(false);
     }
   };

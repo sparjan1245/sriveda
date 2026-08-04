@@ -82,7 +82,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004";
 
     // Success URL — guests land on /booking-success, auth users go to dashboard
     const tokenParam  = guestToken ? `&token=${guestToken}` : "";

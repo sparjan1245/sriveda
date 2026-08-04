@@ -13,7 +13,7 @@ This project runs **Next.js 16** with React 19, which has breaking changes vs. t
 ## Commands
 
 ```bash
-npm run dev          # starts on port 4000 (not 3000) via --webpack
+npm run dev          # starts on port 4004 (not 3000) via --webpack
 npm run build         # runs `prisma generate` first, then next build
 npm run lint          # eslint
 

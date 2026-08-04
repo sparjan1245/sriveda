@@ -5,7 +5,7 @@ import { sendBookingEmails, sendDonationEmails } from "@/lib/email";
 
 // PayPal redirects here after user approves: ?token=ORDER_ID&bookingId=xxx[&token2=guestToken]
 export async function GET(req: NextRequest) {
-  const appUrl     = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000";
+  const appUrl     = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004";
   const ppToken    = req.nextUrl.searchParams.get("token");   // PayPal order ID
   const donationId = req.nextUrl.searchParams.get("donationId");
   const bookingId  = req.nextUrl.searchParams.get("bookingId");

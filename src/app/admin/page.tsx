@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency } from "@/lib/utils";
-import { Users, BookOpen, Heart, MessageSquare, Calendar, Image, Settings, Layers, Megaphone, Users2, BarChart2, ShieldCheck, CalendarDays, CalendarRange } from "lucide-react";
+import { Users, BookOpen, Heart, MessageSquare, Calendar, Image, Settings, Layers, Megaphone, Users2, BarChart2, ShieldCheck, CalendarDays, CalendarRange, Award } from "lucide-react";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -25,6 +25,7 @@ export default async function AdminPage() {
     { label: "Bookings", href: "/admin/bookings", icon: <BookOpen />, desc: "Service requests", badge: pendingBookings },
     { label: "Donations", href: "/admin/donations", icon: <Heart />, desc: "Donation records" },
     { label: "Donation Tiers", href: "/admin/donation-tiers", icon: <Heart />, desc: "Manage public tier options" },
+    { label: "Sponsor Tiers", href: "/admin/sponsor-tiers", icon: <Award />, desc: "Named Seva tiers with $ ranges" },
     { label: "Events", href: "/admin/events", icon: <Calendar />, desc: "Create & manage events" },
     { label: "Banners", href: "/admin/banners", icon: <Layers />, desc: "Hero slideshow images" },
     { label: "Gallery", href: "/admin/gallery", icon: <Image />, desc: "Upload photos" },

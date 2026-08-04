@@ -45,7 +45,7 @@ export default async function BookingSuccessPage({
 
   // Square redirects on success — mark confirmed + send emails here
   if (gateway === "square" && booking.status === "PENDING") {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004";
     await db.booking.update({
       where: { id: bookingId },
       data:  { status: "CONFIRMED", paymentGateway: "square" },

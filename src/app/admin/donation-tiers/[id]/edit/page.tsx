@@ -12,15 +12,24 @@ export default function EditTierPage() {
   const [saving, setSaving]   = useState(false);
   const [error, setError]     = useState("");
   const [form, setForm] = useState({
-    name: "", description: "", amount: "", order: "0", recurring: false, active: true, highlighted: false,
+    name: "", description: "", amount: "", maxAmount: "", order: "0", recurring: false, active: true, highlighted: false,
   });
 
   useEffect(() => {
     fetch(`/api/donation-tiers?all=true`)
       .then(r => r.json())
-      .then((tiers: { id: string; name: string; description: string | null; amount: number; order: number; recurring: boolean; active: boolean; highlighted: boolean }[]) => {
+      .then((tiers: { id: string; name: string; description: string | null; amount: number; maxAmount: number | null; order: number; recurring: boolean; active: boolean; highlighted: boolean }[]) => {
         const t = tiers.find(x => x.id === id);
-        if (t) setForm({ name: t.name, description: t.description || "", amount: String(t.amount), order: String(t.order), recurring: t.recurring, active: t.active, highlighted: t.highlighted });
+        if (t) setForm({
+          name: t.name,
+          description: t.description || "",
+          amount: String(t.amount),
+          maxAmount: t.maxAmount != null ? String(t.maxAmount) : "",
+          order: String(t.order),
+          recurring: t.recurring,
+          active: t.active,
+          highlighted: t.highlighted,
+        });
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -32,7 +41,12 @@ export default function EditTierPage() {
     const res = await fetch(`/api/donation-tiers/${id}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ ...form, amount: parseFloat(form.amount), order: parseInt(form.order) || 0 }),
+      body:    JSON.stringify({
+        ...form,
+        amount:    parseFloat(form.amount),
+        maxAmount: form.maxAmount ? parseFloat(form.maxAmount) : null,
+        order:     parseInt(form.order) || 0,
+      }),
     });
     setSaving(false);
     if (res.ok) router.push("/admin/donation-tiers");
@@ -59,13 +73,17 @@ export default function EditTierPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-maroon/80 mb-1.5">Amount (USD) *</label>
+                <label className="block text-xs font-medium text-maroon/80 mb-1.5">Minimum Amount (USD) *</label>
                 <input className={inp} type="number" min="1" step="0.01" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-maroon/80 mb-1.5">Display Order</label>
-                <input className={inp} type="number" min="0" value={form.order} onChange={e => setForm(f => ({ ...f, order: e.target.value }))} />
+                <label className="block text-xs font-medium text-maroon/80 mb-1.5">Maximum Amount (USD)</label>
+                <input className={inp} type="number" min="1" step="0.01" value={form.maxAmount} onChange={e => setForm(f => ({ ...f, maxAmount: e.target.value }))} placeholder="Leave blank for fixed amount" />
               </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-maroon/80 mb-1.5">Display Order</label>
+              <input className={inp} type="number" min="0" value={form.order} onChange={e => setForm(f => ({ ...f, order: e.target.value }))} />
             </div>
             <div>
               <label className="block text-xs font-medium text-maroon/80 mb-1.5">Description</label>

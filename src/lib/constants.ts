@@ -19,16 +19,16 @@ export const TEMPLE = {
 };
 
 export const IMAGES = {
-  hero: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/pexels-mugesh-dsraj-218642671-11885769-1-1024x618.jpg",
-  temple1: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/pexels-photo-774282-1-1024x682.jpeg",
-  puja: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/pexels-photo-1583244-1.jpeg",
-  altar: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/pexels-photo-1583244.jpeg",
+  hero: "/hero.jpg",
+  temple1: "/temple1.jpg",
+  puja: "/puja.jpg",
+  altar: "/puja.jpg",
   download4: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/download-4.jpg",
   about1: "/about.png",
   about2: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-05-at-9.12.39-PM-1-1.jpeg",
   about3: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-05-at-9.13.45-PM-2.jpeg",
   about4: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-05-at-9.13.45-PM-1-1.jpeg",
-  pujaBase: "https://srivedagayatritemple.org/wp-content/uploads/2026/01/pexels-photo-1583244.jpeg",
+  pujaBase: "/puja.jpg",
 };
 
 export const BOARD_MEMBERS = [

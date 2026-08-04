@@ -69,6 +69,37 @@ async function main() {
     });
   }
 
+  if ((await db.sponsorTier.count()) === 0) {
+    await db.sponsorTier.createMany({
+      data: [
+        {
+          name: "Devotee Seva", minAmount: 51, maxAmount: 999,
+          benefits: "Support daily poojas and temple maintenance\nName listed in weekly announcements\nSpecial blessing at events",
+        },
+        {
+          name: "Bronze Seva", minAmount: 1000, maxAmount: 2499,
+          benefits: "All Devotee benefits\nDedicated pooja on a monthly festival\nAnnual recognition in temple newsletter",
+        },
+        {
+          name: "Silver Seva", minAmount: 2500, maxAmount: 4999,
+          benefits: "Sponsor festivals, pooja materials, or lighting\nCertificate of appreciation\nPriority event seating\nFamily name on temple board",
+        },
+        {
+          name: "Gold Seva", minAmount: 5000, maxAmount: 9999,
+          benefits: "Sponsor homams, sanctum preparation, or mandapam upgrades\nNaming rights for a temple event\nPersonal meeting with board",
+        },
+        {
+          name: "Platinum Seva", minAmount: 10000, maxAmount: 24999,
+          benefits: "Sponsor deity installation or Maha Kumbhabhishekam rituals\nFamily participation in key ceremonies\nLifetime recognition plaque\nFeatured in all publications",
+        },
+        {
+          name: "Diamond Seva", minAmount: 25000, maxAmount: null, highlighted: true,
+          benefits: "Sponsor major renovation phase or Prana Pratishta\nDonor recognition as per temple guidelines\nHighest honour from the board\nPermanent dedication plaque",
+        },
+      ],
+    });
+  }
+
   const events = [
     {
       title: "Satyanarayana Pooja",

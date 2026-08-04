@@ -189,31 +189,55 @@ model Donation {
   createdAt       DateTime       @default(now())
 
   user User? @relation(fields: [userId], references: [id])
+  event   Event?  @relation(fields: [eventId], references: [id])
+  eventId String?
 }
 
 model Event {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  date        DateTime
-  endDate     DateTime?
-  location    String?
-  image       String?
-  featured    Boolean     @default(false)
-  createdAt   DateTime    @default(now())
-  rsvps       EventRsvp[]
+  id              String                @id @default(cuid())
+  title           String
+  description     String?
+  date            DateTime
+  endDate         DateTime?
+  location        String?
+  image           String?
+  flyerImage      String?
+  featured        Boolean               @default(false)
+  createdAt       DateTime              @default(now())
+  rsvps           EventRsvp[]
+  donations       Donation[]
+  donationOptions EventDonationOption[]
 }
 
 model EventRsvp {
-  id        String   @id @default(cuid())
-  userId    String
-  eventId   String
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  userId        String?
+  eventId       String
+  guestName     String?
+  guestEmail    String?
+  guestPhone    String?
+  guestToken    String?  @unique
+  familyMembers Json?
+  createdAt     DateTime @default(now())
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: Cascade)
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([userId, eventId])
+}
+
+model EventDonationOption {
+  id          String  @id @default(cuid())
+  eventId     String
+  name        String
+  description String?
+  amount      Float
+  recurring   Boolean @default(false)
+  order       Int     @default(0)
+  active      Boolean @default(true)
+  highlighted Boolean @default(false)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model GalleryImage {
@@ -258,6 +282,7 @@ model SponsorTier {
   description String?
   benefits    String?
   active      Boolean @default(true)
+  highlighted Boolean @default(false)
 }
 
 model BoardMember {
@@ -291,6 +316,7 @@ model DonationTier {
   name        String
   description String?
   amount      Float
+  maxAmount   Float?
   recurring   Boolean @default(false)
   order       Int     @default(0)
   active      Boolean @default(true)

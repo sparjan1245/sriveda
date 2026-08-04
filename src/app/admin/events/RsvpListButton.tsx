@@ -14,13 +14,23 @@ interface RsvpUser {
 interface Rsvp {
   id: string;
   createdAt: Date;
-  user: RsvpUser;
+  user: RsvpUser | null;
+  guestName: string | null;
+  guestEmail: string | null;
 }
 
-function Avatar({ user, size = "sm" }: { user: RsvpUser; size?: "sm" | "lg" }) {
+function displayName(r: Rsvp) {
+  return r.user?.name || r.guestName || "—";
+}
+function displayEmail(r: Rsvp) {
+  return r.user?.email || r.guestEmail || "—";
+}
+
+function Avatar({ r, size = "sm" }: { r: Rsvp; size?: "sm" | "lg" }) {
   const dim = size === "lg" ? "w-10 h-10" : "w-7 h-7";
   const text = size === "lg" ? "text-sm" : "text-[11px]";
-  const initials = (user.name || user.email || "?")
+  const name = displayName(r);
+  const initials = (name !== "—" ? name : displayEmail(r))
     .split(" ")
     .map((w) => w[0])
     .join("")
@@ -29,8 +39,8 @@ function Avatar({ user, size = "sm" }: { user: RsvpUser; size?: "sm" | "lg" }) {
 
   return (
     <div className={`${dim} rounded-full overflow-hidden bg-maroon/10 border-2 border-white flex items-center justify-center shrink-0`}>
-      {user.image ? (
-        <Image src={user.image} alt={user.name || ""} width={40} height={40} className="object-cover w-full h-full" />
+      {r.user?.image ? (
+        <Image src={r.user.image} alt={name} width={40} height={40} className="object-cover w-full h-full" />
       ) : (
         <span className={`font-cinzel font-bold text-maroon ${text}`}>{initials}</span>
       )}
@@ -59,7 +69,7 @@ export default function RsvpListButton({ rsvps }: { rsvps: Rsvp[] }) {
         {/* Stacked avatars */}
         <div className="flex -space-x-2">
           {shown.map((r) => (
-            <Avatar key={r.id} user={r.user} size="sm" />
+            <Avatar key={r.id} r={r} size="sm" />
           ))}
           {extra > 0 && (
             <div className="w-7 h-7 rounded-full bg-saffron/15 border-2 border-white flex items-center justify-center">
@@ -104,12 +114,15 @@ export default function RsvpListButton({ rsvps }: { rsvps: Rsvp[] }) {
               {rsvps.map((r, i) => (
                 <div key={r.id} className="flex items-center gap-3 p-3 bg-cream rounded-xl gold-border">
                   <span className="text-xs text-foreground/30 w-5 text-right shrink-0">{i + 1}</span>
-                  <Avatar user={r.user} size="lg" />
+                  <Avatar r={r} size="lg" />
                   <div className="min-w-0">
-                    <p className="font-semibold text-maroon text-sm truncate">
-                      {r.user.name || "—"}
+                    <p className="font-semibold text-maroon text-sm truncate flex items-center gap-1.5">
+                      {displayName(r)}
+                      {!r.user && (
+                        <span className="text-[10px] bg-gold/15 text-maroon/60 px-1.5 py-0.5 rounded-full font-medium shrink-0">Guest</span>
+                      )}
                     </p>
-                    <p className="text-foreground/60 text-xs truncate">{r.user.email || "—"}</p>
+                    <p className="text-foreground/60 text-xs truncate">{displayEmail(r)}</p>
                     <p className="text-foreground/40 text-[11px] mt-0.5">
                       RSVPed {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </p>

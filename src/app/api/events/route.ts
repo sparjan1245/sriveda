@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const { title, description, date, endDate, location, image, featured } = await req.json();
+  const { title, description, date, endDate, location, image, flyerImage, featured } = await req.json();
 
   if (!title || !date) {
     return NextResponse.json({ error: "Title and date are required." }, { status: 400 });
@@ -35,6 +35,7 @@ export async function POST(req: Request) {
       endDate: endDate ? new Date(endDate) : undefined,
       location,
       image,
+      flyerImage,
       featured: featured || false,
     },
   });

@@ -11,7 +11,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   const { id } = await params;
-  const { title, description, date, endDate, location, image, featured } = await req.json();
+  const { title, description, date, endDate, location, image, flyerImage, featured } = await req.json();
 
   if (!title || !date) {
     return NextResponse.json({ error: "Title and date are required." }, { status: 400 });
@@ -26,6 +26,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       endDate: endDate ? new Date(endDate) : null,
       location,
       image,
+      flyerImage,
       featured: featured ?? false,
     },
   });

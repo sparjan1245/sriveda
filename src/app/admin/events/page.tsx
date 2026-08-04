@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime } from "@/lib/utils";
 import { parseListParams } from "@/lib/list-query";
-import { ArrowLeft, Calendar, MapPin, Star, CalendarDays } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Star, CalendarDays, HandCoins, Heart, Users } from "lucide-react";
 import { IMAGES } from "@/lib/constants";
 import EventForm from "./EventForm";
 import DeleteEventButton from "./DeleteEventButton";
@@ -48,7 +48,7 @@ export default async function AdminEventsPage({
       skip,
       take,
       include: {
-        _count: { select: { rsvps: true } },
+        _count: { select: { rsvps: true, donations: true } },
         rsvps: {
           include: { user: { select: { id: true, name: true, email: true, image: true } } },
           orderBy: { createdAt: "asc" },
@@ -119,6 +119,7 @@ export default async function AdminEventsPage({
                     <SortableHeader field="location" label="Location" className="w-32" />
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-20">Status</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-20">RSVPs</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-24">Donations</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-28">Actions</th>
                   </tr>
                 </thead>
@@ -195,12 +196,44 @@ export default async function AdminEventsPage({
 
                         {/* RSVPs */}
                         <td className="px-4 py-3 align-middle">
-                          <RsvpListButton rsvps={event.rsvps as Array<{ id: string; createdAt: Date; user: { id: string; name: string | null; email: string | null; image: string | null } }>} />
+                          <div className="flex items-center gap-2">
+                            <RsvpListButton rsvps={event.rsvps} />
+                            {event._count.rsvps > 0 && (
+                              <Link
+                                href={`/admin/events/${event.id}/registrations`}
+                                className="p-1.5 rounded-lg text-foreground/40 hover:text-maroon hover:bg-cream transition-colors"
+                                title="View full registrations & payments"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                              </Link>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Donations */}
+                        <td className="px-4 py-3 align-middle">
+                          {event._count.donations > 0 ? (
+                            <Link
+                              href={`/admin/donations?eventId=${event.id}`}
+                              className="flex items-center gap-1.5 text-xs text-saffron hover:underline whitespace-nowrap"
+                            >
+                              <HandCoins className="w-3.5 h-3.5" /> {event._count.donations}
+                            </Link>
+                          ) : (
+                            <span className="text-foreground/30 text-xs">—</span>
+                          )}
                         </td>
 
                         {/* Actions */}
                         <td className="px-4 py-3 align-middle">
                           <div className="flex items-center gap-1.5">
+                            <Link
+                              href={`/admin/events/${event.id}/donation-options`}
+                              className="p-2 rounded-lg text-foreground/40 hover:text-maroon hover:bg-cream transition-colors inline-flex"
+                              title="Donation Options"
+                            >
+                              <Heart className="w-4 h-4" />
+                            </Link>
                             <EditEventButton event={event} />
                             <DeleteEventButton eventId={event.id} />
                           </div>

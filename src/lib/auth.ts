@@ -1,9 +1,16 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+
+class NoAccountError extends CredentialsSignin {
+  code = "no-account";
+}
+class WrongPasswordError extends CredentialsSignin {
+  code = "wrong-password";
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -29,14 +36,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: credentials.email as string },
         });
 
-        if (!user || !user.password) return null;
+        if (!user || !user.password) throw new NoAccountError();
 
         const valid = await bcrypt.compare(
           credentials.password as string,
           user.password
         );
 
-        if (!valid) return null;
+        if (!valid) throw new WrongPasswordError();
 
         return user;
       },

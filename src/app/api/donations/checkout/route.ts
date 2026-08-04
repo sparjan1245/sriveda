@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { createCheckoutSession } from "@/lib/stripe";
 import { createPayPalOrder } from "@/lib/payments/paypal";
 import { createSquareCheckout } from "@/lib/payments/square";
-import { formatReceiptNumber } from "@/lib/utils";
+import { formatReceiptNumber, formatCurrency } from "@/lib/utils";
 import { randomBytes } from "crypto";
 import { sendDonationEmails } from "@/lib/email";
 
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     const session = await auth();
     const {
       amount, cause, firstName, lastName, email,
-      phone, message, recurring, gateway = "stripe",
+      phone, message, recurring, gateway = "stripe", eventId, tierId, sponsorTierId,
     } = await req.json();
 
     const name = `${firstName ?? ""} ${lastName ?? ""}`.trim();
@@ -21,6 +21,33 @@ export async function POST(req: Request) {
     if (!amount || amount < 1) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
     }
+
+    const rangeError = (label: string, min: number, max: number | null) => {
+      if (amount >= min && (max == null || amount <= max)) return null;
+      const rangeLabel = max != null
+        ? `between ${formatCurrency(min)} and ${formatCurrency(max)}`
+        : `at least ${formatCurrency(min)}`;
+      return `Amount for "${label}" must be ${rangeLabel}.`;
+    };
+
+    if (tierId) {
+      const tier = await db.donationTier.findUnique({ where: { id: tierId } });
+      if (!tier || !tier.active) {
+        return NextResponse.json({ error: "Selected donation tier is no longer available." }, { status: 400 });
+      }
+      const err = rangeError(tier.name, tier.amount, tier.maxAmount);
+      if (err) return NextResponse.json({ error: err }, { status: 400 });
+    }
+
+    if (sponsorTierId) {
+      const sponsorTier = await db.sponsorTier.findUnique({ where: { id: sponsorTierId } });
+      if (!sponsorTier || !sponsorTier.active) {
+        return NextResponse.json({ error: "Selected sponsorship tier is no longer available." }, { status: 400 });
+      }
+      const err = rangeError(sponsorTier.name, sponsorTier.minAmount, sponsorTier.maxAmount);
+      if (err) return NextResponse.json({ error: err }, { status: 400 });
+    }
+
     if (phone) {
       const digits = String(phone).replace(/\D/g, "");
       if (digits.length < 10 || digits.length > 15) {
@@ -53,10 +80,11 @@ export async function POST(req: Request) {
         paymentGateway: gateway,
         receiptNumber,
         guestToken,
+        eventId:        eventId || null,
       },
     });
 
-    const appUrl      = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000";
+    const appUrl      = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004";
     const tokenParam  = guestToken ? `&token=${guestToken}` : "";
     const successBase = `${appUrl}/donation-success?donationId=${donation.id}${tokenParam}`;
     const cancelUrl   = `${appUrl}/donate`;
@@ -71,7 +99,7 @@ export async function POST(req: Request) {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await db.donation.update({ where: { id: donation.id }, data: { paypalOrderId: orderId } as any });
-      return NextResponse.json({ url: approveUrl });
+      return NextResponse.json({ url: approveUrl, successUrl: `${successBase}&gateway=paypal` });
     }
 
     // ── Square ─────────────────────────────────────────────────────────
@@ -85,7 +113,11 @@ export async function POST(req: Request) {
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await db.donation.update({ where: { id: donation.id }, data: { squareOrderId: orderId } as any });
-        return NextResponse.json({ url: checkoutUrl, squareSuccessUrl: `${successBase}&gateway=square` });
+        return NextResponse.json({
+          url: checkoutUrl,
+          squareSuccessUrl: `${successBase}&gateway=square`,
+          successUrl: `${successBase}&gateway=square`,
+        });
       } catch (squareErr) {
         await db.donation.delete({ where: { id: donation.id } }).catch(() => {});
         const msg = squareErr instanceof Error ? squareErr.message : "Square checkout failed";
@@ -121,7 +153,7 @@ export async function POST(req: Request) {
       data:  { stripePaymentId: checkoutSession.id },
     });
 
-    return NextResponse.json({ url: checkoutSession.url });
+    return NextResponse.json({ url: checkoutSession.url, successUrl: `${successBase}&gateway=stripe` });
   } catch (error) {
     console.error("Donation checkout error:", error);
     const msg = error instanceof Error ? error.message : "Failed to create checkout session";
@@ -134,6 +166,6 @@ export async function PATCH(req: Request) {
   const { donationId, appUrl } = await req.json();
   if (!donationId) return NextResponse.json({ error: "Missing donationId" }, { status: 400 });
   await db.donation.update({ where: { id: donationId }, data: { status: "COMPLETED" } });
-  sendDonationEmails(donationId, appUrl || "http://localhost:4000").catch(console.error);
+  sendDonationEmails(donationId, appUrl || "http://localhost:4004").catch(console.error);
   return NextResponse.json({ ok: true });
 }

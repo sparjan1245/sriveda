@@ -5,9 +5,10 @@ import { db } from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
 import { TEMPLE } from "@/lib/constants";
 import { getContactInfo, type ContactInfo } from "@/lib/contact";
-import { formatDate, formatCurrency, amountToWords } from "@/lib/utils";
+import { formatDate, formatDateTime, formatCurrency, amountToWords } from "@/lib/utils";
 import BookingReceiptDoc from "@/components/pdf/BookingReceiptDoc";
 import DonationReceiptDoc from "@/components/pdf/DonationReceiptDoc";
+import EventRegistrationDoc from "@/components/pdf/EventRegistrationDoc";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -127,6 +128,31 @@ async function buildDonationPdf(d: any, appUrl: string, contact: ContactInfo): P
   )) as Buffer);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function buildEventRegistrationPdf(r: any, appUrl: string, contact: ContactInfo): Promise<Buffer> {
+  const confirmationNo = `VGCC/REG/${r.id.slice(-6).toUpperCase()}`;
+  const attendeeName = r.user?.name || r.guestName || "Devotee";
+  const familyMembers = Array.isArray(r.familyMembers) ? r.familyMembers : [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ((await (renderToBuffer as any)(
+    React.createElement(EventRegistrationDoc, {
+      logoUrl:        `${appUrl}/logo.png`,
+      confirmationNo,
+      createdAt:      formatDate(r.createdAt),
+      attendeeName,
+      attendeeEmail:  r.user?.email || r.guestEmail || undefined,
+      attendeePhone:  r.user?.phone || r.guestPhone || undefined,
+      eventTitle:     r.event.title,
+      eventDate:      formatDateTime(r.event.date),
+      eventLocation:  r.event.location || undefined,
+      familyMembers,
+      templeAddress:  contact.address,
+      templePhone:    contact.phones[0],
+      templeEmail:    contact.emails[0],
+    })
+  )) as Buffer);
+}
+
 // ── HTML templates ────────────────────────────────────────────────────────────
 
 const YEAR = new Date().getFullYear();
@@ -238,6 +264,80 @@ function donationConfirmHtml(opts: {
 </div></body></html>`;
 }
 
+function eventRegistrationConfirmHtml(opts: {
+  attendeeName: string; eventTitle: string; eventDate: string; eventLocation?: string;
+  confirmationNo: string; receiptLink: string; familyCount: number; contact: ContactInfo;
+}) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${baseStyles}
+  .welcome{background:linear-gradient(135deg,#7B1B1B,#4A0A12);color:#fff;padding:20px 24px;border-radius:8px;margin-bottom:18px;text-align:center}
+  .welcome h2{margin:0 0 6px;font-size:20px;letter-spacing:0.03em}
+  .welcome p{margin:0;font-size:13px;opacity:0.85}
+  .blessing{background:#FFFDF0;border-left:4px solid #D4A017;padding:12px 16px;margin:16px 0;font-style:italic;font-size:13px;color:#5a3e00;border-radius:0 6px 6px 0}
+  </style></head><body>
+<div class="wrap">
+  <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${opts.contact.address}</p></div>
+  <div class="body">
+    <div class="welcome">
+      <h2>🙏 You're Registered!</h2>
+      <p>We look forward to welcoming you to this sacred event</p>
+    </div>
+
+    <p>Dear <strong>${opts.attendeeName}</strong>,</p>
+    <p>Namaste! Your registration for <strong>${opts.eventTitle}</strong> at <strong>${TEMPLE.name}</strong> has been <strong>confirmed</strong>.</p>
+
+    <div class="blessing">
+      "May this sacred gathering bring you closer to the Divine and fill your heart with peace and joy." 🌸
+    </div>
+
+    <hr class="divider">
+    <p style="font-size:13px;font-weight:bold;color:#7B1B1B">Registration Confirmation</p>
+    <div class="box">
+      <div class="row"><span style="color:#777">Event</span><span>${opts.eventTitle}</span></div>
+      <div class="row"><span style="color:#777">Date</span><span>${opts.eventDate}</span></div>
+      ${opts.eventLocation ? `<div class="row"><span style="color:#777">Location</span><span>${opts.eventLocation}</span></div>` : ""}
+      ${opts.familyCount > 0 ? `<div class="row"><span style="color:#777">Family Members</span><span>${opts.familyCount}</span></div>` : ""}
+      <div class="row"><span>Confirmation #</span><span style="color:#C67C2C">${opts.confirmationNo}</span></div>
+    </div>
+
+    <p style="font-size:13px">Your <strong>confirmation PDF is attached</strong> to this email. Please bring it with you to the event.</p>
+    <div style="text-align:center"><a href="${opts.receiptLink}" class="btn">📄 Download Confirmation PDF</a></div>
+    <hr class="divider">
+    <p style="font-size:13px;color:#555">Please arrive a few minutes early. We can't wait to see you there!</p>
+    <p style="font-size:12px;color:#666">Questions? <a href="mailto:${opts.contact.emails[0]}" style="color:#C67C2C">${opts.contact.emails[0]}</a> · <a href="tel:${opts.contact.phones[0]}" style="color:#C67C2C">${opts.contact.phones[0]}</a></p>
+    <p style="font-size:12px;color:#C67C2C;text-align:center;margin-top:8px">🙏 Jai Sri Veda Gayatri 🙏</p>
+  </div>
+  <div class="footer">&copy; ${YEAR} ${TEMPLE.name} · <a href="https://www.srivedagayatritemple.org" style="color:#C67C2C">www.srivedagayatritemple.org</a></div>
+</div></body></html>`;
+}
+
+function adminEventRegistrationHtml(opts: {
+  attendeeName: string; attendeeEmail: string; attendeePhone: string;
+  eventTitle: string; eventDate: string; confirmationNo: string; familyCount: number; isGuest: boolean;
+}) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+  body{font-family:Arial,sans-serif;color:#222;margin:0;padding:0}
+  .wrap{max-width:560px;margin:0 auto;padding:24px 18px}
+  .header{background:#7B1B1B;color:#fff;padding:16px 20px;border-radius:6px 6px 0 0}
+  .header h2{margin:0;font-size:16px}
+  .body{background:#f9f9f9;border:1px solid #ddd;border-top:none;padding:18px;border-radius:0 0 6px 6px}
+  .row{display:flex;padding:6px 0;border-bottom:1px solid #eee;font-size:13px}
+  .row:last-child{border:none} .label{width:130px;color:#777;flex-shrink:0} .value{font-weight:600}
+  .badge{display:inline-block;background:#FFF3CD;color:#856404;border:1px solid #FFDA6A;border-radius:4px;font-size:11px;padding:2px 8px;margin-left:8px}
+  </style></head><body>
+<div class="wrap">
+  <div class="header"><h2>📋 New Event Registration${opts.isGuest ? ' <span class="badge">Guest</span>' : ""}</h2></div>
+  <div class="body">
+    <div class="row"><span class="label">Attendee</span><span class="value">${opts.attendeeName}</span></div>
+    <div class="row"><span class="label">Email</span><span class="value">${opts.attendeeEmail}</span></div>
+    <div class="row"><span class="label">Phone</span><span class="value">${opts.attendeePhone}</span></div>
+    <div class="row"><span class="label">Event</span><span class="value">${opts.eventTitle}</span></div>
+    <div class="row"><span class="label">Date</span><span class="value">${opts.eventDate}</span></div>
+    ${opts.familyCount > 0 ? `<div class="row"><span class="label">Family Members</span><span class="value">${opts.familyCount}</span></div>` : ""}
+    <div class="row"><span class="label">Confirmation #</span><span class="value" style="font-family:monospace">${opts.confirmationNo}</span></div>
+  </div>
+</div></body></html>`;
+}
+
 function adminBookingHtml(opts: {
   devoteeName: string; devoteeEmail: string; devoteePhone: string;
   serviceName: string; serviceDate: string; amount: string;
@@ -304,7 +404,7 @@ function adminDonationHtml(opts: {
 
 export async function sendBookingEmails(
   bookingId: string,
-  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000"
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004"
 ): Promise<void> {
   const cfg = await getEmailConfig();
   if (!cfg) { console.log("Email: no provider configured, skipping."); return; }
@@ -373,7 +473,7 @@ export async function sendBookingEmails(
 
 export async function sendDonationEmails(
   donationId: string,
-  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000"
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004"
 ): Promise<void> {
   const cfg = await getEmailConfig();
   if (!cfg) { console.log("Email: no provider configured, skipping."); return; }
@@ -436,6 +536,67 @@ export async function sendDonationEmails(
     }),
     attachments: attach,
   }).catch((e) => console.error("Email: admin donation send failed:", e));
+}
+
+export async function sendEventRegistrationEmail(
+  rsvpId: string,
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004"
+): Promise<void> {
+  const cfg = await getEmailConfig();
+  if (!cfg) { console.log("Email: no provider configured, skipping."); return; }
+  const contact = await getContactInfo();
+
+  const rsvp = await db.eventRsvp.findUnique({
+    where: { id: rsvpId },
+    include: { user: true, event: true },
+  });
+  if (!rsvp) return;
+
+  const transport = createTransport(cfg);
+  const confirmationNo = `VGCC/REG/${rsvpId.slice(-6).toUpperCase()}`;
+  const attendeeName = rsvp.user?.name || rsvp.guestName || "Devotee";
+  const attendeeEmail = rsvp.user?.email || rsvp.guestEmail;
+  const attendeePhone = rsvp.user?.phone || rsvp.guestPhone || "N/A";
+  const familyCount = Array.isArray(rsvp.familyMembers) ? rsvp.familyMembers.length : 0;
+
+  const receiptLink = rsvp.guestToken
+    ? `${appUrl}/api/receipts/event-registration/${rsvpId}?token=${rsvp.guestToken}`
+    : `${appUrl}/api/receipts/event-registration/${rsvpId}`;
+
+  let pdfBuffer: Buffer;
+  try { pdfBuffer = await buildEventRegistrationPdf(rsvp, appUrl, contact); }
+  catch (err) { console.error("Email: Event registration PDF failed:", err); return; }
+
+  const attach = [{
+    filename:    `event-registration-${confirmationNo}.pdf`,
+    content:     pdfBuffer,
+    contentType: "application/pdf",
+  }];
+
+  if (attendeeEmail) {
+    transport.sendMail({
+      from: `"${TEMPLE.name}" <${cfg.user}>`,
+      to:   attendeeEmail,
+      subject: `✅ You're Registered – ${rsvp.event.title} | ${TEMPLE.name}`,
+      html: eventRegistrationConfirmHtml({
+        attendeeName, eventTitle: rsvp.event.title, eventDate: formatDateTime(rsvp.event.date),
+        eventLocation: rsvp.event.location || undefined, confirmationNo, receiptLink, familyCount, contact,
+      }),
+      attachments: attach,
+    }).catch((e) => console.error("Email: attendee registration send failed:", e));
+  }
+
+  transport.sendMail({
+    from: `"${TEMPLE.name}" <${cfg.user}>`,
+    to:   cfg.adminEmails.join(", "),
+    subject: `New Event Registration: ${rsvp.event.title} – ${attendeeName}`,
+    html: adminEventRegistrationHtml({
+      attendeeName, attendeeEmail: attendeeEmail || "N/A", attendeePhone,
+      eventTitle: rsvp.event.title, eventDate: formatDateTime(rsvp.event.date),
+      confirmationNo, familyCount, isGuest: !rsvp.userId,
+    }),
+    attachments: attach,
+  }).catch((e) => console.error("Email: admin registration send failed:", e));
 }
 
 export async function sendContactNotification(opts: {

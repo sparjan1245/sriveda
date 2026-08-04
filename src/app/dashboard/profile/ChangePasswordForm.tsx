@@ -26,7 +26,7 @@ export default function ChangePasswordForm() {
       if (res.ok) {
         setSuccess(true);
         setForm({ currentPassword: "", newPassword: "", confirm: "" });
-        setTimeout(() => setSuccess(false), 4000);
+        setTimeout(() => setSuccess(false), 4004);
       } else {
         setError(data.error || "Failed to update password.");
       }

@@ -8,13 +8,14 @@ interface TierData {
   name: string;
   description: string;
   amount: string;
+  maxAmount: string;
   order: string;
   recurring: boolean;
   active: boolean;
   highlighted: boolean;
 }
 
-const BLANK: TierData = { name: "", description: "", amount: "", order: "0", recurring: false, active: true, highlighted: false };
+const BLANK: TierData = { name: "", description: "", amount: "", maxAmount: "", order: "0", recurring: false, active: true, highlighted: false };
 
 export default function TierForm({ nextOrder }: { nextOrder: number }) {
   const router          = useRouter();
@@ -32,7 +33,12 @@ export default function TierForm({ nextOrder }: { nextOrder: number }) {
     const res = await fetch("/api/donation-tiers", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ ...form, amount: parseFloat(form.amount), order: parseInt(form.order) || 0 }),
+      body:    JSON.stringify({
+        ...form,
+        amount:    parseFloat(form.amount),
+        maxAmount: form.maxAmount ? parseFloat(form.maxAmount) : null,
+        order:     parseInt(form.order) || 0,
+      }),
     });
     setSaving(false);
     if (res.ok) { setOpen(false); setForm({ ...BLANK, order: String(nextOrder + 1) }); router.refresh(); }
@@ -61,10 +67,14 @@ export default function TierForm({ nextOrder }: { nextOrder: number }) {
               <input className={inp} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Annadanam Sponsor" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-maroon/80 mb-1.5">Amount (USD) *</label>
+              <label className="block text-xs font-medium text-maroon/80 mb-1.5">Minimum Amount (USD) *</label>
               <input className={inp} type="number" min="1" step="0.01" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="51" />
             </div>
             <div>
+              <label className="block text-xs font-medium text-maroon/80 mb-1.5">Maximum Amount (USD)</label>
+              <input className={inp} type="number" min="1" step="0.01" value={form.maxAmount} onChange={e => setForm(f => ({ ...f, maxAmount: e.target.value }))} placeholder="Leave blank for fixed amount" />
+            </div>
+            <div className="col-span-2">
               <label className="block text-xs font-medium text-maroon/80 mb-1.5">Display Order</label>
               <input className={inp} type="number" min="0" value={form.order} onChange={e => setForm(f => ({ ...f, order: e.target.value }))} />
             </div>

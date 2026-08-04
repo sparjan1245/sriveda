@@ -15,7 +15,7 @@ export default async function HomePage() {
   const todayStr = new Date().toISOString().split("T")[0];
   const [y, m, d] = todayStr.split("-").map(Number);
   const dayStart = new Date(Date.UTC(y, m - 1, d));
-  const dayEnd   = new Date(dayStart.getTime() + 86400000);
+  const dayEnd   = new Date(dayStart.getTime() + 86400400);
 
   const [dbBanners, dbServices, dbTiers, dbTestimonials, dbBoardMembers, dbGalleryImages, dbGalleryVideos, panchangamRow] = await Promise.all([
     db.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),

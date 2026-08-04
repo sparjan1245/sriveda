@@ -12,6 +12,7 @@ interface Event {
   endDate?: Date | null;
   location?: string | null;
   image?: string | null;
+  flyerImage?: string | null;
   featured: boolean;
 }
 
@@ -32,6 +33,11 @@ export default function EditEventButton({ event }: { event: Event }) {
   const [uploadedUrl, setUploadedUrl] = useState(event.image ?? "");
   const [previewSrc, setPreviewSrc] = useState(event.image ?? "");
 
+  const flyerFileRef = useRef<HTMLInputElement>(null);
+  const [flyerUploading, setFlyerUploading] = useState(false);
+  const [flyerUrl, setFlyerUrl] = useState(event.flyerImage ?? "");
+  const [flyerPreviewSrc, setFlyerPreviewSrc] = useState(event.flyerImage ?? "");
+
   const [form, setForm] = useState({
     title: event.title,
     description: event.description ?? "",
@@ -45,8 +51,11 @@ export default function EditEventButton({ event }: { event: Event }) {
     setOpen(false);
     setUploadedUrl(event.image ?? "");
     setPreviewSrc(event.image ?? "");
+    setFlyerUrl(event.flyerImage ?? "");
+    setFlyerPreviewSrc(event.flyerImage ?? "");
     setError("");
     if (fileRef.current) fileRef.current.value = "";
+    if (flyerFileRef.current) flyerFileRef.current.value = "";
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -71,6 +80,23 @@ export default function EditEventButton({ event }: { event: Event }) {
     finally { setUploading(false); }
   };
 
+  const handleFlyerFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFlyerPreviewSrc(URL.createObjectURL(file));
+    setFlyerUrl(""); setError(""); setFlyerUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", "temple/events");
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Upload failed."); setFlyerPreviewSrc(event.flyerImage ?? ""); }
+      else setFlyerUrl(data.url);
+    } catch { setError("Upload failed."); setFlyerPreviewSrc(event.flyerImage ?? ""); }
+    finally { setFlyerUploading(false); }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setError("");
@@ -78,7 +104,7 @@ export default function EditEventButton({ event }: { event: Event }) {
       const res = await fetch(`/api/events/${event.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, image: uploadedUrl || null }),
+        body: JSON.stringify({ ...form, image: uploadedUrl || null, flyerImage: flyerUrl || null }),
       });
       if (!res.ok) { const d = await res.json(); setError(d.error || "Failed to update."); }
       else { close(); router.refresh(); }
@@ -154,6 +180,50 @@ export default function EditEventButton({ event }: { event: Event }) {
                 <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
               </div>
 
+              {/* Flyer image upload */}
+              <div>
+                <label className={labelClass}>Flyer Image <span className="text-foreground/40 font-normal">(optional poster/pamphlet — click to replace)</span></label>
+                <div
+                  onClick={() => !flyerUploading && flyerFileRef.current?.click()}
+                  className={`relative rounded-xl border-2 border-dashed cursor-pointer overflow-hidden transition-colors
+                    ${flyerPreviewSrc ? "border-gold/40" : "border-gold/30 hover:border-saffron"}
+                    ${flyerUploading ? "cursor-wait" : ""}`}
+                  style={{ minHeight: "8rem" }}
+                >
+                  {flyerPreviewSrc ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={flyerPreviewSrc} alt="Flyer preview" className="w-full h-36 object-contain bg-cream" />
+                      {flyerUploading && (
+                        <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 text-white">
+                          <Loader2 className="w-6 h-6 animate-spin" /><span className="text-sm">Uploading…</span>
+                        </div>
+                      )}
+                      {flyerUrl && !flyerUploading && (
+                        <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                          {flyerUrl === event.flyerImage ? "✓ Current flyer" : "✓ Uploaded"}
+                        </div>
+                      )}
+                      {!flyerUploading && (
+                        <button type="button" onClick={(ev) => { ev.stopPropagation(); setFlyerPreviewSrc(event.flyerImage ?? ""); setFlyerUrl(event.flyerImage ?? ""); if (flyerFileRef.current) flyerFileRef.current.value = ""; }}
+                          className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors">
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-2 py-8 text-foreground/50">
+                      <div className="w-10 h-10 rounded-full bg-cream flex items-center justify-center">
+                        <ImageIcon className="w-5 h-5 text-gold/60" />
+                      </div>
+                      <p className="text-sm font-medium">Click to upload flyer</p>
+                      <p className="text-xs">JPEG, PNG, WebP · max 10 MB</p>
+                    </div>
+                  )}
+                </div>
+                <input ref={flyerFileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFlyerFile} />
+              </div>
+
               <div>
                 <label className={labelClass}>Title *</label>
                 <input name="title" value={form.title} onChange={handleChange} required className={inputClass} />
@@ -180,6 +250,13 @@ export default function EditEventButton({ event }: { event: Event }) {
                 <input type="checkbox" name="featured" id="edit-featured" checked={form.featured} onChange={handleChange} className="w-4 h-4 accent-saffron" />
                 <label htmlFor="edit-featured" className="text-sm text-maroon/80">Featured event</label>
               </div>
+
+              <a
+                href={`/admin/events/${event.id}/donation-options`}
+                className="flex items-center gap-1.5 text-xs font-medium text-saffron hover:text-maroon transition-colors w-fit"
+              >
+                Manage donation options for this event →
+              </a>
 
               {error && <p className="text-red-500 text-sm bg-red-50 border border-red-200 p-3 rounded-lg">{error}</p>}
 

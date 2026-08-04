@@ -21,8 +21,9 @@ export default function ForgotPasswordPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) setSent(true);
-      else setError("Something went wrong. Please try again.");
+      else setError(data.error || "Something went wrong. Please try again.");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -49,7 +50,7 @@ export default function ForgotPasswordPage() {
               <CheckCircle className="w-14 h-14 text-green-500 mx-auto mb-4" />
               <h3 className="font-cinzel font-semibold text-maroon text-xl mb-2">Check Your Email</h3>
               <p className="text-foreground/60 text-sm mb-6">
-                If an account with <strong>{email}</strong> exists, a password reset link has been sent.
+                A password reset link has been sent to <strong>{email}</strong>.
               </p>
               <Link href="/auth/login" className="btn-primary px-8">Back to Sign In</Link>
             </div>

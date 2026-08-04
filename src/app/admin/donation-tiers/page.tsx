@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatAmountRange } from "@/lib/utils";
 import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft, RefreshCw, Heart, Star } from "lucide-react";
 import TierForm from "./TierForm";
@@ -120,7 +120,11 @@ export default async function DonationTiersPage({
                         </p>
                       </td>
                       <td className="px-4 py-3 align-middle">
-                        <span className="font-bold text-saffron">{formatCurrency(tier.amount)}</span>
+                        <span className="font-bold text-saffron">
+                          {tier.maxAmount != null && tier.maxAmount > tier.amount
+                            ? formatAmountRange(tier.amount, tier.maxAmount)
+                            : formatCurrency(tier.amount)}
+                        </span>
                       </td>
                       <td className="px-4 py-3 align-middle">
                         {tier.recurring ? (

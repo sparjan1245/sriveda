@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004";
     // Fire-and-forget — don't block the response
     sendBookingEmails(booking.id, appUrl).catch(console.error);
 

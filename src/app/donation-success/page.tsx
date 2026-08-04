@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { TEMPLE } from "@/lib/constants";
 import { getContactInfo } from "@/lib/contact";
 import { sendDonationEmails } from "@/lib/email";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,7 @@ export default async function DonationSuccessPage({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const donation = await db.donation.findUnique({ where: { id: donationId }, include: { user: true } }).catch(() => null) as any;
+  const donation = await db.donation.findUnique({ where: { id: donationId }, include: { user: true, event: true } }).catch(() => null) as any;
 
   if (!donation) {
     return (
@@ -63,7 +63,7 @@ export default async function DonationSuccessPage({
 
   // Square redirects here on success — mark COMPLETED + send emails
   if (gateway === "square" && donation.status === "PENDING") {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004";
     await db.donation.update({ where: { id: donationId }, data: { status: "COMPLETED" } }).catch(() => null);
     sendDonationEmails(donationId, appUrl).catch(console.error);
   }
@@ -76,6 +76,22 @@ export default async function DonationSuccessPage({
   const donorName  = donation.user?.name || donation.guestName || "Devotee";
   const donorEmail = donation.user?.email || donation.guestEmail || null;
   const contact    = await getContactInfo();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const registration = donation.eventId
+    ? await db.eventRsvp.findFirst({
+        where: donation.userId
+          ? { userId: donation.userId, eventId: donation.eventId }
+          : { eventId: donation.eventId, guestEmail: donation.guestEmail || undefined },
+        orderBy: { createdAt: "desc" },
+      }).catch(() => null) as any
+    : null;
+
+  const registrationConfirmationNo = registration ? `VGCC/REG/${registration.id.slice(-6).toUpperCase()}` : null;
+  const registrationFamilyCount = registration && Array.isArray(registration.familyMembers) ? registration.familyMembers.length : 0;
+  const registrationReceiptLink = registration
+    ? `/api/receipts/event-registration/${registration.id}${registration.guestToken ? `?token=${registration.guestToken}` : ""}`
+    : null;
 
   return (
     <div className="min-h-screen bg-cream pattern-bg flex items-center justify-center px-4 py-10">
@@ -102,6 +118,47 @@ export default async function DonationSuccessPage({
                 "your email"
               )}.
             </p>
+
+            {donation.event && registration && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-6 text-left space-y-2.5">
+                <div className="flex items-center gap-2 text-green-700 font-semibold text-sm">
+                  <CheckCircle className="w-4 h-4 shrink-0" /> Registered for {donation.event.title}
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-foreground/55">Event Date</span>
+                  <span className="font-medium">{formatDateTime(donation.event.date)}</span>
+                </div>
+                {donation.event.location && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-foreground/55">Location</span>
+                    <span className="font-medium">{donation.event.location}</span>
+                  </div>
+                )}
+                {registrationFamilyCount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-foreground/55">Family Members</span>
+                    <span className="font-medium">{registrationFamilyCount}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm border-t border-green-200 pt-2 mt-2">
+                  <span className="text-foreground/55">Confirmation #</span>
+                  <span className="font-mono text-green-700 font-semibold">{registrationConfirmationNo}</span>
+                </div>
+                <a
+                  href={registrationReceiptLink!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-green-700 hover:text-maroon text-xs font-medium pt-1"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download Registration PDF
+                </a>
+              </div>
+            )}
+            {donation.event && !registration && (
+              <div className="flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm mb-6 text-left">
+                Your donation was received, but we couldn&apos;t find a matching event registration. Please contact us so we can confirm your spot.
+              </div>
+            )}
 
             {/* Donation summary */}
             <div className="bg-cream rounded-xl p-5 mb-6 text-left space-y-2.5">

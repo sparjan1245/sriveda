@@ -22,12 +22,17 @@ export default async function AdminDonationsPage({
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const { page, pageSize, skip, take, q, sortBy, sortDir, filter } = parseListParams(await searchParams, {
+  const rawParams = await searchParams;
+  const eventIdParam = rawParams.eventId;
+  const eventId = Array.isArray(eventIdParam) ? eventIdParam[0] : eventIdParam;
+
+  const { page, pageSize, skip, take, q, sortBy, sortDir, filter } = parseListParams(rawParams, {
     sortableFields: SORTABLE_FIELDS,
     pageSize: 15,
   });
 
   const where = {
+    ...(eventId ? { eventId } : {}),
     ...(STATUS_OPTIONS.includes(filter) ? { status: filter as "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED" } : {}),
     ...(q
       ? {
@@ -44,10 +49,11 @@ export default async function AdminDonationsPage({
   };
   const orderBy = sortBy ? { [sortBy]: sortDir } : { createdAt: "desc" as const };
 
-  const [donations, total, totalReceivedAgg] = await Promise.all([
-    db.donation.findMany({ where, include: { user: true }, orderBy, skip, take }).catch(() => []),
+  const [donations, total, totalReceivedAgg, event] = await Promise.all([
+    db.donation.findMany({ where, include: { user: true, event: true }, orderBy, skip, take }).catch(() => []),
     db.donation.count({ where }).catch(() => 0),
-    db.donation.aggregate({ where: { status: "COMPLETED" }, _sum: { amount: true } }).catch(() => ({ _sum: { amount: 0 } })),
+    db.donation.aggregate({ where: { ...(eventId ? { eventId } : {}), status: "COMPLETED" }, _sum: { amount: true } }).catch(() => ({ _sum: { amount: 0 } })),
+    eventId ? db.event.findUnique({ where: { id: eventId } }).catch(() => null) : Promise.resolve(null),
   ]);
 
   const totalReceived = totalReceivedAgg._sum.amount || 0;
@@ -55,11 +61,16 @@ export default async function AdminDonationsPage({
   return (
     <div className="min-h-screen bg-cream pattern-bg">
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <Link href="/admin" className="inline-flex items-center gap-2 text-maroon/60 hover:text-maroon text-sm mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Admin Dashboard
+        <Link
+          href={event ? "/admin/events" : "/admin"}
+          className="inline-flex items-center gap-2 text-maroon/60 hover:text-maroon text-sm mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> {event ? "Events" : "Admin Dashboard"}
         </Link>
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-          <h1 className="font-cinzel font-bold text-3xl text-maroon">Donations</h1>
+          <h1 className="font-cinzel font-bold text-3xl text-maroon">
+            {event ? `Donations — ${event.title}` : "Donations"}
+          </h1>
           <div className="flex items-center gap-4">
             <div className="bg-white rounded-xl px-5 py-3 gold-border shadow-sm text-center">
               <p className="text-xs text-foreground/50">Total Received</p>
@@ -87,6 +98,7 @@ export default async function AdminDonationsPage({
                   <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Donor</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Email</th>
                   <SortableHeader field="cause" label="Cause" />
+                  {!event && <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Event</th>}
                   <SortableHeader field="amount" label="Amount" defaultDir="desc" />
                   <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Recurring</th>
                   <SortableHeader field="status" label="Status" />
@@ -96,11 +108,20 @@ export default async function AdminDonationsPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold/10">
-                {donations.map((d: { id: string; status: string; cause: string; amount: number; recurring: boolean; guestName?: string | null; guestEmail?: string | null; receiptNumber?: string | null; createdAt: Date; user?: { name?: string | null; email?: string | null } | null }) => (
+                {donations.map((d: { id: string; status: string; cause: string; amount: number; recurring: boolean; guestName?: string | null; guestEmail?: string | null; receiptNumber?: string | null; createdAt: Date; user?: { name?: string | null; email?: string | null } | null; event?: { id: string; title: string } | null }) => (
                   <tr key={d.id} className="hover:bg-cream/50 transition-colors">
                     <td className="px-4 py-3 font-medium text-maroon">{d.user?.name || d.guestName || "Anonymous"}</td>
                     <td className="px-4 py-3 text-foreground/70 text-xs">{d.user?.email || d.guestEmail || "—"}</td>
                     <td className="px-4 py-3 text-foreground/70">{d.cause}</td>
+                    {!event && (
+                      <td className="px-4 py-3 text-foreground/70 text-xs">
+                        {d.event ? (
+                          <Link href={`/admin/donations?eventId=${d.event.id}`} className="text-saffron hover:underline">
+                            {d.event.title}
+                          </Link>
+                        ) : "General"}
+                      </td>
+                    )}
                     <td className="px-4 py-3 font-bold text-saffron">{formatCurrency(d.amount)}</td>
                     <td className="px-4 py-3 text-center">{d.recurring ? "✓" : "—"}</td>
                     <td className="px-4 py-3">

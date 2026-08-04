@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const contact     = await getContactInfo();
 
   const proto   = req.headers.get("x-forwarded-proto") ?? "http";
-  const host    = req.headers.get("host") ?? "localhost:4000";
+  const host    = req.headers.get("host") ?? "localhost:4004";
   const baseUrl = `${proto}://${host}`;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

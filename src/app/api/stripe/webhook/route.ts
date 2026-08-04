@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const { bookingId, donationId } = session.metadata || {};
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4004";
 
     if (bookingId) {
       await db.booking.update({

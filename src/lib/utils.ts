@@ -12,6 +12,13 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+export function formatAmountRange(min: number, max: number | null): string {
+  const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
+  if (max == null) return `${fmt(min)}+`;
+  if (max === min) return fmt(min);
+  return `${fmt(min)} – ${fmt(max)}`;
+}
+
 export function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
