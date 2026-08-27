@@ -52,7 +52,7 @@ export default async function HomePage() {
       
 
       {/* ─────────────────── FEATURED EVENT FLYER ─────────────────── */}
-      <section className="relative py-12 md:py-18 px-4 overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
+      <section className="relative py-12 md:py-18 px-4 overflow-hidden hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
         {/* Decorations */}
         <div className="absolute inset-0 pattern-bg opacity-30 pointer-events-none" />
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 50%, rgba(212,160,23,0.08), transparent 70%)" }} />
