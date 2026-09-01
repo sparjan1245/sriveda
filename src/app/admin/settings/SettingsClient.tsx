@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Save, Loader2, CheckCircle, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Save, Loader2, CheckCircle, Eye, EyeOff, Plus, Trash2, Upload, ImageIcon, X } from "lucide-react";
 
 type StripeSettings = {
   enabled: boolean;
@@ -55,6 +55,15 @@ type SocialSettings = {
   twitter: string;
   whatsapp: string;
 };
+type AboutSettings = {
+  badge: string;
+  heading: string;
+  story: string;
+  image: string;
+  quoteSanskrit: string;
+  quoteTranslation: string;
+  quoteAttribution: string;
+};
 
 interface InitialSettings {
   stripe: StripeSettings;
@@ -63,9 +72,10 @@ interface InitialSettings {
   email: EmailSettings;
   contact: ContactSettings;
   social: SocialSettings;
+  about: AboutSettings;
 }
 
-const TABS = ["stripe", "paypal", "square", "email", "contact"] as const;
+const TABS = ["stripe", "paypal", "square", "email", "contact", "about"] as const;
 type Tab = (typeof TABS)[number];
 
 function ToggleSwitch({
@@ -169,6 +179,121 @@ function TextField({
   );
 }
 
+function TextAreaField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  hint,
+  rows = 6,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  hint?: string;
+  rows?: number;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-maroon/80 mb-1.5">{label}</label>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className="w-full px-3 py-2.5 border border-gold/30 rounded-lg text-sm focus:outline-none focus:border-saffron transition-colors"
+      />
+      {hint && <p className="text-xs text-foreground/40 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
+function ImageUploadField({
+  label,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+  hint?: string;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState(value);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+    setError("");
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", "temple/about");
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Upload failed."); setPreview(value); }
+      else onChange(data.url);
+    } catch { setError("Upload failed."); setPreview(value); }
+    finally { setUploading(false); }
+  };
+
+  const shown = preview || value;
+
+  return (
+    <div>
+      <label className="block text-xs font-medium text-maroon/80 mb-1.5">{label}</label>
+      <div
+        onClick={() => !uploading && fileRef.current?.click()}
+        className={`relative rounded-xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${shown ? "border-gold/40" : "border-gold/30 hover:border-saffron"} ${uploading ? "cursor-wait" : ""}`}
+        style={{ minHeight: "10rem" }}
+      >
+        {shown ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={shown} alt="About preview" className="w-full h-44 object-cover" />
+            {uploading && (
+              <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 text-white">
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span className="text-sm">Uploading…</span>
+              </div>
+            )}
+            {!uploading && (
+              <button
+                type="button"
+                onClick={(ev) => { ev.stopPropagation(); setPreview(""); onChange(""); if (fileRef.current) fileRef.current.value = ""; }}
+                className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1 transition-colors"
+                title="Remove image"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 py-10 text-foreground/50">
+            <div className="w-12 h-12 rounded-full bg-cream flex items-center justify-center">
+              <ImageIcon className="w-6 h-6 text-gold/60" />
+            </div>
+            <p className="text-sm font-medium">Click to select image</p>
+            <p className="text-xs">JPEG, PNG, WebP · max 10 MB</p>
+          </div>
+        )}
+      </div>
+      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFile} />
+      {uploading && (
+        <p className="text-xs text-saffron mt-1 flex items-center gap-1"><Upload className="w-3 h-3 animate-pulse" /> Uploading…</p>
+      )}
+      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {hint && !error && <p className="text-xs text-foreground/40 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
 function ListField({
   label,
   values,
@@ -243,6 +368,7 @@ export default function SettingsClient({ initial }: { initial: InitialSettings }
   const [email, setEmail]     = useState<EmailSettings>(initial.email);
   const [contact, setContact] = useState<ContactSettings>(initial.contact);
   const [social, setSocial]   = useState<SocialSettings>(initial.social);
+  const [about, setAbout]     = useState<AboutSettings>(initial.about);
   const [saving, setSaving]   = useState(false);
   const [saved, setSaved]     = useState(false);
   const [error, setError]     = useState("");
@@ -255,7 +381,7 @@ export default function SettingsClient({ initial }: { initial: InitialSettings }
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stripe, paypal, square, email, contact, social }),
+        body: JSON.stringify({ stripe, paypal, square, email, contact, social, about }),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -276,6 +402,7 @@ export default function SettingsClient({ initial }: { initial: InitialSettings }
     square: "Square",
     email:  "Email",
     contact: "Contact & Social",
+    about: "About Us",
   };
 
   return (
@@ -577,6 +704,61 @@ export default function SettingsClient({ initial }: { initial: InitialSettings }
               onChange={(v) => setSocial((s) => ({ ...s, whatsapp: v }))}
               placeholder="+16692138780"
               hint="Used for the WhatsApp quick-contact button"
+            />
+          </>
+        )}
+
+        {/* About Us Tab */}
+        {tab === "about" && (
+          <>
+            <TextField
+              label="Section Badge"
+              value={about.badge}
+              onChange={(v) => setAbout((s) => ({ ...s, badge: v }))}
+              placeholder="Our Story"
+            />
+            <TextField
+              label="Heading"
+              value={about.heading}
+              onChange={(v) => setAbout((s) => ({ ...s, heading: v }))}
+              placeholder="Founded With Purpose"
+            />
+            <TextAreaField
+              label="Story"
+              value={about.story}
+              onChange={(v) => setAbout((s) => ({ ...s, story: v }))}
+              placeholder="Sri Veda Gayatri Temple was founded in..."
+              hint="Separate paragraphs with a blank line. Shown on the About page under the heading above."
+              rows={10}
+            />
+            <ImageUploadField
+              label="About Page Image"
+              value={about.image}
+              onChange={(v) => setAbout((s) => ({ ...s, image: v }))}
+              hint="Shown beside the story on the About page."
+            />
+
+            <div className="h-px bg-gold/15" />
+            <h3 className="font-cinzel font-semibold text-maroon text-sm">Featured Quote</h3>
+
+            <TextField
+              label="Sanskrit Line"
+              value={about.quoteSanskrit}
+              onChange={(v) => setAbout((s) => ({ ...s, quoteSanskrit: v }))}
+              placeholder="Lokah Samastah Sukhino Bhavantu"
+            />
+            <TextField
+              label="Translation"
+              value={about.quoteTranslation}
+              onChange={(v) => setAbout((s) => ({ ...s, quoteTranslation: v }))}
+              placeholder="May all beings, everywhere, be happy and live in peace."
+            />
+            <TextField
+              label="Attribution"
+              value={about.quoteAttribution}
+              onChange={(v) => setAbout((s) => ({ ...s, quoteAttribution: v }))}
+              placeholder="VGCC Team"
+              hint="Shown as “— Attribution”"
             />
           </>
         )}

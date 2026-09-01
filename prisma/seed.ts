@@ -135,6 +135,30 @@ async function main() {
     await db.event.create({ data: event }).catch(() => {});
   }
 
+  const festivalYear = 2026;
+  const festivalsByMonth: [number, string[]][] = [
+    [1,  ["Sankranti / Pongal", "Vaikuntha Ekadashi"]],
+    [2,  ["Maha Shivaratri", "Thai Poosam"]],
+    [3,  ["Ugadi (Telugu New Year)", "Holi", "Ram Navami"]],
+    [4,  ["Hanuman Jayanti", "Akshaya Tritiya"]],
+    [5,  ["Buddha Purnima", "Shankaracharya Jayanti"]],
+    [6,  ["Vat Purnima", "Satyanarayana Pooja"]],
+    [7,  ["Guru Purnima", "Ashadha Ekadashi"]],
+    [8,  ["Krishna Janmashtami", "Ganesh Chaturthi", "Onam"]],
+    [9,  ["Navaratri", "Dussehra"]],
+    [10, ["Diwali", "Lakshmi Puja", "Karthik Poornima"]],
+    [11, ["Skanda Sashti", "Karthigai Deepam"]],
+    [12, ["Gita Jayanti", "Vaikunta Ekadashi"]],
+  ];
+
+  if ((await db.festival.count({ where: { year: festivalYear } })) === 0) {
+    await db.festival.createMany({
+      data: festivalsByMonth.flatMap(([month, names]) =>
+        names.map((name, order) => ({ year: festivalYear, month, name, order }))
+      ),
+    });
+  }
+
   console.log("✅ Seeding complete!");
   console.log("   Admin login: vgcc@srivedagayatritemple.org / admin123!");
 }

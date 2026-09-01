@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency } from "@/lib/utils";
-import { Users, BookOpen, Heart, MessageSquare, Calendar, Image, Settings, Layers, Megaphone, Users2, BarChart2, ShieldCheck, CalendarDays, CalendarRange, Award } from "lucide-react";
+import { Users, BookOpen, Heart, MessageSquare, Calendar, Image, Settings, Layers, Megaphone, Users2, BarChart2, ShieldCheck, CalendarDays, CalendarRange, Award, PartyPopper } from "lucide-react";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -36,6 +36,7 @@ export default async function AdminPage() {
     { label: "Reports", href: "/admin/reports", icon: <BarChart2 />, desc: "Analytics & CSV exports" },
     { label: "Staff", href: "/admin/staff", icon: <ShieldCheck />, desc: "Manage roles & permissions" },
     { label: "Panchangam", href: "/admin/panchangam", icon: <CalendarDays />, desc: "Daily Hindu calendar entries" },
+    { label: "Festival Calendar", href: "/admin/festivals", icon: <PartyPopper />, desc: "Annual festival schedule by month" },
     { label: "Calendar",   href: "/admin/calendar",   icon: <CalendarRange />, desc: "Annual calendar image uploads" },
     { label: "Settings",  href: "/admin/settings",  icon: <Settings />,      desc: "Payment gateways & email config" },
   ];
