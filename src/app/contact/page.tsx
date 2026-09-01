@@ -1,7 +1,8 @@
 ﻿import Image from "next/image";
 import type { Metadata } from "next";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
-import { TEMPLE, IMAGES } from "@/lib/constants";
+import { IMAGES } from "@/lib/constants";
+import { getContactInfo } from "@/lib/contact";
 import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
@@ -9,7 +10,10 @@ export const metadata: Metadata = {
   description: "Contact Sri Veda Gayatri Temple for inquiries about services, events, and more.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const contact = await getContactInfo();
+  const mapEmbedSrc = `https://www.google.com/maps?q=${encodeURIComponent(contact.address)}&output=embed`;
+
   return (
     <div>
       {/* ── Inner Page Banner ── */}
@@ -51,8 +55,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-cinzel font-semibold text-maroon mb-1">Temple Address</h4>
-                    <p className="text-foreground text-sm">{TEMPLE.address}</p>
-                    <p className="text-foreground text-xs mt-1">Mailing: {TEMPLE.mailingAddress}</p>
+                    <p className="text-foreground text-sm">{contact.address}</p>
+                    <p className="text-foreground text-xs mt-1">Mailing: {contact.mailingAddress}</p>
                   </div>
                 </div>
 
@@ -62,7 +66,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-cinzel font-semibold text-maroon mb-1">Temple Hours</h4>
-                    <p className="text-foreground text-sm">{TEMPLE.hours}</p>
+                    <p className="text-foreground text-sm">{contact.hours}</p>
                   </div>
                 </div>
 
@@ -72,7 +76,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-cinzel font-semibold text-maroon mb-1">Phone</h4>
-                    {TEMPLE.phones.map((phone) => (
+                    {contact.phones.map((phone) => (
                       <a key={phone} href={`tel:${phone.replace(/\D/g, "")}`} className="block text-foreground text-sm hover:text-saffron transition-colors">
                         {phone}
                       </a>
@@ -86,7 +90,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-cinzel font-semibold text-maroon mb-1">Email</h4>
-                    {TEMPLE.emails.map((email) => (
+                    {contact.emails.map((email) => (
                       <a key={email} href={`mailto:${email}`} className="block text-foreground text-sm hover:text-saffron transition-colors break-all">
                         {email}
                       </a>
@@ -98,7 +102,7 @@ export default function ContactPage() {
               {/* Map */}
               <div className="mt-6 rounded-xl overflow-hidden shadow-sm gold-border h-52">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3162.0!2d-121.216!3d37.796!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s702+W+Yosemite+Ave%2C+Manteca%2C+CA+95337!5e0!3m2!1sen!2sus!4v1!5m2!1sen!2sus"
+                  src={mapEmbedSrc}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}

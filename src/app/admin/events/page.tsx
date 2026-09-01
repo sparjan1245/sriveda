@@ -4,31 +4,63 @@ import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDateTime } from "@/lib/utils";
+import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft, Calendar, MapPin, Star, CalendarDays } from "lucide-react";
 import { IMAGES } from "@/lib/constants";
 import EventForm from "./EventForm";
 import DeleteEventButton from "./DeleteEventButton";
 import EditEventButton from "./EditEventButton";
 import RsvpListButton from "./RsvpListButton";
+import ListSearch from "@/components/admin/ListSearch";
+import SortableHeader from "@/components/admin/SortableHeader";
+import PaginationBar from "@/components/admin/PaginationBar";
 
-export default async function AdminEventsPage() {
+const SORTABLE_FIELDS = ["title", "date", "location", "createdAt"] as const;
+
+export default async function AdminEventsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const events = await db.event.findMany({
-    orderBy: { date: "asc" },
-    include: {
-      _count: { select: { rsvps: true } },
-      rsvps: {
-        include: { user: { select: { id: true, name: true, email: true, image: true } } },
-        orderBy: { createdAt: "asc" },
+  const { page, pageSize, skip, take, q, sortBy, sortDir } = parseListParams(await searchParams, {
+    sortableFields: SORTABLE_FIELDS,
+    pageSize: 10,
+  });
+
+  const where = q
+    ? {
+        OR: [
+          { title: { contains: q, mode: "insensitive" as const } },
+          { description: { contains: q, mode: "insensitive" as const } },
+          { location: { contains: q, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+  const orderBy = sortBy ? { [sortBy]: sortDir } : { date: "asc" as const };
+
+  const [events, total, totalAll, upcoming] = await Promise.all([
+    db.event.findMany({
+      where,
+      orderBy,
+      skip,
+      take,
+      include: {
+        _count: { select: { rsvps: true } },
+        rsvps: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+          orderBy: { createdAt: "asc" },
+        },
       },
-    },
-  }).catch(() => []);
+    }).catch(() => []),
+    db.event.count({ where }).catch(() => 0),
+    db.event.count().catch(() => 0),
+    db.event.count({ where: { date: { gte: new Date() } } }).catch(() => 0),
+  ]);
 
   const now = new Date();
-  const upcoming = events.filter((e) => new Date(e.date) >= now).length;
-  const total = events.length;
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">
@@ -51,19 +83,29 @@ export default async function AdminEventsPage() {
               <div className="text-xs text-foreground/50">Upcoming</div>
             </div>
             <div className="bg-white rounded-xl px-4 py-2 gold-border text-center">
-              <div className="font-cinzel font-bold text-xl text-maroon">{total}</div>
+              <div className="font-cinzel font-bold text-xl text-maroon">{totalAll}</div>
               <div className="text-xs text-foreground/50">Total</div>
             </div>
             <EventForm />
           </div>
         </div>
 
-        {events.length === 0 ? (
+        <div className="mb-4">
+          <ListSearch placeholder="Search by title, description, or location…" />
+        </div>
+
+        {total === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl gold-border">
             <CalendarDays className="w-12 h-12 text-gold/40 mx-auto mb-4" />
-            <p className="text-foreground/50 mb-2 font-cinzel">No events yet.</p>
-            <p className="text-foreground/40 text-sm mb-6">Click &ldquo;Add Event&rdquo; to create your first event.</p>
-            <EventForm />
+            {q ? (
+              <p className="text-foreground/50 mb-2 font-cinzel">No events match &ldquo;{q}&rdquo;.</p>
+            ) : (
+              <>
+                <p className="text-foreground/50 mb-2 font-cinzel">No events yet.</p>
+                <p className="text-foreground/40 text-sm mb-6">Click &ldquo;Add Event&rdquo; to create your first event.</p>
+                <EventForm />
+              </>
+            )}
           </div>
         ) : (
           <div className="bg-white rounded-2xl gold-border shadow-sm overflow-hidden">
@@ -72,9 +114,9 @@ export default async function AdminEventsPage() {
                 <thead>
                   <tr className="border-b border-gold/20 bg-cream/50">
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-20">Image</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Title</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-40">Date & Time</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-32">Location</th>
+                    <SortableHeader field="title" label="Title" />
+                    <SortableHeader field="date" label="Date & Time" className="w-40" />
+                    <SortableHeader field="location" label="Location" className="w-32" />
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-20">Status</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-20">RSVPs</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider w-28">Actions</th>
@@ -169,6 +211,7 @@ export default async function AdminEventsPage() {
                 </tbody>
               </table>
             </div>
+            <PaginationBar page={page} pageSize={pageSize} total={total} />
           </div>
         )}
       </div>

@@ -28,7 +28,12 @@ function formatPanchangamDate(isoDate: string): string {
   return `${days[d.getUTCDay()]}, ${months[d.getUTCMonth()]} ${day}${s} ${year}`;
 }
 
-export default function PanchangamSlide({ data }: { data: PanchangamData }) {
+interface Contact { address: string; phone: string; email: string; }
+
+export default function PanchangamSlide({ data, contact }: { data: PanchangamData; contact?: Contact }) {
+  const address = contact?.address || TEMPLE.address;
+  const phone   = contact?.phone   || TEMPLE.phones[1];
+  const email   = contact?.email   || TEMPLE.emails[0];
   const dateLabel  = formatPanchangamDate(data.date);
   const hinduLine1 = [data.samvatsara, data.masam].filter(Boolean).join(", ");
   const hinduLine2 = [data.ayanam, data.ruthuvu].filter(Boolean).join(", ");
@@ -87,7 +92,7 @@ export default function PanchangamSlide({ data }: { data: PanchangamData }) {
           Sri Veda Gayatri Temple
         </h2>
         <p style={{ fontSize: "0.58rem", color: "#555", textAlign: "center", margin: "0 0 7px" }}>
-          {TEMPLE.address}
+          {address}
         </p>
 
         {/* TODAY PANCHANGAM badge */}
@@ -140,7 +145,7 @@ export default function PanchangamSlide({ data }: { data: PanchangamData }) {
           </p>
           <p style={{ fontSize: "0.57rem", color: "#666", margin: "0 0 2px" }}>Founder &amp; Priest</p>
           <p style={{ fontSize: "0.54rem", color: "#888", margin: 0 }}>
-            www.srivedagayatritemple.org&ensp;·&ensp;{TEMPLE.emails[0]}&ensp;·&ensp;{TEMPLE.phones[1]}
+            www.srivedagayatritemple.org&ensp;·&ensp;{email}&ensp;·&ensp;{phone}
           </p>
         </div>
 

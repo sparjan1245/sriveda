@@ -369,11 +369,30 @@ model SiteSettings {
   squareAppId         String?
   squareLocationId    String?
   squareMode          String   @default("sandbox")
-  // Gmail SMTP (values encrypted)
+  // Email sending — active provider + per-provider credentials (values encrypted)
+  emailProvider       String   @default("gmail") // "gmail" | "hostinger"
   gmailEnabled        Boolean  @default(false)
   gmailUser           String?
   gmailAppPassword    String?
+  hostingerEnabled    Boolean  @default(false)
+  hostingerHost       String?  @default("smtp.hostinger.com")
+  hostingerPort       Int      @default(465)
+  hostingerSecure     Boolean  @default(true)
+  hostingerUser       String?
+  hostingerPassword   String?
   adminEmails         String?  // comma-separated, plain text
+  // Contact info (public-facing; plain text, falls back to defaults in src/lib/constants.ts when unset)
+  contactAddress        String?
+  contactMailingAddress String?
+  contactPhones         String[] @default([])
+  contactEmails         String[] @default([])
+  contactHours          String?
+  // Social media links (public-facing; icon is hidden on the site when unset)
+  facebookUrl           String?
+  instagramUrl          String?
+  youtubeUrl            String?
+  twitterUrl            String?
+  whatsappNumber        String?
 
   updatedAt           DateTime @updatedAt
 }

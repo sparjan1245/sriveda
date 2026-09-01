@@ -3,17 +3,52 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft, Plus, Receipt } from "lucide-react";
 import BookingActions from "./BookingActions";
+import ListSearch from "@/components/admin/ListSearch";
+import FilterSelect from "@/components/admin/FilterSelect";
+import SortableHeader from "@/components/admin/SortableHeader";
+import PaginationBar from "@/components/admin/PaginationBar";
 
-export default async function AdminBookingsPage() {
+const SORTABLE_FIELDS = ["date", "amount", "status", "createdAt"] as const;
+const STATUS_OPTIONS = ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"];
+
+export default async function AdminBookingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const bookings = await db.booking.findMany({
-    include: { service: true, user: true },
-    orderBy: { createdAt: "desc" },
-  }).catch(() => []);
+  const { page, pageSize, skip, take, q, sortBy, sortDir, filter } = parseListParams(await searchParams, {
+    sortableFields: SORTABLE_FIELDS,
+    pageSize: 15,
+  });
+
+  const where = {
+    ...(STATUS_OPTIONS.includes(filter) ? { status: filter as "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" } : {}),
+    ...(q
+      ? {
+          OR: [
+            { guestName: { contains: q, mode: "insensitive" as const } },
+            { guestEmail: { contains: q, mode: "insensitive" as const } },
+            { receiptNumber: { contains: q, mode: "insensitive" as const } },
+            { user: { name: { contains: q, mode: "insensitive" as const } } },
+            { user: { email: { contains: q, mode: "insensitive" as const } } },
+            { service: { name: { contains: q, mode: "insensitive" as const } } },
+          ],
+        }
+      : {}),
+  };
+  const orderBy = sortBy ? { [sortBy]: sortDir } : { createdAt: "desc" as const };
+
+  const [bookings, total, pendingCount] = await Promise.all([
+    db.booking.findMany({ where, include: { service: true, user: true }, orderBy, skip, take }).catch(() => []),
+    db.booking.count({ where }).catch(() => 0),
+    db.booking.count({ where: { status: "PENDING" } }).catch(() => 0),
+  ]);
 
   const statusColors: Record<string, string> = {
     PENDING: "bg-yellow-100 text-yellow-700",
@@ -32,7 +67,7 @@ export default async function AdminBookingsPage() {
           <h1 className="font-cinzel font-bold text-3xl text-maroon">Bookings</h1>
           <div className="flex items-center gap-4">
             <span className="bg-yellow-100 text-yellow-700 text-sm px-3 py-1 rounded-full font-medium">
-              {bookings.filter((b: { status: string }) => b.status === "PENDING").length} Pending
+              {pendingCount} Pending
             </span>
             <Link href="/admin/bookings/new" className="btn-primary flex items-center gap-2 text-sm px-4 py-2 whitespace-nowrap">
               <Plus className="w-4 h-4" /> Walk-in Booking
@@ -40,14 +75,23 @@ export default async function AdminBookingsPage() {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <ListSearch placeholder="Search by devotee, service, or receipt…" />
+          <FilterSelect paramKey="filter" allLabel="All Statuses" options={STATUS_OPTIONS.map((s) => ({ value: s, label: s }))} />
+        </div>
+
         <div className="bg-white rounded-2xl gold-border shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-cream border-b border-gold/20">
                 <tr>
-                  {["Devotee", "Service", "Date", "Amount", "Status", "Receipt", "Actions"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left font-cinzel font-medium text-maroon text-xs">{h}</th>
-                  ))}
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Devotee</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Service</th>
+                  <SortableHeader field="date" label="Date" defaultDir="desc" />
+                  <SortableHeader field="amount" label="Amount" defaultDir="desc" />
+                  <SortableHeader field="status" label="Status" />
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Receipt</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold/10">
@@ -80,9 +124,12 @@ export default async function AdminBookingsPage() {
               </tbody>
             </table>
           </div>
-          {bookings.length === 0 && (
-            <p className="text-center text-foreground/50 py-12">No bookings yet.</p>
+          {total === 0 && (
+            <p className="text-center text-foreground/50 py-12">
+              {q || filter ? "No bookings match your filters." : "No bookings yet."}
+            </p>
           )}
+          <PaginationBar page={page} pageSize={pageSize} total={total} />
         </div>
       </div>
     </div>

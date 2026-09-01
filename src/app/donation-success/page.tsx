@@ -3,6 +3,7 @@ import { CheckCircle, Download, Home, Phone, Mail, LayoutDashboard } from "lucid
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { TEMPLE } from "@/lib/constants";
+import { getContactInfo } from "@/lib/contact";
 import { sendDonationEmails } from "@/lib/email";
 import { formatCurrency } from "@/lib/utils";
 
@@ -74,6 +75,7 @@ export default async function DonationSuccessPage({
 
   const donorName  = donation.user?.name || donation.guestName || "Devotee";
   const donorEmail = donation.user?.email || donation.guestEmail || null;
+  const contact    = await getContactInfo();
 
   return (
     <div className="min-h-screen bg-cream pattern-bg flex items-center justify-center px-4 py-10">
@@ -167,12 +169,12 @@ export default async function DonationSuccessPage({
 
         {/* Contact footer */}
         <div className="mt-5 bg-white/70 rounded-xl gold-border p-4 flex flex-col sm:flex-row gap-3 justify-center text-sm text-foreground/60">
-          <a href={`tel:${TEMPLE.phones[0]}`} className="flex items-center gap-2 hover:text-maroon transition-colors justify-center">
-            <Phone className="w-3.5 h-3.5 text-saffron" /> {TEMPLE.phones[0]}
+          <a href={`tel:${contact.phones[0]}`} className="flex items-center gap-2 hover:text-maroon transition-colors justify-center">
+            <Phone className="w-3.5 h-3.5 text-saffron" /> {contact.phones[0]}
           </a>
           <span className="hidden sm:block text-gold/40">·</span>
-          <a href={`mailto:${TEMPLE.emails[0]}`} className="flex items-center gap-2 hover:text-maroon transition-colors justify-center">
-            <Mail className="w-3.5 h-3.5 text-saffron" /> {TEMPLE.emails[0]}
+          <a href={`mailto:${contact.emails[0]}`} className="flex items-center gap-2 hover:text-maroon transition-colors justify-center">
+            <Mail className="w-3.5 h-3.5 text-saffron" /> {contact.emails[0]}
           </a>
         </div>
       </div>

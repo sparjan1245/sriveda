@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency, amountToWords } from "@/lib/utils";
-import { TEMPLE } from "@/lib/constants";
+import { getContactInfo } from "@/lib/contact";
 import DownloadPDFButton from "./PrintButton";
 
 export default async function BookingReceiptPage({
@@ -45,6 +45,7 @@ export default async function BookingReceiptPage({
 
   const backHref = isAdmin ? "/admin/bookings" : isOwner ? "/dashboard/bookings" : "/";
   const backLabel = isAdmin ? "Back to Bookings" : isOwner ? "Back to My Bookings" : "Home";
+  const contact = await getContactInfo();
 
   const statusColors: Record<string, string> = {
     PENDING:   "text-yellow-700 bg-yellow-50 border-yellow-200",
@@ -77,8 +78,8 @@ export default async function BookingReceiptPage({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Sri Veda Gayatri Temple" className="h-16 w-auto mx-auto mb-3" />
             <p className="font-cinzel font-bold text-lg tracking-wide text-white">Sri Veda Gayatri Cultural Center</p>
-            <p className="text-white/70 text-xs mt-0.5">{TEMPLE.address}</p>
-            <p className="text-white/70 text-xs">{TEMPLE.phones[0]} · {TEMPLE.emails[0]}</p>
+            <p className="text-white/70 text-xs mt-0.5">{contact.address}</p>
+            <p className="text-white/70 text-xs">{contact.phones[0]} · {contact.emails[0]}</p>
           </div>
 
           <div style={{ background: "linear-gradient(90deg,#D4A017,#F5C842,#D4A017)" }} className="h-1" />

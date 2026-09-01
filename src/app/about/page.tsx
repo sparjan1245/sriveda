@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Calendar, Users, Heart, Star, MapPin, Phone, Clock, Mail } from "lucide-react";
 import { TEMPLE, IMAGES } from "@/lib/constants";
+import { getContactInfo } from "@/lib/contact";
 import { db } from "@/lib/db";
 import { BoardCarousel, type BoardMemberItem } from "@/components/about/BoardCarousel";
 
@@ -15,13 +16,14 @@ export const metadata: Metadata = {
 
 
 export default async function AboutPage() {
-  const [userCount, bookingCount, dbServices, dbBoardMembers] = await Promise.all([
+  const [userCount, bookingCount, dbServices, dbBoardMembers, contact] = await Promise.all([
     db.user.count().catch(() => 0),
     db.booking.count().catch(() => 0),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db.service as any).findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (db as any).boardMember.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
+    getContactInfo(),
   ]);
 
   const boardMembers: BoardMemberItem[] = dbBoardMembers as BoardMemberItem[];
@@ -181,20 +183,20 @@ export default async function AboutPage() {
               {
                 icon: <MapPin className="w-4 h-4 text-saffron" />,
                 label: "Temple Address",
-                content: TEMPLE.address,
-                href: `https://maps.google.com/?q=${encodeURIComponent(TEMPLE.address)}`,
+                content: contact.address,
+                href: `https://maps.google.com/?q=${encodeURIComponent(contact.address)}`,
               },
               {
                 icon: <Clock className="w-4 h-4 text-saffron" />,
                 label: "Temple Hours",
-                content: TEMPLE.hours,
+                content: contact.hours,
                 href: null,
               },
               {
                 icon: <Phone className="w-4 h-4 text-saffron" />,
                 label: "Call Us",
-                content: TEMPLE.phones[0],
-                href: `tel:${TEMPLE.phones[0].replace(/\D/g, "")}`,
+                content: contact.phones[0],
+                href: `tel:${contact.phones[0].replace(/\D/g, "")}`,
               },
             ].map((item) => (
               <div key={item.label} className="bg-cream rounded-2xl p-4 gold-border text-center shadow-sm">
@@ -219,7 +221,7 @@ export default async function AboutPage() {
             <Mail className="w-4 h-4 text-saffron shrink-0" />
             <span className="font-cinzel font-semibold text-maroon text-xs md:text-sm">Email Us:</span>
             <div className="flex flex-col sm:flex-row gap-3">
-              {TEMPLE.emails.map((email) => (
+              {contact.emails.map((email) => (
                 <a key={email} href={`mailto:${email}`}
                   className="text-xs text-foreground hover:text-saffron transition-colors">
                   {email}

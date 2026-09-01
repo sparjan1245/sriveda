@@ -4,33 +4,72 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { db } from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
 import { TEMPLE } from "@/lib/constants";
+import { getContactInfo, type ContactInfo } from "@/lib/contact";
 import { formatDate, formatCurrency, amountToWords } from "@/lib/utils";
 import BookingReceiptDoc from "@/components/pdf/BookingReceiptDoc";
 import DonationReceiptDoc from "@/components/pdf/DonationReceiptDoc";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-async function getEmailConfig() {
+interface EmailConfig {
+  user: string;
+  pass: string;
+  adminEmails: string[];
+  transportOptions:
+    | { service: "gmail" }
+    | { host: string; port: number; secure: boolean };
+}
+
+async function getEmailConfig(): Promise<EmailConfig | null> {
   const s = await db.siteSettings.findUnique({ where: { id: "main" } });
-  if (!s?.gmailEnabled || !s.gmailUser || !s.gmailAppPassword) return null;
+  if (!s) return null;
+
+  const resolveAdminEmails = async () =>
+    s.adminEmails
+      ? s.adminEmails.split(",").map((e) => e.trim()).filter(Boolean)
+      : [(await getContactInfo()).emails[0]];
+
+  if (s.emailProvider === "hostinger") {
+    if (!s.hostingerEnabled || !s.hostingerUser || !s.hostingerPassword) return null;
+    const user = decrypt(s.hostingerUser);
+    const pass = decrypt(s.hostingerPassword);
+    if (!user || !pass) return null;
+    return {
+      user,
+      pass,
+      adminEmails: await resolveAdminEmails(),
+      transportOptions: {
+        host: s.hostingerHost || "smtp.hostinger.com",
+        port: s.hostingerPort || 465,
+        secure: s.hostingerSecure ?? true,
+      },
+    };
+  }
+
+  if (!s.gmailEnabled || !s.gmailUser || !s.gmailAppPassword) return null;
   const user = decrypt(s.gmailUser);
   const pass = decrypt(s.gmailAppPassword);
   if (!user || !pass) return null;
-  const adminEmails = s.adminEmails
-    ? s.adminEmails.split(",").map((e) => e.trim()).filter(Boolean)
-    : [TEMPLE.emails[0]];
-  return { user, pass, adminEmails };
+  return {
+    user,
+    pass,
+    adminEmails: await resolveAdminEmails(),
+    transportOptions: { service: "gmail" },
+  };
 }
 
-function createTransport(user: string, pass: string) {
-  return nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
+function createTransport(cfg: EmailConfig) {
+  return nodemailer.createTransport({
+    ...cfg.transportOptions,
+    auth: { user: cfg.user, pass: cfg.pass },
+  });
 }
 
 // ── PDF helpers ───────────────────────────────────────────────────────────────
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function buildBookingPdf(b: any, appUrl: string): Promise<Buffer> {
+async function buildBookingPdf(b: any, appUrl: string, contact: ContactInfo): Promise<Buffer> {
   const receiptNo   = b.receiptNumber || `VGCC/BKG/${b.id.slice(-6).toUpperCase()}`;
   const devoteeName = b.user?.name || b.guestName || "Devotee";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,15 +92,15 @@ async function buildBookingPdf(b: any, appUrl: string): Promise<Buffer> {
       notes:           b.notes       || undefined,
       amountFormatted: formatCurrency(b.amount),
       amountInWords:   amountToWords(b.amount),
-      templeAddress:   TEMPLE.address,
-      templePhone:     TEMPLE.phones[0],
-      templeEmail:     TEMPLE.emails[0],
+      templeAddress:   contact.address,
+      templePhone:     contact.phones[0],
+      templeEmail:     contact.emails[0],
     })
   )) as Buffer);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function buildDonationPdf(d: any, appUrl: string): Promise<Buffer> {
+async function buildDonationPdf(d: any, appUrl: string, contact: ContactInfo): Promise<Buffer> {
   const receiptNo = d.receiptNumber || `VGCC/DON/${d.id.slice(-6).toUpperCase()}`;
   const donorName = d.user?.name || d.guestName || "Devotee";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,9 +120,9 @@ async function buildDonationPdf(d: any, appUrl: string): Promise<Buffer> {
       amountFormatted: formatCurrency(d.amount),
       amountInWords:   amountToWords(d.amount),
       taxId:           TEMPLE.taxId,
-      templeAddress:   TEMPLE.address,
-      templePhone:     TEMPLE.phones[0],
-      templeEmail:     TEMPLE.emails[0],
+      templeAddress:   contact.address,
+      templePhone:     contact.phones[0],
+      templeEmail:     contact.emails[0],
     })
   )) as Buffer);
 }
@@ -109,7 +148,7 @@ const baseStyles = `
 
 function bookingConfirmHtml(opts: {
   devoteeName: string; serviceName: string; serviceDate: string;
-  amount: string; receiptNo: string; receiptLink: string; occasion?: string;
+  amount: string; receiptNo: string; receiptLink: string; occasion?: string; contact: ContactInfo;
 }) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${baseStyles}
   .welcome{background:linear-gradient(135deg,#7B1B1B,#4A0A12);color:#fff;padding:20px 24px;border-radius:8px;margin-bottom:18px;text-align:center}
@@ -118,7 +157,7 @@ function bookingConfirmHtml(opts: {
   .blessing{background:#FFFDF0;border-left:4px solid #D4A017;padding:12px 16px;margin:16px 0;font-style:italic;font-size:13px;color:#5a3e00;border-radius:0 6px 6px 0}
   </style></head><body>
 <div class="wrap">
-  <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${TEMPLE.address}</p></div>
+  <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${opts.contact.address}</p></div>
   <div class="body">
     <div class="welcome">
       <h2>🙏 Welcome to Sri Veda Gayatri Temple</h2>
@@ -146,7 +185,7 @@ function bookingConfirmHtml(opts: {
     <div style="text-align:center"><a href="${opts.receiptLink}" class="btn">📄 Download Receipt PDF</a></div>
     <hr class="divider">
     <p style="font-size:13px;color:#555">We look forward to welcoming you. Please arrive a few minutes early so our priests can begin the ceremony on time.</p>
-    <p style="font-size:12px;color:#666">Questions? <a href="mailto:${TEMPLE.emails[0]}" style="color:#C67C2C">${TEMPLE.emails[0]}</a> · <a href="tel:${TEMPLE.phones[0]}" style="color:#C67C2C">${TEMPLE.phones[0]}</a></p>
+    <p style="font-size:12px;color:#666">Questions? <a href="mailto:${opts.contact.emails[0]}" style="color:#C67C2C">${opts.contact.emails[0]}</a> · <a href="tel:${opts.contact.phones[0]}" style="color:#C67C2C">${opts.contact.phones[0]}</a></p>
     <p style="font-size:12px;color:#C67C2C;text-align:center;margin-top:8px">🙏 Jai Sri Veda Gayatri 🙏</p>
   </div>
   <div class="footer">&copy; ${YEAR} ${TEMPLE.name} · <a href="https://www.srivedagayatritemple.org" style="color:#C67C2C">www.srivedagayatritemple.org</a></div>
@@ -155,7 +194,7 @@ function bookingConfirmHtml(opts: {
 
 function donationConfirmHtml(opts: {
   donorName: string; cause: string; amount: string;
-  receiptNo: string; receiptLink: string; message?: string;
+  receiptNo: string; receiptLink: string; message?: string; contact: ContactInfo;
 }) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${baseStyles}
   .welcome{background:linear-gradient(135deg,#7B1B1B,#4A0A12);color:#fff;padding:20px 24px;border-radius:8px;margin-bottom:18px;text-align:center}
@@ -164,7 +203,7 @@ function donationConfirmHtml(opts: {
   .blessing{background:#FFFDF0;border-left:4px solid #D4A017;padding:12px 16px;margin:16px 0;font-style:italic;font-size:13px;color:#5a3e00;border-radius:0 6px 6px 0}
   </style></head><body>
 <div class="wrap">
-  <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${TEMPLE.address}</p></div>
+  <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${opts.contact.address}</p></div>
   <div class="body">
     <div class="welcome">
       <h2>🙏 Welcome to Sri Veda Gayatri Temple</h2>
@@ -192,7 +231,7 @@ function donationConfirmHtml(opts: {
     <div style="text-align:center"><a href="${opts.receiptLink}" class="btn">📄 Download Receipt PDF</a></div>
     <hr class="divider">
     <p style="font-size:13px;color:#555">We warmly invite you to join us for our upcoming pujas and events. Your continued support makes all of this possible.</p>
-    <p style="font-size:12px;color:#666">Questions? Contact us at <a href="mailto:${TEMPLE.emails[0]}" style="color:#C67C2C">${TEMPLE.emails[0]}</a> · <a href="tel:${TEMPLE.phones[0]}" style="color:#C67C2C">${TEMPLE.phones[0]}</a></p>
+    <p style="font-size:12px;color:#666">Questions? Contact us at <a href="mailto:${opts.contact.emails[0]}" style="color:#C67C2C">${opts.contact.emails[0]}</a> · <a href="tel:${opts.contact.phones[0]}" style="color:#C67C2C">${opts.contact.phones[0]}</a></p>
     <p style="font-size:12px;color:#C67C2C;text-align:center;margin-top:8px">🙏 Jai Sri Veda Gayatri 🙏</p>
   </div>
   <div class="footer">&copy; ${YEAR} ${TEMPLE.name} · Tax ID: ${TEMPLE.taxId} · <a href="https://www.srivedagayatritemple.org" style="color:#C67C2C">www.srivedagayatritemple.org</a></div>
@@ -268,7 +307,8 @@ export async function sendBookingEmails(
   appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000"
 ): Promise<void> {
   const cfg = await getEmailConfig();
-  if (!cfg) { console.log("Email: Gmail not configured, skipping."); return; }
+  if (!cfg) { console.log("Email: no provider configured, skipping."); return; }
+  const contact = await getContactInfo();
 
   const bookingRaw = await db.booking.findUnique({
     where: { id: bookingId },
@@ -278,7 +318,7 @@ export async function sendBookingEmails(
   // guestToken / paymentGateway exist in schema; Prisma client needs regeneration to reflect them
   const booking = bookingRaw as typeof bookingRaw & { guestToken?: string | null; paymentGateway?: string | null };
 
-  const transport   = createTransport(cfg.user, cfg.pass);
+  const transport   = createTransport(cfg);
   const receiptNo   = booking.receiptNumber || `VGCC/BKG/${bookingId.slice(-6).toUpperCase()}`;
   const devoteeName = booking.user?.name  || booking.guestName  || "Devotee";
   const devoteeEmail = booking.user?.email || booking.guestEmail;
@@ -291,7 +331,7 @@ export async function sendBookingEmails(
       : `${appUrl}/api/receipts/booking/${bookingId}`;
 
   let pdfBuffer: Buffer;
-  try { pdfBuffer = await buildBookingPdf(booking, appUrl); }
+  try { pdfBuffer = await buildBookingPdf(booking, appUrl, contact); }
   catch (err) { console.error("Email: Booking PDF failed:", err); return; }
 
   const attach = [{
@@ -308,7 +348,7 @@ export async function sendBookingEmails(
       html: bookingConfirmHtml({
         devoteeName, serviceName: booking.service.name,
         serviceDate: formatDate(booking.date), amount: formatCurrency(booking.amount),
-        receiptNo, receiptLink, occasion: booking.occasion || undefined,
+        receiptNo, receiptLink, occasion: booking.occasion || undefined, contact,
       }),
       attachments: attach,
     }).catch((e) => console.error("Email: devotee booking send failed:", e));
@@ -336,7 +376,8 @@ export async function sendDonationEmails(
   appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000"
 ): Promise<void> {
   const cfg = await getEmailConfig();
-  if (!cfg) { console.log("Email: Gmail not configured, skipping."); return; }
+  if (!cfg) { console.log("Email: no provider configured, skipping."); return; }
+  const contact = await getContactInfo();
 
   const donationRaw = await db.donation.findUnique({
     where: { id: donationId },
@@ -346,7 +387,7 @@ export async function sendDonationEmails(
   // guestToken exists in schema; Prisma client needs regeneration to reflect it
   const donation = donationRaw as typeof donationRaw & { guestToken?: string | null };
 
-  const transport  = createTransport(cfg.user, cfg.pass);
+  const transport  = createTransport(cfg);
   const receiptNo  = donation.receiptNumber || `VGCC/DON/${donationId.slice(-6).toUpperCase()}`;
   const donorName  = donation.user?.name  || donation.guestName  || "Devotee";
   const donorEmail = donation.user?.email || donation.guestEmail;
@@ -359,7 +400,7 @@ export async function sendDonationEmails(
       : `${appUrl}/api/receipts/donation/${donationId}`;
 
   let pdfBuffer: Buffer;
-  try { pdfBuffer = await buildDonationPdf(donation, appUrl); }
+  try { pdfBuffer = await buildDonationPdf(donation, appUrl, contact); }
   catch (err) { console.error("Email: Donation PDF failed:", err); return; }
 
   const attach = [{
@@ -375,7 +416,7 @@ export async function sendDonationEmails(
       subject: `✅ Donation Received – ${donation.cause} | ${TEMPLE.name}`,
       html: donationConfirmHtml({
         donorName, cause: donation.cause, amount: formatCurrency(donation.amount),
-        receiptNo, receiptLink, message: donation.message || undefined,
+        receiptNo, receiptLink, message: donation.message || undefined, contact,
       }),
       attachments: attach,
     }).catch((e) => console.error("Email: donor send failed:", e));
@@ -401,9 +442,10 @@ export async function sendContactNotification(opts: {
   name: string; email: string; phone?: string | null; message: string;
 }): Promise<void> {
   const cfg = await getEmailConfig();
-  if (!cfg) { console.log("Email: Gmail not configured, skipping contact notification."); return; }
+  if (!cfg) { console.log("Email: no provider configured, skipping contact notification."); return; }
+  const contact = await getContactInfo();
 
-  const transport = createTransport(cfg.user, cfg.pass);
+  const transport = createTransport(cfg);
 
   // Notify admin
   transport.sendMail({
@@ -439,13 +481,13 @@ export async function sendContactNotification(opts: {
     subject: `We received your message — ${TEMPLE.name}`,
     html: `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${baseStyles}</style></head><body>
     <div class="wrap">
-      <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${TEMPLE.address}</p></div>
+      <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${contact.address}</p></div>
       <div class="body">
         <p>Dear <strong>${opts.name}</strong>,</p>
         <p>Namaste! Thank you for reaching out to <strong>${TEMPLE.name}</strong>. We have received your message and our team will get back to you within 1–2 business days.</p>
         <hr class="divider">
         <p style="font-size:13px;color:#555">If your matter is urgent, please call us directly:</p>
-        <p style="font-size:13px"><a href="tel:${TEMPLE.phones[0]}" style="color:#C67C2C">${TEMPLE.phones[0]}</a> · <a href="mailto:${TEMPLE.emails[0]}" style="color:#C67C2C">${TEMPLE.emails[0]}</a></p>
+        <p style="font-size:13px"><a href="tel:${contact.phones[0]}" style="color:#C67C2C">${contact.phones[0]}</a> · <a href="mailto:${contact.emails[0]}" style="color:#C67C2C">${contact.emails[0]}</a></p>
         <p style="font-size:12px;color:#C67C2C;text-align:center;margin-top:16px">🙏 Jai Sri Veda Gayatri 🙏</p>
       </div>
       <div class="footer">&copy; ${YEAR} ${TEMPLE.name}</div>
@@ -458,8 +500,9 @@ export async function sendPasswordResetEmail(opts: {
 }): Promise<void> {
   const cfg = await getEmailConfig();
   if (!cfg) { console.log(`[Password Reset] ${opts.email}: ${opts.resetUrl}`); return; }
+  const contact = await getContactInfo();
 
-  const transport = createTransport(cfg.user, cfg.pass);
+  const transport = createTransport(cfg);
   const name = opts.name || opts.email;
 
   transport.sendMail({
@@ -471,7 +514,7 @@ export async function sendPasswordResetEmail(opts: {
       .notice{background:#FFF3CD;border:1px solid #FFDA6A;border-radius:6px;padding:10px 14px;font-size:12px;color:#856404;margin-top:14px}
     </style></head><body>
     <div class="wrap">
-      <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${TEMPLE.address}</p></div>
+      <div class="header"><h1>🛕 ${TEMPLE.name}</h1><p>${contact.address}</p></div>
       <div class="body">
         <p>Dear <strong>${name}</strong>,</p>
         <p>We received a request to reset the password for your account at <strong>${TEMPLE.name}</strong>.</p>

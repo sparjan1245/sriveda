@@ -3,25 +3,65 @@ import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft, ImageIcon, Video } from "lucide-react";
 import { IMAGES } from "@/lib/constants";
 import GalleryForm from "./GalleryForm";
 import DeleteImageButton from "./DeleteImageButton";
 import VideoForm from "./VideoForm";
 import DeleteVideoButton from "./DeleteVideoButton";
+import ListSearch from "@/components/admin/ListSearch";
+import PaginationBar from "@/components/admin/PaginationBar";
 
 function getYouTubeThumb(url: string): string | null {
   const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
 }
 
-export default async function AdminGalleryPage() {
+export default async function AdminGalleryPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const [images, videos] = await Promise.all([
-    db.galleryImage.findMany({ orderBy: { createdAt: "desc" } }).catch(() => []),
-    db.galleryVideo.findMany({ orderBy: { createdAt: "desc" } }).catch(() => []),
+  const sp = await searchParams;
+  const imgParams = parseListParams(sp, {
+    sortableFields: [],
+    pageSize: 15,
+    queryKey: "imgQ",
+    pageKey: "imgPage",
+  });
+  const vidParams = parseListParams(sp, {
+    sortableFields: [],
+    pageSize: 12,
+    queryKey: "vidQ",
+    pageKey: "vidPage",
+  });
+
+  const imageWhere = imgParams.q
+    ? {
+        OR: [
+          { caption: { contains: imgParams.q, mode: "insensitive" as const } },
+          { category: { contains: imgParams.q, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+  const videoWhere = vidParams.q
+    ? {
+        OR: [
+          { title: { contains: vidParams.q, mode: "insensitive" as const } },
+          { category: { contains: vidParams.q, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+
+  const [images, imageTotal, videos, videoTotal] = await Promise.all([
+    db.galleryImage.findMany({ where: imageWhere, orderBy: { createdAt: "desc" }, skip: imgParams.skip, take: imgParams.take }).catch(() => []),
+    db.galleryImage.count({ where: imageWhere }).catch(() => 0),
+    db.galleryVideo.findMany({ where: videoWhere, orderBy: { createdAt: "desc" }, skip: vidParams.skip, take: vidParams.take }).catch(() => []),
+    db.galleryVideo.count({ where: videoWhere }).catch(() => 0),
   ]);
 
   const staticImages = [
@@ -56,35 +96,48 @@ export default async function AdminGalleryPage() {
           <div className="flex items-center gap-2 mb-4">
             <ImageIcon className="w-5 h-5 text-saffron" />
             <h2 className="font-cinzel font-semibold text-maroon text-lg">
-              Photos <span className="text-foreground/40 text-sm font-normal">({images.length} uploaded)</span>
+              Photos <span className="text-foreground/40 text-sm font-normal">({imageTotal} uploaded)</span>
             </h2>
           </div>
 
-          {images.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-              {images.map((img) => (
-                <div key={img.id} className="group relative rounded-xl overflow-hidden gold-border bg-white shadow-sm">
-                  <div className="relative aspect-square">
-                    <Image src={img.url} alt={img.caption || "Gallery photo"} fill className="object-cover" />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
-                    <DeleteImageButton imageId={img.id} />
+          <div className="mb-4">
+            <ListSearch placeholder="Search by caption or category…" queryKey="imgQ" pageKey="imgPage" />
+          </div>
+
+          {imageTotal > 0 ? (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
+                {images.map((img) => (
+                  <div key={img.id} className="group relative rounded-xl overflow-hidden gold-border bg-white shadow-sm">
+                    <div className="relative aspect-square">
+                      <Image src={img.url} alt={img.caption || "Gallery photo"} fill className="object-cover" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
+                      <DeleteImageButton imageId={img.id} />
+                    </div>
+                    <div className="p-2">
+                      {img.caption && <p className="text-xs text-foreground/70 truncate">{img.caption}</p>}
+                      {img.category && <span className="text-xs text-gold">{img.category}</span>}
+                    </div>
                   </div>
-                  <div className="p-2">
-                    {img.caption && <p className="text-xs text-foreground/70 truncate">{img.caption}</p>}
-                    {img.category && <span className="text-xs text-gold">{img.category}</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <div className="bg-white rounded-2xl gold-border shadow-sm mb-6">
+                <PaginationBar page={imgParams.page} pageSize={imgParams.pageSize} total={imageTotal} pageKey="imgPage" />
+              </div>
+            </>
           ) : (
             <div className="text-center py-8 bg-white rounded-2xl gold-border mb-6">
               <ImageIcon className="w-10 h-10 text-gold/40 mx-auto mb-3" />
-              <p className="text-foreground/50 mb-1">No photos uploaded yet.</p>
-              <p className="text-foreground/40 text-sm">Click &ldquo;Add Photo&rdquo; to add images by URL.</p>
+              {imgParams.q ? (
+                <p className="text-foreground/50">No photos match &ldquo;{imgParams.q}&rdquo;.</p>
+              ) : (
+                <>
+                  <p className="text-foreground/50 mb-1">No photos uploaded yet.</p>
+                  <p className="text-foreground/40 text-sm">Click &ldquo;Add Photo&rdquo; to add images by URL.</p>
+                </>
+              )}
             </div>
           )}
-
-         
         </div>
 
         {/* Videos Section */}
@@ -92,15 +145,25 @@ export default async function AdminGalleryPage() {
           <div className="flex items-center gap-2 mb-4">
             <Video className="w-5 h-5 text-saffron" />
             <h2 className="font-cinzel font-semibold text-maroon text-lg">
-              Videos <span className="text-foreground/40 text-sm font-normal">({videos.length} added)</span>
+              Videos <span className="text-foreground/40 text-sm font-normal">({videoTotal} added)</span>
             </h2>
           </div>
 
-          {videos.length === 0 ? (
+          <div className="mb-4">
+            <ListSearch placeholder="Search by title or category…" queryKey="vidQ" pageKey="vidPage" />
+          </div>
+
+          {videoTotal === 0 ? (
             <div className="text-center py-8 bg-white rounded-2xl gold-border">
               <Video className="w-10 h-10 text-gold/40 mx-auto mb-3" />
-              <p className="text-foreground/50 mb-1">No videos added yet.</p>
-              <p className="text-foreground/40 text-sm">Click &ldquo;Add Video&rdquo; to embed YouTube links.</p>
+              {vidParams.q ? (
+                <p className="text-foreground/50">No videos match &ldquo;{vidParams.q}&rdquo;.</p>
+              ) : (
+                <>
+                  <p className="text-foreground/50 mb-1">No videos added yet.</p>
+                  <p className="text-foreground/40 text-sm">Click &ldquo;Add Video&rdquo; to embed YouTube links.</p>
+                </>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -130,6 +193,11 @@ export default async function AdminGalleryPage() {
                   </div>
                 );
               })}
+            </div>
+          )}
+          {videoTotal > 0 && (
+            <div className="bg-white rounded-2xl gold-border shadow-sm mt-4">
+              <PaginationBar page={vidParams.page} pageSize={vidParams.pageSize} total={videoTotal} pageKey="vidPage" />
             </div>
           )}
         </div>

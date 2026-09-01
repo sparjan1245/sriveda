@@ -2,6 +2,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { decrypt, mask } from "@/lib/encryption";
+import { getContactInfo } from "@/lib/contact";
 import SettingsClient from "./SettingsClient";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ export default async function SettingsPage() {
   }
 
   const s = await db.siteSettings.findUnique({ where: { id: "main" } });
+  const contact = await getContactInfo();
 
   const initial = {
     stripe: {
@@ -34,11 +36,36 @@ export default async function SettingsPage() {
       locationId:  s?.squareLocationId  ? decrypt(s.squareLocationId)  : "",
       mode:        (s?.squareMode ?? "sandbox") as "sandbox" | "production",
     },
-    gmail: {
-      enabled:     s?.gmailEnabled     ?? false,
-      user:        s?.gmailUser        ? decrypt(s.gmailUser)        : "",
-      appPassword: s?.gmailAppPassword ? mask(decrypt(s.gmailAppPassword)) : "",
-      adminEmails: s?.adminEmails      ?? "",
+    email: {
+      provider: (s?.emailProvider === "hostinger" ? "hostinger" : "gmail") as "gmail" | "hostinger",
+      gmail: {
+        enabled:     s?.gmailEnabled     ?? false,
+        user:        s?.gmailUser        ? decrypt(s.gmailUser)        : "",
+        appPassword: s?.gmailAppPassword ? mask(decrypt(s.gmailAppPassword)) : "",
+      },
+      hostinger: {
+        enabled:  s?.hostingerEnabled  ?? false,
+        host:     s?.hostingerHost     ?? "smtp.hostinger.com",
+        port:     s?.hostingerPort     ?? 465,
+        secure:   s?.hostingerSecure   ?? true,
+        user:     s?.hostingerUser     ? decrypt(s.hostingerUser)     : "",
+        password: s?.hostingerPassword ? mask(decrypt(s.hostingerPassword)) : "",
+      },
+      adminEmails: s?.adminEmails ?? "",
+    },
+    contact: {
+      address:        contact.address,
+      mailingAddress: contact.mailingAddress,
+      phones:         contact.phones,
+      emails:         contact.emails,
+      hours:          contact.hours,
+    },
+    social: {
+      facebook:  contact.social.facebook  ?? "",
+      instagram: contact.social.instagram ?? "",
+      youtube:   contact.social.youtube   ?? "",
+      twitter:   contact.social.twitter   ?? "",
+      whatsapp:  contact.social.whatsapp  ?? "",
     },
   };
 
@@ -47,9 +74,9 @@ export default async function SettingsPage() {
       <div className="max-w-4xl mx-auto px-4 py-10">
         <div className="mb-8">
           <p className="text-maroon font-cinzel text-base font-extrabold uppercase tracking-widest mb-1">Admin Panel</p>
-          <h1 className="font-cinzel font-bold text-3xl text-maroon">Payment &amp; Email Settings</h1>
+          <h1 className="font-cinzel font-bold text-3xl text-maroon">Site Settings</h1>
           <p className="text-foreground/60 text-sm mt-1">
-            Configure payment gateways and email credentials. All secrets are encrypted before storage.
+            Configure payment gateways, email delivery, contact details, and social links. Secrets are encrypted before storage.
           </p>
         </div>
         <SettingsClient initial={initial} />

@@ -5,6 +5,12 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import QuickContact from "@/components/layout/QuickContact";
 import { db } from "@/lib/db";
+import { getContactInfo } from "@/lib/contact";
+
+// Footer/QuickContact read admin-configured contact & social settings on every
+// render; without this, pages with no other dynamic API would be statically
+// prerendered at build time and go stale until the next deploy.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
@@ -47,6 +53,7 @@ export default async function RootLayout({
   const services = await (db as any).service
     .findMany({ where: { active: true }, orderBy: { order: "asc" }, select: { name: true, slug: true } })
     .catch(() => []) as { name: string; slug: string }[];
+  const contact = await getContactInfo();
 
   return (
     <html lang="en" className="h-full">
@@ -55,7 +62,14 @@ export default async function RootLayout({
           <Header services={services} />
           <main className="flex-1">{children}</main>
           <Footer services={services} />
-          <QuickContact />
+          <QuickContact
+            phone={contact.phones[0]}
+            whatsapp={contact.social.whatsapp}
+            facebook={contact.social.facebook}
+            instagram={contact.social.instagram}
+            youtube={contact.social.youtube}
+            twitter={contact.social.twitter}
+          />
         </SessionProvider>
       </body>
     </html>

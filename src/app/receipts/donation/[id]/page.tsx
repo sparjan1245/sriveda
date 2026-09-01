@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate, formatCurrency, amountToWords } from "@/lib/utils";
 import { TEMPLE } from "@/lib/constants";
+import { getContactInfo } from "@/lib/contact";
 import DownloadPDFButton from "./PrintButton";
 
 export default async function DonationReceiptPage({
@@ -44,6 +45,7 @@ export default async function DonationReceiptPage({
 
   const backHref  = isAdmin ? "/admin/donations" : isOwner ? "/dashboard/donations" : "/";
   const backLabel = isAdmin ? "Back to Donations" : isOwner ? "Back to My Donations" : "Home";
+  const contact   = await getContactInfo();
 
   return (
     <>
@@ -69,8 +71,8 @@ export default async function DonationReceiptPage({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Sri Veda Gayatri Temple" className="h-16 w-auto mx-auto mb-3" />
             <p className="font-cinzel font-bold text-lg tracking-wide text-white">Sri Veda Gayatri Cultural Center</p>
-            <p className="text-white/70 text-xs mt-0.5">{TEMPLE.address}</p>
-            <p className="text-white/70 text-xs">{TEMPLE.phones[0]} · {TEMPLE.emails[0]}</p>
+            <p className="text-white/70 text-xs mt-0.5">{contact.address}</p>
+            <p className="text-white/70 text-xs">{contact.phones[0]} · {contact.emails[0]}</p>
           </div>
 
           <div style={{ background: "linear-gradient(90deg,#D4A017,#F5C842,#D4A017)" }} className="h-1" />

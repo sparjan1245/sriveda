@@ -3,17 +3,53 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
+import { parseListParams } from "@/lib/list-query";
 import { ArrowLeft } from "lucide-react";
+import ListSearch from "@/components/admin/ListSearch";
+import SortableHeader from "@/components/admin/SortableHeader";
+import PaginationBar from "@/components/admin/PaginationBar";
 
-export default async function AdminDevoteesPage() {
+const SORTABLE_FIELDS = ["name", "email", "city", "createdAt"] as const;
+
+export default async function AdminDevoteesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== "ADMIN") redirect("/dashboard");
 
-  const devotees = await db.user.findMany({
-    where: { role: "DEVOTEE" },
-    orderBy: { createdAt: "desc" },
-    include: { _count: { select: { bookings: true, donations: true } } },
-  }).catch(() => []);
+  const { page, pageSize, skip, take, q, sortBy, sortDir } = parseListParams(await searchParams, {
+    sortableFields: SORTABLE_FIELDS,
+    pageSize: 15,
+  });
+
+  const where = {
+    role: "DEVOTEE" as const,
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { email: { contains: q, mode: "insensitive" as const } },
+            { phone: { contains: q, mode: "insensitive" as const } },
+            { city: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+  const orderBy = sortBy ? { [sortBy]: sortDir } : { createdAt: "desc" as const };
+
+  const [devotees, total, totalAll] = await Promise.all([
+    db.user.findMany({
+      where,
+      orderBy,
+      skip,
+      take,
+      include: { _count: { select: { bookings: true, donations: true } } },
+    }).catch(() => []),
+    db.user.count({ where }).catch(() => 0),
+    db.user.count({ where: { role: "DEVOTEE" } }).catch(() => 0),
+  ]);
 
   return (
     <div className="min-h-screen bg-cream pattern-bg">
@@ -24,8 +60,12 @@ export default async function AdminDevoteesPage() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-cinzel font-bold text-3xl text-maroon">Devotees</h1>
           <span className="bg-blue-100 text-blue-700 text-sm px-3 py-1 rounded-full font-medium">
-            {devotees.length} Total
+            {totalAll} Total
           </span>
+        </div>
+
+        <div className="mb-4">
+          <ListSearch placeholder="Search by name, email, phone, or city…" />
         </div>
 
         <div className="bg-white rounded-2xl gold-border shadow-sm overflow-hidden">
@@ -33,9 +73,13 @@ export default async function AdminDevoteesPage() {
             <table className="w-full text-sm">
               <thead className="bg-cream border-b border-gold/20">
                 <tr>
-                  {["Name", "Email", "Phone", "City", "Bookings", "Donations", "Joined"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left font-cinzel font-medium text-maroon text-xs">{h}</th>
-                  ))}
+                  <SortableHeader field="name" label="Name" />
+                  <SortableHeader field="email" label="Email" />
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Phone</th>
+                  <SortableHeader field="city" label="City" />
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Bookings</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-maroon/60 uppercase tracking-wider">Donations</th>
+                  <SortableHeader field="createdAt" label="Joined" defaultDir="desc" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold/10">
@@ -53,9 +97,12 @@ export default async function AdminDevoteesPage() {
               </tbody>
             </table>
           </div>
-          {devotees.length === 0 && (
-            <p className="text-center text-foreground/50 py-12">No devotees registered yet.</p>
+          {total === 0 && (
+            <p className="text-center text-foreground/50 py-12">
+              {q ? "No devotees match your search." : "No devotees registered yet."}
+            </p>
           )}
+          <PaginationBar page={page} pageSize={pageSize} total={total} />
         </div>
       </div>
     </div>
