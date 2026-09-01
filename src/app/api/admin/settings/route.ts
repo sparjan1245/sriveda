@@ -65,6 +65,15 @@ export async function GET() {
       twitter:   contact.social.twitter   ?? "",
       whatsapp:  contact.social.whatsapp  ?? "",
     },
+    about: {
+      badge:              s?.aboutBadge            ?? "",
+      heading:            s?.aboutHeading           ?? "",
+      story:              s?.aboutStory             ?? "",
+      image:              s?.aboutImage             ?? "",
+      quoteSanskrit:      s?.aboutQuoteSanskrit      ?? "",
+      quoteTranslation:   s?.aboutQuoteTranslation   ?? "",
+      quoteAttribution:   s?.aboutQuoteAttribution   ?? "",
+    },
   });
 }
 
@@ -127,6 +136,13 @@ export async function PUT(req: Request) {
       youtubeUrl:   body.social?.youtube   || null,
       twitterUrl:   body.social?.twitter   || null,
       whatsappNumber: body.social?.whatsapp || null,
+      aboutBadge:            body.about?.badge            || null,
+      aboutHeading:          body.about?.heading          || null,
+      aboutStory:            body.about?.story            || null,
+      aboutImage:            body.about?.image            || null,
+      aboutQuoteSanskrit:    body.about?.quoteSanskrit    || null,
+      aboutQuoteTranslation: body.about?.quoteTranslation || null,
+      aboutQuoteAttribution: body.about?.quoteAttribution || null,
     },
     update: {
       stripeEnabled:       body.stripe?.enabled       ?? false,
@@ -163,6 +179,13 @@ export async function PUT(req: Request) {
       youtubeUrl:   body.social?.youtube   || null,
       twitterUrl:   body.social?.twitter   || null,
       whatsappNumber: body.social?.whatsapp || null,
+      aboutBadge:            body.about?.badge            || null,
+      aboutHeading:          body.about?.heading          || null,
+      aboutStory:            body.about?.story            || null,
+      aboutImage:            body.about?.image            || null,
+      aboutQuoteSanskrit:    body.about?.quoteSanskrit    || null,
+      aboutQuoteTranslation: body.about?.quoteTranslation || null,
+      aboutQuoteAttribution: body.about?.quoteAttribution || null,
     },
   });
 

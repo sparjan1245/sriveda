@@ -378,6 +378,17 @@ model Panchangam {
   updatedAt   DateTime @updatedAt
 }
 
+model Festival {
+  id        String   @id @default(cuid())
+  year      Int
+  month     Int // 1-12
+  name      String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([year, month])
+}
+
 model SiteSettings {
   id                  String   @id @default("main")
   // Stripe (values encrypted)
@@ -420,6 +431,14 @@ model SiteSettings {
   youtubeUrl            String?
   twitterUrl            String?
   whatsappNumber        String?
+  // About page content (public-facing; falls back to defaults in src/lib/constants.ts when unset)
+  aboutBadge            String?
+  aboutHeading          String?
+  aboutStory            String?
+  aboutImage            String?
+  aboutQuoteSanskrit    String?
+  aboutQuoteTranslation String?
+  aboutQuoteAttribution String?
 
   updatedAt           DateTime @updatedAt
 }

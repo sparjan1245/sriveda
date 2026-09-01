@@ -14,15 +14,30 @@ export const metadata: Metadata = {
   description: "Upcoming temple events, festivals, and celebrations at Sri Veda Gayatri Temple.",
 };
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 export default async function EventsPage() {
   const session = await auth();
   const userId = (session?.user as { id?: string })?.id ?? null;
+  const calendarYear = new Date().getFullYear();
 
-  const events = await db.event
-    .findMany({ where: { date: { gte: new Date() } }, orderBy: { date: "asc" } })
-    .catch(() => []);
+  const [events, festivals] = await Promise.all([
+    db.event.findMany({ where: { date: { gte: new Date() } }, orderBy: { date: "asc" } }).catch(() => []),
+    db.festival.findMany({
+      where: { year: calendarYear },
+      orderBy: [{ month: "asc" }, { order: "asc" }, { createdAt: "asc" }],
+    }).catch(() => []),
+  ]);
   const featuredEvent = events.find((e) => e.featured) || events[0];
   const otherEvents = events.filter((e) => e.id !== featuredEvent?.id);
+
+  const festivalsByMonth: Record<number, string[]> = {};
+  for (const f of festivals) {
+    (festivalsByMonth[f.month] ??= []).push(f.name);
+  }
 
   return (
     <div>
@@ -213,7 +228,7 @@ export default async function EventsPage() {
           <div className="text-center mb-8 md:mb-10">
             <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Annual Schedule</span>
             <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
-              2026 Festival Calendar
+              {calendarYear} Festival Calendar
             </h2>
             <div className="flex items-center justify-center gap-4">
               <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
@@ -221,33 +236,30 @@ export default async function EventsPage() {
               <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
             </div>
           </div>
-          <div className="grid md:grid-cols-2 gap-3">
-            {[
-              { month: "January",   festivals: ["Sankranti / Pongal", "Vaikuntha Ekadashi"] },
-              { month: "February",  festivals: ["Maha Shivaratri", "Thai Poosam"] },
-              { month: "March",     festivals: ["Ugadi (Telugu New Year)", "Holi", "Ram Navami"] },
-              { month: "April",     festivals: ["Hanuman Jayanti", "Akshaya Tritiya"] },
-              { month: "May",       festivals: ["Buddha Purnima", "Shankaracharya Jayanti"] },
-              { month: "June",      festivals: ["Vat Purnima", "Satyanarayana Pooja"] },
-              { month: "July",      festivals: ["Guru Purnima", "Ashadha Ekadashi"] },
-              { month: "August",    festivals: ["Krishna Janmashtami", "Ganesh Chaturthi", "Onam"] },
-              { month: "September", festivals: ["Navaratri", "Dussehra"] },
-              { month: "October",   festivals: ["Diwali", "Lakshmi Puja", "Karthik Poornima"] },
-              { month: "November",  festivals: ["Skanda Sashti", "Karthigai Deepam"] },
-              { month: "December",  festivals: ["Gita Jayanti", "Vaikunta Ekadashi"] },
-            ].map((row) => (
-              <div key={row.month} className="flex items-start gap-4 p-4 bg-cream rounded-xl gold-border hover:border-saffron/40 transition-colors">
-                <div className="font-cinzel font-bold text-maroon text-xs w-20 shrink-0 pt-0.5 uppercase tracking-wide">{row.month}</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {row.festivals.map((f) => (
-                    <span key={f} className="bg-white text-foreground text-[11px] px-2.5 py-1 rounded-full border border-gold/20 hover:border-gold/50 transition-colors">
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          {festivals.length === 0 ? (
+            <div className="text-center py-16 bg-cream rounded-2xl gold-border">
+              <p className="text-foreground text-sm">Festival calendar for {calendarYear} is coming soon.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-3">
+              {MONTHS.map((month, i) => {
+                const names = festivalsByMonth[i + 1];
+                if (!names?.length) return null;
+                return (
+                  <div key={month} className="flex items-start gap-4 p-4 bg-cream rounded-xl gold-border hover:border-saffron/40 transition-colors">
+                    <div className="font-cinzel font-bold text-maroon text-xs w-20 shrink-0 pt-0.5 uppercase tracking-wide">{month}</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {names.map((f) => (
+                        <span key={f} className="bg-white text-foreground text-[11px] px-2.5 py-1 rounded-full border border-gold/20 hover:border-gold/50 transition-colors">
+                          {f}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

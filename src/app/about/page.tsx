@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Calendar, Users, Heart, Star, MapPin, Phone, Clock, Mail } from "lucide-react";
 import { TEMPLE, IMAGES } from "@/lib/constants";
 import { getContactInfo } from "@/lib/contact";
+import { getAboutInfo } from "@/lib/about";
 import { db } from "@/lib/db";
 import { BoardCarousel, type BoardMemberItem } from "@/components/about/BoardCarousel";
 
@@ -25,6 +26,7 @@ export default async function AboutPage() {
     (db as any).boardMember.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
     getContactInfo(),
   ]);
+  const about = await getAboutInfo();
 
   const boardMembers: BoardMemberItem[] = dbBoardMembers as BoardMemberItem[];
 
@@ -75,46 +77,26 @@ export default async function AboutPage() {
 
             {/* Text */}
             <div>
-              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">Our Story</span>
+              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">{about.badge}</span>
               <h2 className="font-cinzel font-bold text-lg md:text-xl text-maroon mb-3 leading-tight drop-shadow-sm">
-                Founded With Purpose
+                {about.heading}
               </h2>
               <div className="flex items-center gap-4 mb-5">
                 <span className="block h-px w-16 bg-linear-to-r from-transparent to-gold/60" />
                 <span className="text-gold text-xl drop-shadow-md">🪷</span>
               </div>
-              <p className="text-foreground text-base leading-relaxed mb-3">
-                Sri Veda Gayatri Temple was founded in {TEMPLE.founded} with a singular vision to establish
-                a sacred spiritual home that preserves and promotes the timeless values of Sanatana Dharma
-                while serving the growing Hindu community in California&apos;s Central Valley. Located at{" "}
-                <strong className="text-maroon font-semibold">702 W Yosemite Ave, Manteca, CA</strong>, the
-                temple stands as a beacon of devotion, spirituality, culture, and community, welcoming people
-                of all ages to experience the richness of Vedic traditions.
-              </p>
-              <p className="text-foreground text-base leading-relaxed mb-3">
-                As a <strong className="text-maroon font-semibold">California Registered 501(c)(3) Non-Profit
-                Organization</strong> (Tax ID: {TEMPLE.taxId}), Sri Veda Gayatri Temple is dedicated to serving
-                the community with integrity, transparency, and the highest standards of Vedic worship and
-                spiritual practices. Every donation made to the temple is fully tax-deductible under U.S. law
-                and directly supports our religious, educational, and charitable initiatives.
-              </p>
-              <p className="text-foreground text-base leading-relaxed mb-5">
-                Our temple offers a wide range of spiritual and cultural services, including daily pujas,
-                sacred homams, life cycle samskaras, Vedic astrology consultations, and religious observances.
-                The temple organizes festivals, community gatherings, and charitable outreach programs that
-                bring families together in devotion and service.
-              </p>
-
-              {/* Quote */}
-              <blockquote className="relative bg-cream rounded-2xl p-4 gold-border shadow-sm mb-6">
-                <span className="absolute -top-3 left-4 text-5xl text-gold/15 font-serif leading-none select-none">&ldquo;</span>
-                <p className="font-cinzel text-maroon text-md italic leading-relaxed relative z-10 font-semibold">
-                  Lokah Samastah Sukhino Bhavantu
+              {about.paragraphs.map((p, i) => (
+                <p key={i} className={`text-foreground text-base leading-relaxed ${i === about.paragraphs.length - 1 ? "mb-5" : "mb-3"}`}>
+                  {p}
                 </p>
-                <p className="text-foreground text-md mt-1">May all beings, everywhere, be happy and live in peace.</p>
+              ))}
+
+               <p className="font-cinzel text-maroon text-md italic leading-relaxed relative z-10 font-semibold">
+                  {about.quote.sanskrit}
+                </p>
+                <p className="text-foreground text-md mt-1">{about.quote.translation}</p>
                 <div className="divider-gold mt-3" />
-                <p className="text-foreground text-[11px] mt-2 font-semibold tracking-wide">— VGCC Team</p>
-              </blockquote>
+                <p className="text-foreground text-[11px] mt-2 mb-5 font-semibold tracking-wide">— {about.quote.attribution}</p>
 
               {/* Live stats row */}
               <div className="grid grid-cols-4 gap-2">
@@ -131,7 +113,7 @@ export default async function AboutPage() {
             {/* Single image */}
             <div className="relative rounded-3xl overflow-hidden shadow-xl gold-border h-100 md:h-125 group">
               <Image
-                src={IMAGES.about1}
+                src={about.image}
                 alt="Sri Veda Gayatri Temple"
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"

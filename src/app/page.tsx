@@ -4,8 +4,10 @@ import { Calendar, Heart, Star, Users, ArrowRight, CheckCircle } from "lucide-re
 import { TEMPLE, IMAGES } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { getContactInfo } from "@/lib/contact";
+import { getAboutInfo } from "@/lib/about";
 import HeroSlider, { type BannerSlide, type PanchangamData } from "@/components/home/HeroSlider";
 import { ServiceSlider } from "@/components/home/ServiceSlider";
+import { EventSlider } from "@/components/home/EventSlider";
 import { GallerySection } from "@/components/home/GallerySection";
 import TestimonialCarousel from "@/components/home/TestimonialCarousel";
 
@@ -17,7 +19,7 @@ export default async function HomePage() {
   const dayStart = new Date(Date.UTC(y, m - 1, d));
   const dayEnd   = new Date(dayStart.getTime() + 86400400);
 
-  const [dbBanners, dbServices, dbTiers, dbTestimonials, dbBoardMembers, dbGalleryImages, dbGalleryVideos, panchangamRow] = await Promise.all([
+  const [dbBanners, dbServices, dbTiers, dbTestimonials, dbBoardMembers, dbGalleryImages, dbGalleryVideos, panchangamRow, dbEvents] = await Promise.all([
     db.banner.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
     db.service.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }).catch(() => []),
     db.donationTier.findMany({ where: { active: true }, orderBy: { order: "asc" } }).catch(() => []),
@@ -27,8 +29,10 @@ export default async function HomePage() {
     db.galleryImage.findMany({ orderBy: { createdAt: "desc" }, take: 8 }).catch(() => []),
     db.galleryVideo.findMany({ orderBy: { createdAt: "desc" }, take: 5 }).catch(() => []),
     db.panchangam.findFirst({ where: { date: { gte: dayStart, lt: dayEnd } } }).catch(() => null),
+    db.event.findMany({ where: { date: { gte: dayStart } }, orderBy: { date: "asc" }, take: 8 }).catch(() => []),
   ]);
   const contact = await getContactInfo();
+  const about = await getAboutInfo();
 
   const todayPanchangam: PanchangamData | null = panchangamRow
     ? { ...panchangamRow, date: panchangamRow.date.toISOString() }
@@ -51,99 +55,40 @@ export default async function HomePage() {
 
       
 
-      {/* ─────────────────── FEATURED EVENT FLYER ─────────────────── */}
-      <section className="relative py-12 md:py-18 px-4 overflow-hidden hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
-        {/* Decorations */}
-        <div className="absolute inset-0 pattern-bg opacity-30 pointer-events-none" />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 50%, rgba(212,160,23,0.08), transparent 70%)" }} />
-        <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-gold/40 to-transparent" />
-        <div className="absolute bottom-0 inset-x-0 h-px bg-linear-to-r from-transparent via-gold/40 to-transparent" />
+      {/* ─────────────────────── LATEST EVENTS ─────────────────────── */}
+      {dbEvents.length > 0 && (
+        <section className="py-12 md:py-16 px-4 relative overflow-hidden" style={{ background: "linear-gradient(160deg,#FFF8F0 0%,#F5EBD8 50%,#FFF8F0 100%)" }}>
+          <div className="absolute inset-0 pattern-bg opacity-30 pointer-events-none" />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 50%, rgba(212,160,23,0.08), transparent 70%)" }} />
+          <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-gold/40 to-transparent" />
+          <div className="absolute bottom-0 inset-x-0 h-px bg-linear-to-r from-transparent via-gold/40 to-transparent" />
 
-        <div className="relative max-w-7xl mx-auto">
-
-          {/* ── "Upcoming Event" highlighted banner ── */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex items-center gap-3 bg-gold text-maroon font-cinzel font-bold text-sm md:text-base px-7 py-2.5 rounded-full shadow-lg shadow-gold/30 tracking-widest uppercase">
-              <span className="w-2 h-2 rounded-full bg-maroon animate-ping" />
-              Upcoming Event
-              <span className="w-2 h-2 rounded-full bg-maroon animate-ping" />
-            </div>
-          </div>
-
-          {/* ── Two-column: flyer left, text right ── */}
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-
-            {/* LEFT — flyer image */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] border-2 border-gold/50 max-w-md w-full">
-                <div className="h-1.5 bg-linear-to-r from-saffron via-gold to-saffron" />
-                <Image
-                  src="/flayer.jpeg"
-                  alt="Moola Vigraha Pratishtha Mahotsavam — August 14–16 2026"
-                  width={600}
-                  height={850}
-                  className="w-full h-auto object-contain block"
-                  priority
-                />
-                <div className="h-1.5 bg-linear-to-r from-saffron via-gold to-saffron" />
-              </div>
-            </div>
-
-            {/* RIGHT — text content */}
-            <div className="text-center lg:text-left">
-              {/* Date badge */}
-              <div className="inline-flex items-center gap-2 border border-saffron/40 bg-saffron/10 text-saffron text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6">
-                <Calendar className="w-3.5 h-3.5" />
-                August 14 – 16, 2026 · 3 Days
-              </div>
-
-              <h2 className="font-cinzel font-bold text-2xl md:text-3xl lg:text-4xl text-maroon mb-3 leading-tight">
-                Moola Vigraha<br />
-                <span className="text-saffron">Pratishtha Mahotsavam</span>
+          <div className="relative max-w-7xl mx-auto">
+            <div className="text-center mb-10 md:mb-12">
+              <span className="badge-gold mb-4 inline-flex text-xs md:text-sm px-4 py-1.5">What&apos;s Coming</span>
+              <h2 className="font-cinzel font-bold text-2xl md:text-3xl text-maroon mb-3 leading-tight drop-shadow-sm">
+                Latest Events
               </h2>
-
-              <div className="flex items-center lg:justify-start justify-center gap-3 mb-5">
-                <span className="block h-px w-12 bg-gold/50" />
-                <span className="text-gold text-xl">🪷</span>
-                <span className="block h-px w-12 bg-gold/50" />
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <span className="block h-px w-20 md:w-32 bg-linear-to-r from-transparent to-gold/60" />
+                <span className="text-gold text-2xl md:text-3xl drop-shadow-md">🪷</span>
+                <span className="block h-px w-20 md:w-32 bg-linear-to-l from-transparent to-gold/60" />
               </div>
-
-              <p className="text-foreground text-sm md:text-base leading-relaxed mb-4">
-                With the divine blessings of our revered Guru, the <strong className="text-maroon">Moola Vigraha Pratishtha Mahotsavam</strong> will be grandly celebrated at Sri Veda Gayatri Temple.
+              <p className="text-base max-w-2xl mx-auto leading-relaxed">
+                Join us for upcoming festivals, celebrations, and community gatherings at Sri Veda Gayatri Temple.
               </p>
-              <p className="text-foreground text-sm leading-relaxed mb-8">
-                All devotees are cordially invited to participate in these sacred rituals at{" "}
-                <strong className="text-maroon">702 W Yosemite Ave, Manteca, CA 95337</strong>.
-              </p>
-
-              {/* Info tiles */}
-              <div className="grid grid-cols-3 gap-3 mb-8">
-                {[
-                  { label: "Devata Ahvanam", value: "Aug 14", sub: "Friday" },
-                  { label: "Adhivasa Mahotsvam", value: "Aug 15", sub: "Saturday" },
-                  { label: "Pratishta Mahotsvam", value: "Aug 16", sub: "Sunday" },
-                ].map((d) => (
-                  <div key={d.label} className="rounded-xl border border-gold/30 bg-white shadow-sm text-center py-3 px-2">
-                    <div className="text-black text-[10px] uppercase tracking-widest mb-0.5 font-bold">{d.label}</div>
-                    <div className="font-cinzel font-bold text-maroon text-sm">{d.value}</div>
-                    <div className="text-foreground text-[10px]">{d.sub}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <Link href="/events" className="btn-primary px-10 py-3 shadow-md">
-                  View All Events
-                </Link>
-                <Link href="/contact" className="btn-secondary px-10 py-3">
-                  Contact Us
-                </Link>
-              </div>
             </div>
 
+            <EventSlider events={dbEvents} />
+
+            <div className="text-center mt-10">
+              <Link href="/events" className="btn-secondary inline-flex items-center gap-2 px-10 py-3">
+                View All Events <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─────────────────────── PURPOSE + STATS ──────────────────── */}
       <section className="relative py-8 md:py-6 px-4 overflow-hidden" style={{ background: "linear-gradient(160deg, #FFF8F0 0%, #F5EBD8 50%, #FFF8F0 100%)" }}>
@@ -241,10 +186,10 @@ export default async function HomePage() {
 
             {/* ── Text column ── */}
             <div>
-              <span className="badge-gold mb-5 inline-flex">Who We Are</span>
+              <span className="badge-gold mb-5 inline-flex">{about.badge}</span>
 
             <h2 className="font-cinzel font-bold text-xl md:text-2xl text-maroon mb-3 leading-tight drop-shadow-sm">
-                About Our Sacred Temple
+                {about.heading}
               </h2>
 
               {/* Lotus divider */}
@@ -252,20 +197,16 @@ export default async function HomePage() {
                 <span className="text-gold text-lg shrink-0">🪷</span>
               </div>
 
-              <p className="leading-relaxed mb-4 text-base">
-                Founded in 2024, Sri Veda Gayatri Temple is a spiritual and charitable non-profit
-                dedicated to serving the Hindu community in and around Manteca, California.
-              </p>
               <p className="leading-relaxed mb-8 text-base">
-                We offer daily pujas by trained priests, cultural programs in music, dance, Sanskrit,
-                and yoga, community events, and weekly Annadaanam (food offering).
+                {about.paragraphs[0]}
               </p>
 
               <blockquote className="relative bg-white rounded-2xl p-5 gold-border shadow-sm mb-8">
                 <span className="absolute -top-4 left-5 text-6xl text-gold/15 font-serif leading-none select-none">&ldquo;</span>
                 <p className="font-cinzel text-maroon text-sm md:text-[15px] italic font-bold leading-relaxed relative z-10">
-                  {TEMPLE.quote}
+                  {about.quote.sanskrit}
                 </p>
+                <p className="text-foreground/70 text-xs mt-1.5 relative z-10">{about.quote.translation}</p>
                 <div className="divider-gold mt-4" />
               </blockquote>
 
@@ -278,7 +219,7 @@ export default async function HomePage() {
             {/* ── Single image ── */}
             <div className="relative rounded-3xl overflow-hidden gold-border shadow-xl h-100 lg:h-115 group">
               <Image
-                src={IMAGES.about1}
+                src={about.image}
                 alt="Sri Veda Gayatri Temple"
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"

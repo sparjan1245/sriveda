@@ -67,6 +67,15 @@ export default async function SettingsPage() {
       twitter:   contact.social.twitter   ?? "",
       whatsapp:  contact.social.whatsapp  ?? "",
     },
+    about: {
+      badge:            s?.aboutBadge            ?? "",
+      heading:          s?.aboutHeading          ?? "",
+      story:            s?.aboutStory            ?? "",
+      image:            s?.aboutImage            ?? "",
+      quoteSanskrit:    s?.aboutQuoteSanskrit    ?? "",
+      quoteTranslation: s?.aboutQuoteTranslation ?? "",
+      quoteAttribution: s?.aboutQuoteAttribution ?? "",
+    },
   };
 
   return (
